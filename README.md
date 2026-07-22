@@ -1,6 +1,6 @@
-# PWRDA Backend
+# SDSO Backend
 
-Laravel backend service for the PWRDA project.
+Laravel backend service for the SDSO project.
 
 ## Features
 
