@@ -51,7 +51,7 @@ class AuthController extends Controller
          * Authenticate
          */
         $response = $this->authService->login([
-            'email' => $request['email'],
+            'hrmscode' => $request['hrmscode'],
             'password' => RSAHelper::decrypt($request['password']),
         ]);
 
@@ -97,9 +97,6 @@ class AuthController extends Controller
      */
     public function user()
     {
-        Log::channel('test')->info('User info requested', [
-            'user_id' => auth('api')->id(),
-        ]);
         return response()->json([
             'success' => true,
             'user' => $this->authService->user(),
@@ -205,7 +202,7 @@ class AuthController extends Controller
      */
     public function changeForgotPassword(ChangeForgotPasswordRequest $request)
     {
-                $response = $this->authService->changeForgotPassword(
+        $response = $this->authService->changeForgotPassword(
             $request->hash,
             $request->new_password,
             $request->confirm_password

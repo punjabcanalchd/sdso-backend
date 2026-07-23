@@ -10,6 +10,7 @@ class AttributeNames
 
             'name' => 'Full Name',
             'email' => 'Email Address',
+            'hrmscode' => 'HRMS Code',
             'mobile' => 'Mobile Number',
             'username' => 'Username',
         ];

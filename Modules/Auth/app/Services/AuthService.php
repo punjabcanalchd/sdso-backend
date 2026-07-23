@@ -32,7 +32,7 @@ class AuthService
     public function login(array $credentials): array
     {
         // Find user by email first
-        $user = User::where('email', $credentials['email'])->first();
+        $user = User::where('hrmscode', $credentials['hrmscode'])->first();
 
         if (!$user) {
             return [

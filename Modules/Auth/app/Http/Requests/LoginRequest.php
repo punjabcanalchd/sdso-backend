@@ -11,7 +11,7 @@ class LoginRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'email' => CommonRules::email(),
+            'hrmscode' => CommonRules::positiveInteger(),
             'password' => 'required|string',
         ];
     }

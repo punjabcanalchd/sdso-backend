@@ -14,37 +14,14 @@ class RoleCategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Applicant' => [
-                'is_default' => false,
-                'roles' => ['Applicant Users']
-            ],
             'Admin' => [
                 'is_default' => true,
-                'roles' => ['Super Admin', 'Admin', 'Editor', 'Mobile', 'Offline permissions']
-            ],
-            'Permission' => [
-                'is_default' => false,
-                'roles' => ['RO', 'SO', 'AO1', 'AO2', 'AO3', 'DSO']
-            ],
-            'Account' => [
-                'is_default' => false,
-                'roles' => ['Accountant', 'Account Executive', 'Accounts Division']
-            ],
-            'Reports' => [
-                'is_default' => false,
-                'roles' => ['MIS Report', 'Mis Report Accountant']
+                'roles' => ['Super Admin', 'Admin']
             ],
             'Others' => [
                 'is_default' => false,
                 'roles' => [
-                    'Water Resource User',
-                    'Chief Administrator Officer',
-                    'Principal Secretary, Local Government',
-                    'Canals Administration',
-                    'Member Secretary, PPCB, Nabha Road, Patiala',
-                    'Directorate of Groundwater designated as Implementing Agency',
-                    'Deputy Commissioner',
-                    'XEN'
+                    'Department Role',
                 ]
             ],
         ];
