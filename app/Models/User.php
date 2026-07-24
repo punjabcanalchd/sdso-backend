@@ -1,20 +1,19 @@
 <?php
+
 namespace App\Models;
 
 use App\Traits\HasPublicId;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\Crypt;
-use Tymon\JWTAuth\Contracts\JWTSubject;
-use Spatie\Permission\Traits\HasRoles;
-use App\Models\Role;
-use App\Models\AdditionalRole;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Crypt;
+use Spatie\Permission\Traits\HasRoles;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasPublicId, HasRoles;
+    use HasFactory, HasPublicId, HasRoles;
 
     protected $fillable = [
         'name',
@@ -62,7 +61,7 @@ class User extends Authenticatable implements JWTSubject
     }
 
     protected $appends = [
-        'public_id'
+        'public_id',
     ];
 
     public function scopeWherePublicId($query, string $publicId)
@@ -73,6 +72,7 @@ class User extends Authenticatable implements JWTSubject
 
         return $query->where('id', $id);
     }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
@@ -84,6 +84,7 @@ class User extends Authenticatable implements JWTSubject
             'role_id' => $this->role_id,
         ];
     }
+
     public function role()
     {
         return $this->hasOne(UserRole::class, 'role_id', 'role_id');
@@ -100,37 +101,39 @@ class User extends Authenticatable implements JWTSubject
         $salted = '';
         $dx = '';
         while (strlen($salted) < 48) {
-            $dx = md5($dx . $passphrase . $salt, true);
+            $dx = md5($dx.$passphrase.$salt, true);
             $salted .= $dx;
         }
         $key = substr($salted, 0, 32);
-        $iv  = substr($salted, 32, 16);
+        $iv = substr($salted, 32, 16);
         $encrypted_data = openssl_encrypt(json_encode($value), 'aes-256-cbc', $key, true, $iv);
-        $data = array("ct" => base64_encode($encrypted_data), "iv" => bin2hex($iv), "s" => bin2hex($salt));
+        $data = ['ct' => base64_encode($encrypted_data), 'iv' => bin2hex($iv), 's' => bin2hex($salt)];
+
         return json_encode($data);
     }
 
     public static function cryptoJsAesDecrypt($passphrase, $jsonString)
     {
         $jsondata = json_decode($jsonString, true);
- 
-        if (isset($jsondata) && !empty($jsondata) && !is_int($jsondata)) {
- 
-            $salt = hex2bin($jsondata["s"]);
- 
-            $ct = base64_decode($jsondata["ct"]);
- 
-            $iv  = hex2bin($jsondata["iv"]);
-            $concatedPassphrase = $passphrase . $salt;
-            $md5 = array();
+
+        if (isset($jsondata) && ! empty($jsondata) && ! is_int($jsondata)) {
+
+            $salt = hex2bin($jsondata['s']);
+
+            $ct = base64_decode($jsondata['ct']);
+
+            $iv = hex2bin($jsondata['iv']);
+            $concatedPassphrase = $passphrase.$salt;
+            $md5 = [];
             $md5[0] = md5($concatedPassphrase, true);
             $result = $md5[0];
             for ($i = 1; $i < 3; $i++) {
-                $md5[$i] = md5($md5[$i - 1] . $concatedPassphrase, true);
+                $md5[$i] = md5($md5[$i - 1].$concatedPassphrase, true);
                 $result .= $md5[$i];
             }
             $key = substr($result, 0, 32);
             $data = openssl_decrypt($ct, 'aes-256-cbc', $key, true, $iv);
+
             return json_decode($data, true);
         } else {
             return $jsonString;
