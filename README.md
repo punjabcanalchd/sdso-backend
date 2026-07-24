@@ -171,3 +171,6 @@ We have a centralized command to sync permissions based on our configured module
    ```
    *This command is safe to run multiple times without creating duplicates.*
 
+
+   **Remove role_id Column from tbl_admin_pages**
+

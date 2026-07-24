@@ -18,7 +18,6 @@ return new class extends Migration
             'Master Tables' => 'database',
             'Settings' => 'gear',
             'Others' => 'layers',
-            'Mobile Menus' => 'phone',
             'Applications' => 'card-list', // Add just in case it exists, though not in the list explicitly.
         ];
 
@@ -39,7 +38,6 @@ return new class extends Migration
             'Master Tables',
             'Settings',
             'Others',
-            'Mobile Menus',
             'Applications',
         ];
 

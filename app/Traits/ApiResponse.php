@@ -44,34 +44,22 @@ trait ApiResponse
      * PAGINATION RESPONSE
      * ---------------------------------------------------------------- */
 
-    protected function paginatedResponse($paginator,string $message = 'Data fetched successfully') {
-
+    protected function paginatedResponse($paginator, string $message = 'Data fetched successfully', $draw = 1)
+    {
         return response()->json([
-
-            'success' => true,
-
-            'message' => $message,
-
+            'draw' => (int) $draw,
+            'recordsTotal' => $paginator->total(),
+            'recordsFiltered' => $paginator->total(), // Change if search/filter is applied
             'data' => $paginator->items(),
-
             'pagination' => [
-
                 'current_page' => $paginator->currentPage(),
-
                 'last_page' => $paginator->lastPage(),
-
                 'per_page' => $paginator->perPage(),
-
                 'total' => $paginator->total(),
-
                 'from' => $paginator->firstItem(),
-
                 'to' => $paginator->lastItem(),
-
                 'has_more_pages' => $paginator->hasMorePages(),
-
             ]
-
         ]);
     }
 }
