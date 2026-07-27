@@ -29,13 +29,16 @@ class UserController extends Controller
 
         $maxLimit = config('pagination.max_limit');
 
-        $limit = (int) $request->get('limit',$defaultLimit);
+        $limit = (int) $request->input('per_page',$defaultLimit);
+        $search = $request->input('search');
+        $sort_column =  $request->input('sort_column');
+        $sort_direction =  $request->input('sort_direction');
 
         $limit = min($limit, $maxLimit);
 
         $limit = max($limit, 1);
 
-        $users = $this->service->getUsers($limit);
+        $users = $this->service->getUsers($limit, $search, $sort_column, $sort_direction);
 
         return $this->paginatedResponse(
             $users,
@@ -87,6 +90,19 @@ class UserController extends Controller
         return $this->successResponse(
             $user,
             'User updated successfully.'
+        );
+    }
+
+    public function updateStatus(UpdateUserRequest $request, string $id) {
+
+        $user = $this->service->updateStatus(
+            $id,
+            $request->validated()
+        );
+
+        return $this->successResponse(
+            $user,
+            'User status updated successfully.'
         );
     }
 

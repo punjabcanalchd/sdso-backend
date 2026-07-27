@@ -19,21 +19,33 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'status',
         'role_id',
+        'officelevelcode',
+        'circle_id',
+        'division_id',
+        'subdivision_id',
         'mobile_number',
         'current_user_role',
-        'password_updated_at',
-        'applicant_type',
-        'office_district',
-        'is_ip_caf_user',
-        'mobile_password',
-        'applicant_first_name',
-        'applicant_middle_name',
-        'applicant_last_name',
-        'designation',
-        'id_proof',
-        'id_proof_number',
-        'status',
+        'current_circle_id',
+        'current_division_id',
+        'current_subdivision_id',
+        'officecode',
+        'current_officecode',
+        'hrmscode',
+        'retirementdate',
+        'is_password_updated',
+        'login_attempts',
+        'locked_at',
+    ];
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'locked_at' => 'datetime',
     ];
 
     protected $hidden = [
@@ -138,5 +150,41 @@ class User extends Authenticatable implements JWTSubject
         } else {
             return $jsonString;
         }
+    }
+
+    public function division()
+    {
+        if(!defined('default_language')){
+            define('default_language',1);
+        }
+        return $this->hasOne(DivisionsDescription::class,'division_id','division_id')->where('language_id','=',default_language);
+    }
+    public function subdivision()
+    {
+        if(!defined('default_language')){
+            define('default_language',1);
+        }
+        return $this->hasOne(SubDivisionsDescription::class,'subdivision_id','subdivision_id')->where('language_id','=',default_language);
+    }
+    public function office()
+    {
+        if(!defined('default_language')){
+            define('default_language',1);
+        }
+        return $this->hasOne(OfficeDescription::class,'officecode','officecode')->where('language_id','=',default_language);
+    }
+    public function circle()
+    {
+        if(!defined('default_language')){
+            define('default_language',1);
+        }
+        return $this->hasOne(CirclesDescription::class,'circle_id','circle_id')->where('language_id','=',default_language);
+    }
+    public function officelevel()
+    {
+        if(!defined('default_language')){
+            define('default_language',1);
+        }
+        return $this->hasOne(OfficeHierarchiesDescription::class,'officelevelcode','officelevelcode')->where('language_id','=',default_language);
     }
 }

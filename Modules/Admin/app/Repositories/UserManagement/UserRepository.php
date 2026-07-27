@@ -10,9 +10,24 @@ class UserRepository
      * GET ALL USERS
      * ---------------------------------------------------------------- */
 
-    public function getAll(int $limit)
+    public function getAll(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
     {
-        return User::latest()->paginate($limit);
+        $query = User::query();
+
+        if (!empty($search)) {
+            $query->where('name', 'ilike', "%{$search}%");
+        }
+        
+        $sort_column = $sort_column ?: 'id';
+
+        $sort_direction = strtolower($sort_direction ?? 'desc');
+
+        if (!in_array($sort_direction, ['asc', 'desc'])) {
+            $sort_direction = 'desc';
+        }
+        $query->orderBy($sort_column, $sort_direction);
+
+        return $query->paginate($limit);
     }
 
     /* ------------------------------------------------------------------

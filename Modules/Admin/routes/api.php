@@ -34,6 +34,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::get('/{public_id}', [UserController::class, 'show'])->name('admin.get_user_details');
         Route::post('/', [UserController::class, 'store'])->name('admin.create_new_user');
         Route::post('/{public_id}/update', [UserController::class, 'update'])->name('admin.update_user_details');
+        Route::post('/{public_id}/updateStatus', [UserController::class, 'updateStatus'])->name('admin.update_user_status');
         Route::post('/{public_id}/delete', [UserController::class, 'destroy'])->name('admin.delete_user');
     });
     Route::get('roles', [RoleController::class, 'index'])->name('admin.get_all_roles');

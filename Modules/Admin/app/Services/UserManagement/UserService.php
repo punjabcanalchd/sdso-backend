@@ -21,9 +21,9 @@ class UserService
      * GET ALL USERS
      * ---------------------------------------------------------------- */
 
-    public function getUsers(int $limit)
+    public function getUsers(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
     {
-        $users = $this->repository->getAll($limit);
+        $users = $this->repository->getAll($limit,$search,$sort_column,$sort_direction);
         
         $users->getCollection()->transform(function ($user) {
             return $this->formatUser($user);
@@ -43,46 +43,15 @@ class UserService
 
     private function formatUser($user)
     {
-        $idProofTypeMap = [
-            1 => 'PAN Card',
-            2 => 'Driving License',
-        ];
-
-        $idProofType = $user->id_proof;
-        if (is_numeric($idProofType) && isset($idProofTypeMap[$idProofType])) {
-            $idProofType = $idProofTypeMap[$idProofType];
-        }
-
-        $idProofNumber = $user->id_proof_number;
-        if (!empty($idProofNumber)) {
-            $passPhrase = User::passPhrase();
-            $decryptedNumber = User::cryptoJsAesDecrypt($passPhrase, $idProofNumber);
-               
-            $length = strlen($decryptedNumber);
-            if ($length > 4) {
-                $idProofNumber = str_repeat('X', $length - 4) . substr($decryptedNumber, -4);
-            } else {
-                $idProofNumber = $decryptedNumber;
-            }
-        }
-
-        $fullName = trim($user->applicant_first_name . ' ' . $user->applicant_middle_name . ' ' . $user->applicant_last_name);
-        if (empty($fullName)) {
-            $fullName = $user->name;
-        }
 
         return [
             'public_id' => $user->public_id,
-            'name' => $fullName,
+            'name' => $user->name,
+            'hrmscode' => $user->hrmscode,
             'role' => $user->mainRole ? $user->mainRole->name : null,
             'email' => $user->email,
             'created_at' => $user->created_at,
-            'proof_type' => $idProofType,
-            'proof_number' => $idProofNumber,
-            'applicant_type' => $user->applicant_type,
-            'first_name' => $user->applicant_first_name,
-            'middle_name' => $user->applicant_middle_name,
-            'last_name' => $user->applicant_last_name,
+            'office' => $user->office->officename ?? null,
             'mobileNumber' => $user->mobile_number,
             'designation' => $user->designation,
             'status' => $user->status,
@@ -260,6 +229,12 @@ class UserService
     /* ------------------------------------------------------------------
      * DELETE USER
      * ---------------------------------------------------------------- */
+
+    public function updateStatus(string $publicId, array $data): User{
+
+        $user =  $this->repository->update($publicId, $data);
+        return $user;
+    }
 
     public function deleteUser(string $publicId): bool {
 
