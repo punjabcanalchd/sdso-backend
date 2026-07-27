@@ -1,0 +1,13 @@
+{
+    "name": "Front",
+    "alias": "front",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "namespace": "Modules\\Front",
+    "providers": [
+        "Modules\\Front\\Providers\\FrontServiceProvider"
+    ],
+    "files": []
+}
+

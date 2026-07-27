@@ -28,6 +28,7 @@
             "App\\": "app/",
             "Modules\\Admin\\": "Modules/Admin/app/",
             "Modules\\Auth\\": "Modules/Auth/app/",
+            "Modules\\Front\\": "Modules/Front/app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
