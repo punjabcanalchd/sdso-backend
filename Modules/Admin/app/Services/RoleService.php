@@ -32,33 +32,46 @@ class RoleService
         return Role::findOrFail($id);
     }
 
-    public function getAllRoles()
+    public function getAllRoles(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
     {
-        $roles = Role::with('category')->where('guard_name', 'api')->get();
-        
-        $grouped = $roles->groupBy(function($role) {
-            return $role->category ? $role->category->name : 'Uncategorized';
-        });
+        $query = Role::with('category')->where('guard_name', 'api');
 
-        $tree = [];
-        foreach($grouped as $categoryName => $categoryRoles) {
-            $mappedRoles = $categoryRoles->map(function ($role) {
-                return [
-                    'public_id'  => $this->encryptRoleId($role->id),
-                    'name'       => $role->name,
-                    'guard_name' => $role->guard_name,
-                    'created_at' => $role->created_at,
-                    'updated_at' => $role->updated_at,
-                ];
-            })->values();
-
-            $tree[] = [
-                'name'  => $categoryName,
-                'roles' => $mappedRoles
-            ];
+        if (!empty($search)) {
+            $query->where('name', 'ilike', "%{$search}%");
         }
+        
+        $sort_column = $sort_column ?: 'id';
 
-        return $tree;
+        $sort_direction = strtolower($sort_direction ?? 'desc');
+
+        if (!in_array($sort_direction, ['asc', 'desc'])) {
+            $sort_direction = 'desc';
+        }
+        $roles = $query->orderBy($sort_column, $sort_direction)
+                   ->paginate($limit);
+
+        $grouped = $roles->getCollection()
+            ->groupBy(fn($role) => $role->category->name ?? 'Uncategorized')
+            ->map(function ($categoryRoles, $categoryName) {
+
+                return [
+                    'name' => $categoryName,
+                    'roles' => $categoryRoles->map(function ($role) {
+                        return [
+                            'public_id'  => $this->encryptRoleId($role->id),
+                            'name'       => $role->name,
+                            'guard_name' => $role->guard_name,
+                            'created_at' => $role->created_at,
+                            'updated_at' => $role->updated_at,
+                        ];
+                    })->values(),
+                ];
+            })
+            ->values();
+
+        $roles->setCollection($grouped);
+
+        return $roles;
     }
 
     public function createRole(array $data)

@@ -3,27 +3,38 @@
 namespace Modules\Admin\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
 use Modules\Admin\Requests\Roles\StoreRoleRequest;
 use Modules\Admin\Requests\Roles\UpdateRoleRequest;
 use Modules\Admin\Services\RoleService;
+use App\Traits\ApiResponse;
 
 class RoleController extends Controller
 {
     protected $roleService;
-
+    use ApiResponse;
     public function __construct(RoleService $roleService)
     {
         $this->roleService = $roleService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $roles = $this->roleService->getAllRoles();
-        return response()->json([
-            'success' => true,
-            'message' => 'Roles retrieved successfully.',
-            'data' => $roles
-        ], 200);
+        $defaultLimit = config('pagination.default_limit');
+        $maxLimit = config('pagination.max_limit');
+        $limit = (int) $request->input('per_page',$defaultLimit);
+        $search = $request->input('search');
+        $sort_column =  $request->input('sort_column');
+        $sort_direction =  $request->input('sort_direction');
+        $limit = min($limit, $maxLimit);
+
+        $limit = max($limit, 1);
+        $roles = $this->roleService->getAllRoles($limit, $search, $sort_column, $sort_direction);
+        return $this->paginatedResponse(
+            $roles,
+            'Roles fetched successfully.'
+        );
     }
 
     public function store(StoreRoleRequest $request)
