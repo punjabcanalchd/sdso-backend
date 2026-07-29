@@ -3,13 +3,15 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Admin\Http\Controllers\AdminController;
 use Modules\Admin\Http\Controllers\DashboardController;
-use Modules\Admin\Http\Controllers\DistrictController;
+use Modules\Admin\Http\Controllers\MasterManagement\DistrictController;
 use Modules\Admin\Http\Controllers\MenuController;
 use Modules\Admin\Http\Controllers\PageManagement\PageController;
 use Modules\Admin\Http\Controllers\PermissionController;
 use Modules\Admin\Http\Controllers\RoleController;
 use Modules\Admin\Http\Controllers\UserManagement\UserController;
 use Modules\Admin\Http\Controllers\UserRoleController;
+use Modules\Admin\Http\Controllers\MasterManagement\StateController;
+use Modules\Admin\Http\Controllers\MasterManagement\OfficeHierarchyController;
 
 // Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
 //     Route::apiResource('admins', AdminController::class)->names('admin');
@@ -48,11 +50,22 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::get('permissions/allowed-actions/{slug}', [PermissionController::class, 'allowedActions'])->name('admin.allowed_actions');
     Route::post('users/{public_id}/role', [UserRoleController::class, 'assignRoleToUser'])->name('admin.assign_role_to_user');
     Route::get('users/{public_id}/role', [UserRoleController::class, 'getUserRoleAndPermissions'])->name('admin.get_user_role_and_permissions');
+    
     Route::get('districts', [DistrictController::class, 'index'])->name('admin.get_all_districts');
 
     Route::prefix('pages')->group(function () {
         Route::get('/', [PageController::class, 'index'])->name('admin.get_all_pages');
         Route::get('/{public_id}', [PageController::class, 'show'])->name('admin.get_page_by_public_id');
+    });
+
+    Route::prefix('states')->group(function () {
+        Route::get('/', [StateController::class, 'index'])->name('admin.states');
+        Route::get('/{public_id}', [StateController::class, 'show'])->name('admin.get_state_by_public_id');
+    });
+
+    Route::prefix('office_hierarchy ')->group(function () {
+        Route::get('/', [OfficeHierarchyController::class, 'index'])->name('admin.office_hierarchy ');
+        Route::get('/{public_id}', [OfficeHierarchyController::class, 'show'])->name('admin.get_office_hierarchy_by_public_id');
     });
 
     // Menu routes

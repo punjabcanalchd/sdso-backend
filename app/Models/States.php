@@ -4,17 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log 
+use App\Traits\HasPublicId;
 
 class States extends Model
 {    
-    use Loggable; //for creating log
-    use HasFactory;    
+    use HasFactory, HasPublicId;    
     protected $primaryKey = 'state_id';      
     protected $fillable = [
     'lgdstatecode', 
     'status',
     ];
+
+    protected $appends = [
+        'public_id',
+    ];
+
     /**
     * Get the description for the page.
     */
@@ -43,5 +47,18 @@ class States extends Model
             }
         }
         return $return;
+    }
+
+    public function stateDescription()
+    {
+        if (!defined('default_language')) {
+            define('default_language', 1);
+        }
+
+        return $this->hasOne(
+            StatesDescription::class,
+            'lgdstatecode',
+            'lgdstatecode'
+        )->where('language_id', default_language);
     }
 }

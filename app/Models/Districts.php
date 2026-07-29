@@ -4,20 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log 
+use App\Traits\HasPublicId;
 
 class Districts extends Model
 {
-    use Loggable; //for creating log
-    use HasFactory;
+    use HasFactory, HasPublicId;
     protected $primaryKey = 'district_id';
 
     protected $fillable = [
-        // 'state_id',
         'lgdstatecode',
         'lgddistcode',
         'status',
        
+    ];
+
+    protected $appends = [
+        'public_id',
     ];
 
     /**
@@ -48,6 +50,11 @@ class Districts extends Model
             }
         }
         return $return;
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(States::class, 'lgdstatecode', 'lgdstatecode');
     }
 }
 
