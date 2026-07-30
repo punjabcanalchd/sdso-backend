@@ -3,15 +3,17 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Admin\Http\Controllers\AdminController;
 use Modules\Admin\Http\Controllers\DashboardController;
-use Modules\Admin\Http\Controllers\MasterManagement\DistrictController;
 use Modules\Admin\Http\Controllers\MenuController;
-use Modules\Admin\Http\Controllers\PageManagement\PageController;
 use Modules\Admin\Http\Controllers\PermissionController;
 use Modules\Admin\Http\Controllers\RoleController;
-use Modules\Admin\Http\Controllers\UserManagement\UserController;
 use Modules\Admin\Http\Controllers\UserRoleController;
+use Modules\Admin\Http\Controllers\UserManagement\UserController;
+use Modules\Admin\Http\Controllers\PageManagement\PageController;
 use Modules\Admin\Http\Controllers\MasterManagement\StateController;
 use Modules\Admin\Http\Controllers\MasterManagement\OfficeHierarchyController;
+use Modules\Admin\Http\Controllers\MasterManagement\DesignationController;
+use Modules\Admin\Http\Controllers\MasterManagement\DistrictController;
+
 
 // Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
 //     Route::apiResource('admins', AdminController::class)->names('admin');
@@ -66,6 +68,11 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::prefix('office_hierarchy ')->group(function () {
         Route::get('/', [OfficeHierarchyController::class, 'index'])->name('admin.office_hierarchy ');
         Route::get('/{public_id}', [OfficeHierarchyController::class, 'show'])->name('admin.get_office_hierarchy_by_public_id');
+    });
+
+    Route::prefix('designation ')->group(function () {
+        Route::get('/', [DesignationController::class, 'index'])->name('admin.designation ');
+        Route::get('/{public_id}', [DesignationController::class, 'show'])->name('admin.get_designation_by_public_id');
     });
 
     // Menu routes

@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log 
+use App\Traits\HasPublicId;
 
 class Designation extends Model
 {
-    use HasFactory;
+    use HasFactory, HasPublicId;
     protected $primaryKey = 'desigcode';      
     protected $fillable = [         
     'desigsenioritylevel',

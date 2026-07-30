@@ -26,7 +26,7 @@ class OfficeHierarchyService
     }
 
     /* ------------------------------------------------------------------
-     * GET SINGLE OfficeHierarchy
+     * GET SINGLE Office Hierarchy
      * ---------------------------------------------------------------- */
 
     public function getOfficeHierarchy(string $publicId) {
