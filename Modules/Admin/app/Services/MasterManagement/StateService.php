@@ -19,7 +19,7 @@ class StateService
     {
         $states = $this->repository->getAll($limit,$search,$sort_column,$sort_direction);
         $states->getCollection()->transform(function ($state) {
-            return $this->formatState($state);
+            return $this->formatResponse($state);
         });
 
         return $states;
@@ -31,10 +31,10 @@ class StateService
 
     public function getState(string $publicId) {
         $state = $this->repository->findByPublicId($publicId);
-        return $this->formatState($state);
+        return $this->formatResponse($state);
     }
 
-    private function formatState($state)
+    private function formatResponse($state)
     {
         $english = $state->description->firstWhere('language_id', 1);
         $punjabi = $state->description->firstWhere('language_id', 2);

@@ -13,6 +13,10 @@ use Modules\Admin\Http\Controllers\MasterManagement\StateController;
 use Modules\Admin\Http\Controllers\MasterManagement\OfficeHierarchyController;
 use Modules\Admin\Http\Controllers\MasterManagement\DesignationController;
 use Modules\Admin\Http\Controllers\MasterManagement\DistrictController;
+use Modules\Admin\Http\Controllers\MasterManagement\CircleController;
+use Modules\Admin\Http\Controllers\MasterManagement\DivisionController;
+use Modules\Admin\Http\Controllers\MasterManagement\SubDivisionController;
+use Modules\Admin\Http\Controllers\MasterManagement\OfficeController;
 
 
 // Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
@@ -73,6 +77,26 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::prefix('designation ')->group(function () {
         Route::get('/', [DesignationController::class, 'index'])->name('admin.designation ');
         Route::get('/{public_id}', [DesignationController::class, 'show'])->name('admin.get_designation_by_public_id');
+    });
+
+    Route::prefix('circles ')->group(function () {
+        Route::get('/', [CircleController::class, 'index'])->name('admin.circle ');
+        Route::get('/{public_id}', [CircleController::class, 'show'])->name('admin.get_circle_by_public_id');
+    });
+
+    Route::prefix('divisions ')->group(function () {
+        Route::get('/', [DivisionController::class, 'index'])->name('admin.divisions ');
+        Route::get('/{public_id}', [DivisionController::class, 'show'])->name('admin.get_division_by_public_id');
+    });
+
+    Route::prefix('subdivisions ')->group(function () {
+        Route::get('/', [SubDivisionController::class, 'index'])->name('admin.subdivisions ');
+        Route::get('/{public_id}', [SubDivisionController::class, 'show'])->name('admin.get_subdivision_by_public_id');
+    });
+
+    Route::prefix('offices ')->group(function () {
+        Route::get('/', [OfficeController::class, 'index'])->name('admin.offices ');
+        Route::get('/{public_id}', [OfficeController::class, 'show'])->name('admin.get_office_by_public_id');
     });
 
     // Menu routes

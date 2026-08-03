@@ -19,7 +19,7 @@ class DesignationService
     {
         $designations = $this->repository->getAll($limit,$search,$sort_column,$sort_direction);
         $designations->getCollection()->transform(function ($designation) {
-            return $this->formatState($designation);
+            return $this->formatResponse($designation);
         });
 
         return $designations;
@@ -31,10 +31,10 @@ class DesignationService
 
     public function getDesignation(string $publicId) {
         $designation = $this->repository->findByPublicId($publicId);
-        return $this->formatState($designation);
+        return $this->formatResponse($designation);
     }
 
-    private function formatState($designation)
+    private function formatResponse($designation)
     {
         $english = $designation->description->firstWhere('language_id', 1);
         $punjabi = $designation->description->firstWhere('language_id', 2);

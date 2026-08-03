@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log 
+use App\Traits\HasPublicId;
 
 class Divisions extends Model
 {
-    use Loggable; //for creating log
+    use HasPublicId;
     use HasFactory;
     protected $primaryKey = 'division_id';
 
@@ -16,6 +16,10 @@ class Divisions extends Model
         'circle_id',
         'status',
        
+    ];
+
+    protected $appends = [
+        'public_id',
     ];
 
     /**
@@ -35,8 +39,6 @@ class Divisions extends Model
         return $this->hasOne(DivisionsDescription::class,'division_id','division_id')->where('language_id','=',default_language);
     }
 
-
-
     public static function getdivisionName($division_id) {
         $return = 'None';
         $model = new DivisionsDescription;
@@ -48,5 +50,11 @@ class Divisions extends Model
         }
         return $return;
     }
+
+    public function circle()
+    {
+        return $this->belongsTo(Circles::class, 'circle_id', 'circle_id');
+    }
+
 }
 

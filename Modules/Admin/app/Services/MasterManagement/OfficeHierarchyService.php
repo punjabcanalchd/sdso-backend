@@ -19,7 +19,7 @@ class OfficeHierarchyService
     {
         $officeHierarchies = $this->repository->getAll($limit,$search,$sort_column,$sort_direction);
         $officeHierarchies->getCollection()->transform(function ($officeHierarchy) {
-            return $this->formatState($officeHierarchy);
+            return $this->formatResponse($officeHierarchy);
         });
 
         return $officeHierarchies;
@@ -31,10 +31,10 @@ class OfficeHierarchyService
 
     public function getOfficeHierarchy(string $publicId) {
         $officeHierarchy = $this->repository->findByPublicId($publicId);
-        return $this->formatState($officeHierarchy);
+        return $this->formatResponse($officeHierarchy);
     }
 
-    private function formatState($officeHierarchy)
+    private function formatResponse($officeHierarchy)
     {
         $english = $officeHierarchy->description->firstWhere('language_id', 1);
         $punjabi = $officeHierarchy->description->firstWhere('language_id', 2);

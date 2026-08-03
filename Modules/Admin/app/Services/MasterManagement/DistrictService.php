@@ -19,7 +19,7 @@ class DistrictService
     {
         $districts = $this->repository->getAll($limit,$search,$sort_column,$sort_direction);
         $districts->getCollection()->transform(function ($district) {
-            return $this->formatState($district);
+            return $this->formatResponse($district);
         });
 
         return $districts;
@@ -31,10 +31,10 @@ class DistrictService
 
     public function getDistrict(string $publicId) {
         $district = $this->repository->findByPublicId($publicId);
-        return $this->formatState($district);
+        return $this->formatResponse($district);
     }
 
-    private function formatState($district)
+    private function formatResponse($district)
     {
         $english = $district->description->firstWhere('language_id', 1);
         $punjabi = $district->description->firstWhere('language_id', 2);

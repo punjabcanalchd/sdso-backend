@@ -4,16 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log 
+use App\Traits\HasPublicId;
 
 class Circles extends Model
 {
-    use Loggable; //for creating log
+    use HasPublicId;
     use HasFactory;
     protected $primaryKey = 'circle_id';
     protected $fillable = [
         'lgdstatecode',
         'status',      
+    ];
+
+    protected $appends = [
+        'public_id',
     ];
 
 
@@ -29,12 +33,7 @@ class Circles extends Model
         }
 
         return $this->hasOne(CirclesDescription::class,'circle_id','circle_id')->where('language_id','=',default_language);
-
-      
     }
-
-
-
 
     public static function getCircleName($circle_id) {
       
@@ -47,5 +46,10 @@ class Circles extends Model
             }
         }
         return $return;
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(States::class, 'lgdstatecode', 'lgdstatecode');
     }
 }
