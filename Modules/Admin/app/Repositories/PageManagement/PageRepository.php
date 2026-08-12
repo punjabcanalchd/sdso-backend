@@ -16,7 +16,7 @@ class PageRepository
         ?string $sort_column,
         ?string $sort_direction
     ) {
-        $query = Page::with(['englishDescription', 'punjabiDescription']);
+        $query = Page::with(['descriptions']);
 
         if (! empty($search)) {
             $query->whereHas('descriptions', function ($q) use ($search) {
