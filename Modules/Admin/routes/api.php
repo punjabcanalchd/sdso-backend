@@ -12,7 +12,7 @@ use Modules\Admin\Http\Controllers\MasterManagement\OfficeHierarchyController;
 use Modules\Admin\Http\Controllers\MasterManagement\StateController;
 use Modules\Admin\Http\Controllers\MasterManagement\SubDivisionController;
 use Modules\Admin\Http\Controllers\MenuController;
-use Modules\Admin\Http\Controllers\PageManagement\PageController;
+use Modules\Admin\Http\Controllers\Others\PageController;
 use Modules\Admin\Http\Controllers\PermissionController;
 use Modules\Admin\Http\Controllers\RoleController;
 use Modules\Admin\Http\Controllers\UserManagement\UserController;
@@ -61,6 +61,9 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::prefix('pages')->group(function () {
         Route::get('/', [PageController::class, 'index'])->name('admin.pages');
         Route::get('/{public_id}', [PageController::class, 'show'])->name('admin.get_page_by_public_id');
+        Route::post('/', [PageController::class, 'store'])->name('admin.create_new_page');
+        Route::post('/{public_id}/update', [PageController::class, 'update'])->name('admin.update_page_details');
+        Route::post('/{public_id}/delete', [PageController::class, 'destroy'])->name('admin.delete_page');
     });
 
     Route::prefix('states')->group(function () {

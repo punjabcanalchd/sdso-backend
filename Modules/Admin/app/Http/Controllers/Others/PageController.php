@@ -1,11 +1,14 @@
 <?php
 
-namespace Modules\Admin\Http\Controllers\PageManagement;
+namespace Modules\Admin\Http\Controllers\Others;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Modules\Admin\Services\PageManagement\PageService;
+use Modules\Admin\Services\Others\PageService;
+use Modules\Admin\Requests\Others\StorePageRequest;
+use Modules\Admin\Requests\Others\UpdatePageRequest;
+use App\Models\Page;
 
 class PageController extends Controller
 {
@@ -60,6 +63,50 @@ class PageController extends Controller
         return $this->successResponse(
             $page,
             'Page fetched successfully.'
+        );
+    }
+
+    /**
+     * Create page
+     */
+
+    public function store(StorePageRequest $request)
+    {
+        $page = $this->service->createPage($request->validated());
+
+        return $this->successResponse(
+            $page,
+            'Page created successfully.',
+            201
+        );
+    }
+
+    /**
+     * Update page
+     */
+
+    public function update(UpdatePageRequest $request,  Page $page)
+    {
+        $page = $this->service->updatePage($page, $request->validated());
+
+        return $this->successResponse(
+            $page,
+            'Page updated successfully.'
+        );
+    }
+
+    /**
+     * Delete page
+     */
+
+    public function destroy(Page $page)
+    {
+        // Delete the page using the service
+        $this->service->deletePage($page->public_id);
+
+        return $this->successResponse(
+            null,
+            'Page deleted successfully.'
         );
     }
 }

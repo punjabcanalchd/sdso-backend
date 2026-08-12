@@ -1,8 +1,9 @@
 <?php
 
-namespace Modules\Admin\Repositories\PageManagement;
+namespace Modules\Admin\Repositories\Others;
 
 use App\Models\Page;
+use App\Models\PageDescription;
 
 class PageRepository
 {
@@ -56,6 +57,20 @@ class PageRepository
         return Page::create($data);
     }
 
+    public function createDescriptions(int $pageId, array $translations): void {
+        foreach ($translations['title'] as $languageId => $title) {
+            PageDescription::create([
+                'page_id' => $pageId,
+                'language_id' => $languageId,
+                'title' => $title,
+                'description' => $translations['description'][$languageId] ?? null,
+                'meta_title' => $translations['meta_title'][$languageId] ?? null,
+                'meta_description' => $translations['meta_description'][$languageId] ?? null,
+                'meta_keyword' => $translations['meta_keyword'][$languageId] ?? null,
+            ]);
+        }
+    }
+
     /* ------------------------------------------------------------------
      * UPDATE page
      * ---------------------------------------------------------------- */
@@ -64,6 +79,28 @@ class PageRepository
     {
         $page = $this->findByPublicId($publicId);
         $page->update($data);
+
+        return $page;
+    }
+
+    public function updatePageWithDescriptions(Page $page, array $pageData, array $descriptions): Page {
+
+        $page->update($pageData);
+        
+        PageDescription::where('page_id', $page->page_id)->delete();
+
+        foreach ($descriptions as $description) {
+
+            PageDescription::create([
+                'page_id' => $page->page_id,
+                'language_id' => $description['language_id'],
+                'title' => $description['title'],
+                'description' => $description['description'],
+                'meta_title' => $description['meta_title'],
+                'meta_description' => $description['meta_description'],
+                'meta_keyword' => $description['meta_keyword'],
+            ]);
+        }
 
         return $page;
     }
