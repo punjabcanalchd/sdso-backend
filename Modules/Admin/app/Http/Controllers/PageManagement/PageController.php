@@ -23,6 +23,7 @@ class PageController extends Controller
      */
     public function index(Request $request)
     {
+
         $defaultLimit = config('pagination.default_limit');
         $maxLimit = config('pagination.max_limit');
 
@@ -30,7 +31,11 @@ class PageController extends Controller
         $limit = min($limit, $maxLimit);
         $limit = max($limit, 1);
 
-        $pages = $this->service->getPages($limit);
+        $pages = $this->service->getPages($limit,
+            $request->get('search'),
+            $request->get('sort_column'),
+            $request->get('sort_direction')
+        );
 
         return $this->paginatedResponse(
             $pages,

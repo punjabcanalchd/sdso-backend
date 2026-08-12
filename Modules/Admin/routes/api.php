@@ -3,21 +3,20 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Admin\Http\Controllers\AdminController;
 use Modules\Admin\Http\Controllers\DashboardController;
-use Modules\Admin\Http\Controllers\MenuController;
-use Modules\Admin\Http\Controllers\PermissionController;
-use Modules\Admin\Http\Controllers\RoleController;
-use Modules\Admin\Http\Controllers\UserRoleController;
-use Modules\Admin\Http\Controllers\UserManagement\UserController;
-use Modules\Admin\Http\Controllers\PageManagement\PageController;
-use Modules\Admin\Http\Controllers\MasterManagement\StateController;
-use Modules\Admin\Http\Controllers\MasterManagement\OfficeHierarchyController;
+use Modules\Admin\Http\Controllers\MasterManagement\CircleController;
 use Modules\Admin\Http\Controllers\MasterManagement\DesignationController;
 use Modules\Admin\Http\Controllers\MasterManagement\DistrictController;
-use Modules\Admin\Http\Controllers\MasterManagement\CircleController;
 use Modules\Admin\Http\Controllers\MasterManagement\DivisionController;
-use Modules\Admin\Http\Controllers\MasterManagement\SubDivisionController;
 use Modules\Admin\Http\Controllers\MasterManagement\OfficeController;
-
+use Modules\Admin\Http\Controllers\MasterManagement\OfficeHierarchyController;
+use Modules\Admin\Http\Controllers\MasterManagement\StateController;
+use Modules\Admin\Http\Controllers\MasterManagement\SubDivisionController;
+use Modules\Admin\Http\Controllers\MenuController;
+use Modules\Admin\Http\Controllers\PageManagement\PageController;
+use Modules\Admin\Http\Controllers\PermissionController;
+use Modules\Admin\Http\Controllers\RoleController;
+use Modules\Admin\Http\Controllers\UserManagement\UserController;
+use Modules\Admin\Http\Controllers\UserRoleController;
 
 // Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
 //     Route::apiResource('admins', AdminController::class)->names('admin');
@@ -56,11 +55,11 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::get('permissions/allowed-actions/{slug}', [PermissionController::class, 'allowedActions'])->name('admin.allowed_actions');
     Route::post('users/{public_id}/role', [UserRoleController::class, 'assignRoleToUser'])->name('admin.assign_role_to_user');
     Route::get('users/{public_id}/role', [UserRoleController::class, 'getUserRoleAndPermissions'])->name('admin.get_user_role_and_permissions');
-    
+
     Route::get('districts', [DistrictController::class, 'index'])->name('admin.get_all_districts');
 
     Route::prefix('pages')->group(function () {
-        Route::get('/', [PageController::class, 'index'])->name('admin.get_all_pages');
+        Route::get('/', [PageController::class, 'index'])->name('admin.pages');
         Route::get('/{public_id}', [PageController::class, 'show'])->name('admin.get_page_by_public_id');
     });
 

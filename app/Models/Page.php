@@ -33,7 +33,8 @@ class Page extends Model
     protected $fillable = [
         'parent_id',
         'page_id',
-        'external_link',
+        'slug',
+        'external_url',
         'sort_order',
         'status',
         'show_on_footer',
