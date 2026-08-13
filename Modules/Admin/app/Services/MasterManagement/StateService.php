@@ -5,6 +5,7 @@ namespace Modules\Admin\Services\MasterManagement;
 use Modules\Admin\Repositories\MasterManagement\StateRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\States;
 
 
 class StateService
@@ -26,12 +27,69 @@ class StateService
     }
 
     /* ------------------------------------------------------------------
-     * GET SINGLE USER
+     * GET SINGLE STATE
      * ---------------------------------------------------------------- */
 
     public function getState(string $publicId) {
         $state = $this->repository->findByPublicId($publicId);
         return $this->formatResponse($state);
+    }
+
+    public function createState(array $data): States
+    {
+        return DB::transaction(function () use ($data) {
+
+            $translations = [
+                'name' => $data['name'] ?? [],
+                'description' => $data['description'] ?? [],
+            ];
+
+            unset(
+                $data['name'],
+                $data['description'],
+            );
+
+            // Repository handles database operation
+            $state = $this->repository->create($data);
+
+            // Repository handles translation database operation
+            $this->repository->createDescriptions($state, $translations);
+
+            return $state;
+        });
+    }
+
+    public function updateState(array $data, string $publicId)
+    {
+
+        $names = $data['name'] ?? [];
+        $descriptions = $data['description'] ?? [];
+
+    
+        unset(
+            $data['name'],
+            $data['description'],
+        );
+
+        $descriptions = [];
+
+        foreach ($names as $languageId => $name) {
+
+            $descriptions[] = [
+                'language_id' => $languageId,
+                'name' => $name,
+                'description' => $descriptions[$languageId] ?? null,
+            ];
+        }
+        DB::transaction(function () use ($publicId, $data, $descriptions) {
+
+            return $this->repository->updatePageWithDescriptions(
+                $publicId,
+                $data,
+                $descriptions
+            );
+        });
+
     }
 
     private function formatResponse($state)

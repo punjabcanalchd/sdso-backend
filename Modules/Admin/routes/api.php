@@ -69,6 +69,8 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::prefix('states')->group(function () {
         Route::get('/', [StateController::class, 'index'])->name('admin.states');
         Route::get('/{public_id}', [StateController::class, 'show'])->name('admin.get_state_by_public_id');
+        Route::post('/', [StateController::class, 'store'])->name('admin.create_new_state');
+        Route::post('/{public_id}/update', [StateController::class, 'update'])->name('admin.update_state_details');
     });
 
     Route::prefix('office_hierarchy ')->group(function () {

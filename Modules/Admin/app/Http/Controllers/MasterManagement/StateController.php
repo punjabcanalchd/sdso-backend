@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Modules\Admin\Services\MasterManagement\StateService;
+use Modules\Admin\Requests\MasterManagement\StoreStateRequest;
+use Modules\Admin\Requests\MasterManagement\UpdateStateRequest;
 
 class StateController extends Controller
 {
@@ -61,6 +63,36 @@ class StateController extends Controller
         return $this->successResponse(
             $state,
             'State fetched successfully.'
+        );
+    }
+
+     /* ------------------------------------------------------------------
+     * CREATE State
+     * ---------------------------------------------------------------- */
+
+    public function store(StoreStateRequest $request)
+    {
+
+        $state = $this->service->createState($request->validated());
+
+        return $this->successResponse(
+            $state,
+            'State created successfully.',
+            201
+        );
+    }
+
+    /* ------------------------------------------------------------------
+     * UPDATE State
+     * ---------------------------------------------------------------- */
+
+    public function update(UpdateStateRequest $request, string $publicId) {
+
+        $state = $this->service->updateState($request->validated(), $publicId);
+
+        return $this->successResponse(
+            $state,
+            'State updated successfully.'
         );
     }
 }

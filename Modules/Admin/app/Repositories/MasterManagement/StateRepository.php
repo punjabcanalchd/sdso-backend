@@ -3,6 +3,7 @@
 namespace Modules\Admin\Repositories\MasterManagement;
 
 use App\Models\States;
+use App\Models\StatesDescription;
 
 class StateRepository
 {
@@ -74,6 +75,18 @@ class StateRepository
         return States::create($data);
     }
 
+    public function createDescriptions(States $state, array $translations): void {
+        foreach ($translations['name'] as $languageId => $name) {
+            StatesDescription::create([
+                'state_id' => $state->state_id,
+                'lgdstatecode' => $state->lgdstatecode,
+                'language_id' => $languageId,
+                'name' => $name,
+                'description' => $translations['description'][$languageId] ?? null,
+            ]);
+        }
+    }
+
     /* ------------------------------------------------------------------
      * UPDATE State
      * ---------------------------------------------------------------- */
@@ -82,6 +95,26 @@ class StateRepository
     {
         $state = $this->findByPublicId($publicId);
         $state->update($data);
+        return $state;
+    }
+
+    public function updatePageWithDescriptions(string $publicId, array $stateData, array $descriptions): States {
+
+        $state= States::findByPublicId($publicId);
+
+        $state->update($stateData);
+        
+        StatesDescription::where('lgdstatecode', $stateData['lgdstatecode'])->delete();
+
+        foreach ($descriptions as $description) {
+
+            StatesDescription::create([
+                'lgdstatecode' => $stateData['lgdstatecode'],
+                'language_id' => $description['language_id'],
+                'name' => $description['name'],
+                'description' => $description['description']
+            ]);
+        }
         return $state;
     }
 
