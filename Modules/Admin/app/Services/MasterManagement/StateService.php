@@ -43,6 +43,9 @@ class StateService
             'public_id' => $state->public_id,
             'name_en'   => $english?->name,
             'name_pb'   => $punjabi?->name,
+            'description_en'   => $english?->description,
+            'description_pb'   => $punjabi?->description,
+            'lgdstatecode'=> $state->lgdstatecode,
             'created_at'=> $state->created_at,
             'status'    => $state->status,
         ];
