@@ -5,6 +5,7 @@ namespace Modules\Admin\Services\MasterManagement;
 use Modules\Admin\Repositories\MasterManagement\DesignationRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Designation;
 
 
 class DesignationService
@@ -26,7 +27,7 @@ class DesignationService
     }
 
     /* ------------------------------------------------------------------
-     * GET SINGLE Office Hierarchy
+     * GET SINGLE Designation
      * ---------------------------------------------------------------- */
 
     public function getDesignation(string $publicId) {
@@ -43,9 +44,68 @@ class DesignationService
             'public_id' => $designation->public_id,
             'name_en'   => $english?->designation,
             'name_pb'   => $punjabi?->designation,
+            'description_en'   => $english?->description,
+            'description_pb'   => $punjabi?->description,
             'desigsenioritylevel'=> $designation->desigsenioritylevel,
             'created_at'=> $designation->created_at,
             'status'    => $designation->status,
         ];
+    }
+
+        public function createDesignation(array $data): Designation
+    {
+        return DB::transaction(function () use ($data) {
+
+            $translations = [
+                'name' => $data['name'] ?? [],
+                'description' => $data['description'] ?? [],
+            ];
+
+            unset(
+                $data['name'],
+                $data['description'],
+            );
+
+            // Repository handles database operation
+            $officeHierarchy = $this->repository->create($data);
+
+            // Repository handles translation database operation
+            $this->repository->createDescriptions($officeHierarchy, $translations);
+
+            return $officeHierarchy;
+        });
+    }
+
+    public function updateDesignation(array $data, string $publicId)
+    {
+
+        $names = $data['name'] ?? [];
+        $description = $data['description'] ?? [];
+
+        unset(
+            $data['name'],
+            $data['description'],
+        );
+
+        $descriptions = [];
+
+        foreach ($names as $languageId => $name) {
+
+            $descriptions[] = [
+                'language_id' => $languageId,
+                'name' => $name,
+                'description' => $description[$languageId] ?? null,
+            ];
+        }
+
+        DB::transaction(function () use ($publicId, $data, $descriptions) {
+
+            return $this->repository->updatePageWithDescriptions(
+                $publicId,
+                $data,
+                $descriptions
+            );
+        });
+
     }
 }

@@ -3,6 +3,9 @@
 namespace Modules\Admin\Repositories\MasterManagement;
 
 use App\Models\Districts;
+use App\Models\DistrictsDescription;
+
+use App\Enums\StatusEnum;
 
 class DistrictRepository
 {
@@ -54,6 +57,11 @@ class DistrictRepository
         return $query->paginate($limit);
     }
 
+    public function getAllDistricts()
+    {
+        return Districts::with('description')->where('status', StatusEnum::ACTIVE->value)->get();
+    }
+
     /* ------------------------------------------------------------------
      * GET SINGLE District BY PUBLIC ID
      * ---------------------------------------------------------------- */
@@ -74,6 +82,18 @@ class DistrictRepository
         return Districts::create($data);
     }
 
+    public function createDescriptions(Districts $districts, array $translations): void {
+        foreach ($translations['name'] as $languageId => $name) {
+            DistrictsDescription::create([
+                'state_id' => $districts->state_id,
+                'lgddistcode' => $districts->lgddistcode,
+                'language_id' => $languageId,
+                'name' => $name,
+                'description' => $translations['description'][$languageId] ?? null,
+            ]);
+        }
+    }
+
     /* ------------------------------------------------------------------
      * UPDATE State
      * ---------------------------------------------------------------- */
@@ -82,6 +102,26 @@ class DistrictRepository
     {
         $district = $this->findByPublicId($publicId);
         $district->update($data);
+        return $district;
+    }
+
+    public function updatePageWithDescriptions(string $publicId, array $districtData, array $descriptions): Districts {
+
+        $district= Districts::findByPublicId($publicId);
+
+        $district->update($districtData);
+        
+        DistrictsDescription::where('lgddistcode', $districtData['lgddistcode'])->delete();
+
+        foreach ($descriptions as $description) {
+
+            DistrictsDescription::create([
+                'lgddistcode' => $districtData['lgddistcode'],
+                'language_id' => $description['language_id'],
+                'name' => $description['name'],
+                'description' => $description['description']
+            ]);
+        }
         return $district;
     }
 

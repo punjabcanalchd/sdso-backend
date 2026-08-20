@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Modules\Admin\Services\MasterManagement\DesignationService;
+use Modules\Admin\Requests\MasterManagement\StoreDesignationRequest;
+use Modules\Admin\Requests\MasterManagement\UpdateDesignationRequest;
 
 class DesignationController extends Controller
 {
@@ -20,7 +22,7 @@ class DesignationController extends Controller
 
 
     /**
-     * Get all Office Hierarchies
+     * Get all Designations
      */
 
     public function index(Request $request)
@@ -47,7 +49,7 @@ class DesignationController extends Controller
     }
 
     /**
-     * Get Office Hierarchy by id
+     * Get Designation by id
      */
     public function show(string $publicId)
     {
@@ -63,6 +65,36 @@ class DesignationController extends Controller
         return $this->successResponse(
             $designation,
             'Designation fetched successfully.'
+        );
+    }
+
+    /* ------------------------------------------------------------------
+     * CREATE Designation
+     * ---------------------------------------------------------------- */
+
+    public function store(StoreDesignationRequest $request)
+    {
+
+        $designation = $this->service->createDesignation($request->validated());
+
+        return $this->successResponse(
+            $designation,
+            'Designation created successfully.',
+            201
+        );
+    }
+
+    /* ------------------------------------------------------------------
+     * UPDATE Designation
+     * ---------------------------------------------------------------- */
+
+    public function update(UpdateDesignationRequest $request, string $publicId) {
+
+        $designation = $this->service->updateDesignation($request->validated(), $publicId);
+
+        return $this->successResponse(
+            $designation,
+            'Designation updated successfully.'
         );
     }
 }

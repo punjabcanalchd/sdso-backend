@@ -4,6 +4,7 @@ namespace Modules\Admin\Repositories\MasterManagement;
 
 use App\Models\States;
 use App\Models\StatesDescription;
+use App\Enums\StatusEnum;
 
 class StateRepository
 {
@@ -53,6 +54,11 @@ class StateRepository
         }
 
         return $query->paginate($limit);
+    }
+
+    public function getAllStates()
+    {
+        return States::with('description')->where('status', StatusEnum::ACTIVE->value)->get();
     }
 
     /* ------------------------------------------------------------------

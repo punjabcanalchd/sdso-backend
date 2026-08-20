@@ -46,6 +46,17 @@ class StateController extends Controller
         );
     }
 
+    public function getAllStates(Request $request)
+    {
+       
+        $states = $this->service->getAllStates();
+
+        return $this->successResponse(
+            $states,
+            'States fetched successfully.'
+        );
+    }
+
     /**
      * Get state by slug
      */

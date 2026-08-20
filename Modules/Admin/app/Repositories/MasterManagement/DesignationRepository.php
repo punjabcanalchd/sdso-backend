@@ -3,6 +3,7 @@
 namespace Modules\Admin\Repositories\MasterManagement;
 
 use App\Models\Designation;
+use App\Models\DesignationDescription;
 
 class DesignationRepository
 {
@@ -74,14 +75,38 @@ class DesignationRepository
         return Designation::create($data);
     }
 
+     public function createDescriptions(Designation $designations, array $translations): void {
+        foreach ($translations['name'] as $languageId => $name) {
+            DesignationDescription::create([
+                'desigcode' => $designations->desigcode,
+                'language_id' => $languageId,
+                'designation' => $name,
+                'description' => $translations['description'][$languageId] ?? null,
+            ]);
+        }
+    }
+
     /* ------------------------------------------------------------------
      * UPDATE Designation
      * ---------------------------------------------------------------- */
 
-    public function update(string $publicId, array $data): Designation
-    {
-        $designation = $this->findByPublicId($publicId);
-        $designation->update($data);
+    public function updatePageWithDescriptions(string $publicId, array $designationData, array $descriptions): Designation {
+
+        $designation= Designation::findByPublicId($publicId);
+
+        $designation->update($designationData);
+        
+        DesignationDescription::where('desigcode', $designation->desigcode)->delete();
+
+        foreach ($descriptions as $description) {
+
+            DesignationDescription::create([
+                'desigcode' => $designation->desigcode,
+                'language_id' => $description['language_id'],
+                'designation' => $description['name'],
+                'description' => $description['description']
+            ]);
+        }
         return $designation;
     }
 

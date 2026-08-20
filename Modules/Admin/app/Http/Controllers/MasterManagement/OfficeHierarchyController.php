@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Modules\Admin\Services\MasterManagement\OfficeHierarchyService;
+use Modules\Admin\Requests\MasterManagement\StoreOfficeHierarchyRequest;
+use Modules\Admin\Requests\MasterManagement\UpdateOfficeHierarchyRequest;
 
 class OfficeHierarchyController extends Controller
 {
@@ -63,6 +65,36 @@ class OfficeHierarchyController extends Controller
         return $this->successResponse(
             $officeHierarchy,
             'Office Hierarchy fetched successfully.'
+        );
+    }
+
+     /* ------------------------------------------------------------------
+     * CREATE Office Hierarchy
+     * ---------------------------------------------------------------- */
+
+    public function store(StoreOfficeHierarchyRequest $request)
+    {
+
+        $officeHierarchy = $this->service->createOfficeHierarchy($request->validated());
+
+        return $this->successResponse(
+            $officeHierarchy,
+            'Office Hierarchy created successfully.',
+            201
+        );
+    }
+
+    /* ------------------------------------------------------------------
+     * UPDATE Office Hierarchy
+     * ---------------------------------------------------------------- */
+
+    public function update(UpdateOfficeHierarchyRequest $request, string $publicId) {
+
+        $officeHierarchy = $this->service->updateOfficeHierarchy($request->validated(), $publicId);
+
+        return $this->successResponse(
+            $officeHierarchy,
+            'Office Hierarchy updated successfully.'
         );
     }
 }

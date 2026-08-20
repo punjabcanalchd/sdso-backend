@@ -3,6 +3,7 @@
 namespace Modules\Admin\Repositories\MasterManagement;
 
 use App\Models\OfficeHierarchies;
+use App\Models\OfficeHierarchiesDescription;
 
 class OfficeHierarchyRepository
 {
@@ -65,7 +66,7 @@ class OfficeHierarchyRepository
         return $officeHierarchy;
     }
 
-    /* ------------------------------------------------------------------
+   /* ------------------------------------------------------------------
      * CREATE Office Hierarchy
      * ---------------------------------------------------------------- */
 
@@ -74,14 +75,38 @@ class OfficeHierarchyRepository
         return OfficeHierarchies::create($data);
     }
 
+    public function createDescriptions(OfficeHierarchies $officeHierarchies, array $translations): void {
+        foreach ($translations['name'] as $languageId => $name) {
+            OfficeHierarchiesDescription::create([
+                'officelevelcode' => $officeHierarchies->officelevelcode,
+                'language_id' => $languageId,
+                'officelevel' => $name,
+                'description' => $translations['description'][$languageId] ?? null,
+            ]);
+        }
+    }
+
     /* ------------------------------------------------------------------
      * UPDATE Office Hierarchy
      * ---------------------------------------------------------------- */
 
-    public function update(string $publicId, array $data): OfficeHierarchies
-    {
-        $officeHierarchy = $this->findByPublicId($publicId);
-        $officeHierarchy->update($data);
+    public function updatePageWithDescriptions(string $publicId, array $officeHierarchyData, array $descriptions): OfficeHierarchies {
+
+        $officeHierarchy= OfficeHierarchies::findByPublicId($publicId);
+
+        $officeHierarchy->update($officeHierarchyData);
+        
+        OfficeHierarchiesDescription::where('officelevelcode', $officeHierarchy->officelevelcode)->delete();
+
+        foreach ($descriptions as $description) {
+
+            OfficeHierarchiesDescription::create([
+                'officelevelcode' => $officeHierarchy->officelevelcode,
+                'language_id' => $description['language_id'],
+                'officelevel' => $description['name'],
+                'description' => $description['description']
+            ]);
+        }
         return $officeHierarchy;
     }
 

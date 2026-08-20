@@ -56,8 +56,6 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::post('users/{public_id}/role', [UserRoleController::class, 'assignRoleToUser'])->name('admin.assign_role_to_user');
     Route::get('users/{public_id}/role', [UserRoleController::class, 'getUserRoleAndPermissions'])->name('admin.get_user_role_and_permissions');
 
-    Route::get('districts', [DistrictController::class, 'index'])->name('admin.get_all_districts');
-
     Route::prefix('pages')->group(function () {
         Route::get('/', [PageController::class, 'index'])->name('admin.pages');
         Route::get('/{public_id}', [PageController::class, 'show'])->name('admin.get_page_by_public_id');
@@ -68,37 +66,50 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
 
     Route::prefix('states')->group(function () {
         Route::get('/', [StateController::class, 'index'])->name('admin.states');
+        Route::get('/all', [StateController::class, 'getAllStates'])->name('admin.all_states');
         Route::get('/{public_id}', [StateController::class, 'show'])->name('admin.get_state_by_public_id');
         Route::post('/', [StateController::class, 'store'])->name('admin.create_new_state');
         Route::post('/{public_id}/update', [StateController::class, 'update'])->name('admin.update_state_details');
     });
 
-    Route::prefix('office_hierarchy ')->group(function () {
+    Route::prefix('districts')->group(function () {
+        Route::get('/', [DistrictController::class, 'index'])->name('admin.districts');
+        Route::get('/all', [DistrictController::class, 'getAllStates'])->name('admin.get_all_districts');
+        Route::get('/{public_id}', [DistrictController::class, 'show'])->name('admin.get_district_by_public_id');
+        Route::post('/', [DistrictController::class, 'store'])->name('admin.create_new_district');
+        Route::post('/{public_id}/update', [DistrictController::class, 'update'])->name('admin.update_district_details');
+    });
+
+    Route::prefix('office_hierarchy')->group(function () {
         Route::get('/', [OfficeHierarchyController::class, 'index'])->name('admin.office_hierarchy ');
         Route::get('/{public_id}', [OfficeHierarchyController::class, 'show'])->name('admin.get_office_hierarchy_by_public_id');
+        Route::post('/', [OfficeHierarchyController::class, 'store'])->name('admin.create_new_office_hierarchy');
+        Route::post('/{public_id}/update', [OfficeHierarchyController::class, 'update'])->name('admin.update_office_hierarchy_details');
     });
 
-    Route::prefix('designation ')->group(function () {
+    Route::prefix('designation')->group(function () {
         Route::get('/', [DesignationController::class, 'index'])->name('admin.designation ');
         Route::get('/{public_id}', [DesignationController::class, 'show'])->name('admin.get_designation_by_public_id');
+         Route::post('/', [DesignationController::class, 'store'])->name('admin.create_new_designation');
+        Route::post('/{public_id}/update', [DesignationController::class, 'update'])->name('admin.update_designation_details');
     });
 
-    Route::prefix('circles ')->group(function () {
+    Route::prefix('circles')->group(function () {
         Route::get('/', [CircleController::class, 'index'])->name('admin.circle ');
         Route::get('/{public_id}', [CircleController::class, 'show'])->name('admin.get_circle_by_public_id');
     });
 
-    Route::prefix('divisions ')->group(function () {
+    Route::prefix('divisions')->group(function () {
         Route::get('/', [DivisionController::class, 'index'])->name('admin.divisions ');
         Route::get('/{public_id}', [DivisionController::class, 'show'])->name('admin.get_division_by_public_id');
     });
 
-    Route::prefix('subdivisions ')->group(function () {
+    Route::prefix('subdivisions')->group(function () {
         Route::get('/', [SubDivisionController::class, 'index'])->name('admin.subdivisions ');
         Route::get('/{public_id}', [SubDivisionController::class, 'show'])->name('admin.get_subdivision_by_public_id');
     });
 
-    Route::prefix('offices ')->group(function () {
+    Route::prefix('offices')->group(function () {
         Route::get('/', [OfficeController::class, 'index'])->name('admin.offices ');
         Route::get('/{public_id}', [OfficeController::class, 'show'])->name('admin.get_office_by_public_id');
     });

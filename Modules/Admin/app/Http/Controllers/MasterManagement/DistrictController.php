@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Modules\Admin\Services\MasterManagement\DistrictService;
+use Modules\Admin\Requests\MasterManagement\StoreDistrictRequest;
+use Modules\Admin\Requests\MasterManagement\UpdateDistrictRequest;
 
 class DistrictController extends Controller
 {
@@ -38,31 +40,73 @@ class DistrictController extends Controller
 
         $limit = max($limit, 1);
 
-        $states = $this->service->getDistricts($limit, $search, $sort_column, $sort_direction);
+        $districts = $this->service->getDistricts($limit, $search, $sort_column, $sort_direction);
 
         return $this->paginatedResponse(
-            $states,
-            'States fetched successfully.'
+            $districts,
+            'Districts fetched successfully.'
         );
     }
 
+    public function getAllDistricts(Request $request)
+    {
+       
+        $districts = $this->service->getAllDistricts();
+
+        return $this->successResponse(
+            $districts,
+            'Districts fetched successfully.'
+        );
+    }
+
+
     /**
-     * Get page by slug
+     * Get District by id
      */
     public function show(string $publicId)
     {
-        $state = $this->service->getDistrict($publicId);
+        $district = $this->service->getDistrict($publicId);
 
-        if (! $state) {
+        if (! $district) {
             return $this->errorResponse(
-                'State not found.',
+                'District not found.',
                 404
             );
         }
 
         return $this->successResponse(
-            $state,
-            'State fetched successfully.'
+            $district,
+            'District fetched successfully.'
+        );
+    }
+
+     /* ------------------------------------------------------------------
+     * CREATE District
+     * ---------------------------------------------------------------- */
+
+    public function store(StoreDistrictRequest $request)
+    {
+
+        $district = $this->service->createDistrict($request->validated());
+
+        return $this->successResponse(
+            $district,
+            'District created successfully.',
+            201
+        );
+    }
+
+    /* ------------------------------------------------------------------
+     * UPDATE District
+     * ---------------------------------------------------------------- */
+
+    public function update(UpdateDistrictRequest $request, string $publicId) {
+
+        $district = $this->service->updateDistrict($request->validated(), $publicId);
+
+        return $this->successResponse(
+            $district,
+            'District updated successfully.'
         );
     }
 }

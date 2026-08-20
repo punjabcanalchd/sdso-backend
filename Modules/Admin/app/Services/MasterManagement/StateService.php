@@ -26,6 +26,16 @@ class StateService
         return $states;
     }
 
+    public function getAllStates()
+    {
+        $states = $this->repository->getAllStates();
+        $states->transform(function ($state) {
+            return $this->formatResponse($state);
+        });
+
+        return $states;
+    }
+
     /* ------------------------------------------------------------------
      * GET SINGLE STATE
      * ---------------------------------------------------------------- */
@@ -63,7 +73,7 @@ class StateService
     {
 
         $names = $data['name'] ?? [];
-        $descriptions = $data['description'] ?? [];
+        $description = $data['description'] ?? [];
 
     
         unset(
@@ -78,7 +88,7 @@ class StateService
             $descriptions[] = [
                 'language_id' => $languageId,
                 'name' => $name,
-                'description' => $descriptions[$languageId] ?? null,
+                'description' => $description[$languageId] ?? null,
             ];
         }
         DB::transaction(function () use ($publicId, $data, $descriptions) {
