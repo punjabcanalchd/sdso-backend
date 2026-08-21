@@ -15,13 +15,13 @@ class OfficeHierarchyRepository
     {
         $query = OfficeHierarchies::with(['description']);
         // Search in both English & Punjabi
-        if (!empty($search)) {
+        if (! empty($search)) {
             $query->whereHas('description', function ($q) use ($search) {
                 $q->where('officelevel', 'ILIKE', "%{$search}%");
             });
         }
         $sort_direction = strtolower($sort_direction ?? 'asc');
-        if (!in_array($sort_direction, ['asc', 'desc'])) {
+        if (! in_array($sort_direction, ['asc', 'desc'])) {
             $sort_direction = 'asc';
         }
         /*
@@ -38,7 +38,7 @@ class OfficeHierarchyRepository
 
             $query->select('office_hierarchies.*')->orderBy('sd.officelevel', $sort_direction);
 
-        } else if($sort_column === 'name_pb') {
+        } elseif ($sort_column === 'name_pb') {
 
             $query->leftJoin('office_hierarchies_descriptions as sd', function ($join) {
                 $join->on('sd.officelevelcode', '=', 'office_hierarchies.officelevelcode')
@@ -62,20 +62,22 @@ class OfficeHierarchyRepository
     public function findByPublicId(string $publicId): OfficeHierarchies
     {
         $officeHierarchy = OfficeHierarchies::findByPublicId($publicId);
-        abort_if(!$officeHierarchy, 404, 'State not found.');
+        abort_if(! $officeHierarchy, 404, 'State not found.');
+
         return $officeHierarchy;
     }
 
-   /* ------------------------------------------------------------------
-     * CREATE Office Hierarchy
-     * ---------------------------------------------------------------- */
+    /* ------------------------------------------------------------------
+      * CREATE Office Hierarchy
+      * ---------------------------------------------------------------- */
 
     public function create(array $data): OfficeHierarchies
     {
         return OfficeHierarchies::create($data);
     }
 
-    public function createDescriptions(OfficeHierarchies $officeHierarchies, array $translations): void {
+    public function createDescriptions(OfficeHierarchies $officeHierarchies, array $translations): void
+    {
         foreach ($translations['name'] as $languageId => $name) {
             OfficeHierarchiesDescription::create([
                 'officelevelcode' => $officeHierarchies->officelevelcode,
@@ -90,12 +92,13 @@ class OfficeHierarchyRepository
      * UPDATE Office Hierarchy
      * ---------------------------------------------------------------- */
 
-    public function updatePageWithDescriptions(string $publicId, array $officeHierarchyData, array $descriptions): OfficeHierarchies {
+    public function updatePageWithDescriptions(string $publicId, array $officeHierarchyData, array $descriptions): OfficeHierarchies
+    {
 
-        $officeHierarchy= OfficeHierarchies::findByPublicId($publicId);
+        $officeHierarchy = OfficeHierarchies::findByPublicId($publicId);
 
         $officeHierarchy->update($officeHierarchyData);
-        
+
         OfficeHierarchiesDescription::where('officelevelcode', $officeHierarchy->officelevelcode)->delete();
 
         foreach ($descriptions as $description) {
@@ -104,9 +107,10 @@ class OfficeHierarchyRepository
                 'officelevelcode' => $officeHierarchy->officelevelcode,
                 'language_id' => $description['language_id'],
                 'officelevel' => $description['name'],
-                'description' => $description['description']
+                'description' => $description['description'],
             ]);
         }
+
         return $officeHierarchy;
     }
 
@@ -117,6 +121,7 @@ class OfficeHierarchyRepository
     public function delete(string $publicId): bool
     {
         $officeHierarchy = $this->findByPublicId($publicId);
+
         return $officeHierarchy->delete();
     }
 }
