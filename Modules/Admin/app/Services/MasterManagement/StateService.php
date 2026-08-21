@@ -2,23 +2,22 @@
 
 namespace Modules\Admin\Services\MasterManagement;
 
-use Modules\Admin\Repositories\MasterManagement\StateRepository;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use App\Models\States;
-
+use Illuminate\Support\Facades\DB;
+use Modules\Admin\Repositories\MasterManagement\StateRepository;
 
 class StateService
 {
     protected StateRepository $repository;
 
-    public function __construct(StateRepository $repository) {
+    public function __construct(StateRepository $repository)
+    {
         $this->repository = $repository;
     }
 
     public function getStates(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
     {
-        $states = $this->repository->getAll($limit,$search,$sort_column,$sort_direction);
+        $states = $this->repository->getAll($limit, $search, $sort_column, $sort_direction);
         $states->getCollection()->transform(function ($state) {
             return $this->formatResponse($state);
         });
@@ -40,8 +39,10 @@ class StateService
      * GET SINGLE STATE
      * ---------------------------------------------------------------- */
 
-    public function getState(string $publicId) {
+    public function getState(string $publicId)
+    {
         $state = $this->repository->findByPublicId($publicId);
+
         return $this->formatResponse($state);
     }
 
@@ -49,21 +50,25 @@ class StateService
     {
         return DB::transaction(function () use ($data) {
 
-            $translations = [
-                'name' => $data['name'] ?? [],
-                'description' => $data['description'] ?? [],
-            ];
+            $languages = $data['languages'] ?? [];
 
-            unset(
-                $data['name'],
-                $data['description'],
-            );
+            unset($data['languages']);
+
+            // $translations = [
+            //     'name' => $data['name'] ?? [],
+            //     'description' => $data['description'] ?? [],
+            // ];
+
+            // unset(
+            //     $data['name'],
+            //     $data['description'],
+            // );
 
             // Repository handles database operation
             $state = $this->repository->create($data);
 
             // Repository handles translation database operation
-            $this->repository->createDescriptions($state, $translations);
+            $this->repository->createDescriptions($state, $languages);
 
             return $state;
         });
@@ -71,36 +76,54 @@ class StateService
 
     public function updateState(array $data, string $publicId)
     {
+        return DB::transaction(function () use ($data, $publicId) {
 
-        $names = $data['name'] ?? [];
-        $description = $data['description'] ?? [];
-
-    
-        unset(
-            $data['name'],
-            $data['description'],
-        );
-
-        $descriptions = [];
-
-        foreach ($names as $languageId => $name) {
-
-            $descriptions[] = [
-                'language_id' => $languageId,
-                'name' => $name,
-                'description' => $description[$languageId] ?? null,
+            $stateData = [
+                'lgdstatecode' => $data['lgdstatecode'],
+                'status' => $data['status'],
             ];
-        }
-        DB::transaction(function () use ($publicId, $data, $descriptions) {
+
+            $descriptions = $data['languages'] ?? [];
 
             return $this->repository->updatePageWithDescriptions(
                 $publicId,
-                $data,
+                $stateData,
                 $descriptions
             );
         });
-
     }
+    // public function updateState(array $data, string $publicId)
+    // {
+    //     echo 'asdasdasdas';
+    //     dd($data);
+    //     $names = $data['name'] ?? [];
+    //     $descriptions = $data['description'] ?? [];
+
+    //     unset(
+    //         $data['name'],
+    //         $data['description'],
+    //     );
+
+    //     $descriptions = [];
+
+    //     foreach ($names as $languageId => $name) {
+
+    //         $descriptions[] = [
+    //             'language_id' => $languageId,
+    //             'name' => $name,
+    //             'description' => $descriptions[$languageId] ?? null,
+    //         ];
+    //     }
+    //     DB::transaction(function () use ($publicId, $data, $descriptions) {
+
+    //         return $this->repository->updatePageWithDescriptions(
+    //             $publicId,
+    //             $data,
+    //             $descriptions
+    //         );
+    //     });
+
+    // }
 
     private function formatResponse($state)
     {
@@ -109,13 +132,13 @@ class StateService
 
         return [
             'public_id' => $state->public_id,
-            'name_en'   => $english?->name,
-            'name_pb'   => $punjabi?->name,
-            'description_en'   => $english?->description,
-            'description_pb'   => $punjabi?->description,
-            'lgdstatecode'=> $state->lgdstatecode,
-            'created_at'=> $state->created_at,
-            'status'    => $state->status,
+            'name_en' => $english?->name,
+            'name_pb' => $punjabi?->name,
+            'description_en' => $english?->description,
+            'description_pb' => $punjabi?->description,
+            'lgdstatecode' => $state->lgdstatecode,
+            'created_at' => $state->created_at,
+            'status' => $state->status,
         ];
     }
 }

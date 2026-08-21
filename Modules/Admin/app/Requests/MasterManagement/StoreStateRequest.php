@@ -3,12 +3,6 @@
 namespace Modules\Admin\Requests\MasterManagement;
 
 use App\Http\Requests\BaseRequest;
-use App\Validation\Rules\CommonRules;
-use App\Validation\Rules\SecurityRules;
-use App\Helpers\RSAHelper;
-use App\Validation\Patterns\RegexPatterns;
-use Illuminate\Support\Facades\Crypt;
-use App\Validation\Rules\FileRules;
 
 class StoreStateRequest extends BaseRequest
 {
@@ -23,24 +17,57 @@ class StoreStateRequest extends BaseRequest
     |--------------------------------------------------------------------------
     */
 
+    // public function rules(): array
+    // {
+    //     $rules = [];
+
+    //     $rules['name'] = ['required','array'];
+
+    //     $rules['name.*'] = ['required','string'];
+
+    //     $rules['description'] = ['required','array'];
+
+    //     $rules['description.*'] = ['required','string'];
+
+    //     $rules['lgdstatecode'] = ['required','numeric','unique:states,lgdstatecode'];
+
+    //     $rules['status'] = ['required','boolean'];
+
+    //     return $rules;
+    // }
+
     public function rules(): array
     {
-        $rules = [];
+        return [
+            'languages' => ['required', 'array', 'size:2'],
 
-        $rules['name'] = ['required','array'];
+            'languages.*.language_id' => [
+                'required',
+                'integer',
+                'in:1,2',
+            ],
 
-        $rules['name.*'] = ['required','string'];
+            'languages.*.name' => [
+                'required',
+                'string',
+            ],
 
-        $rules['description'] = ['required','array'];
+            'languages.*.description' => [
+                'required',
+                'string',
+            ],
 
-        $rules['description.*'] = ['required','string'];
+            'lgdstatecode' => [
+                'required',
+                'numeric',
+                'unique:states,lgdstatecode',
+            ],
 
-        $rules['lgdstatecode'] = ['required','numeric','unique:states,lgdstatecode'];
-
-        $rules['status'] = ['required','boolean'];
-
-
-        return $rules;
+            'status' => [
+                'required',
+                'boolean',
+            ],
+        ];
     }
 
     /*
@@ -52,30 +79,56 @@ class StoreStateRequest extends BaseRequest
     public function messages(): array
     {
         return [
+            'languages.required' => 'Languages are required.',
+            'languages.array' => 'Languages must be provided in the correct format.',
+            'languages.size' => 'Exactly two languages are required.',
+
+            'languages.*.language_id.required' => 'Language ID is required.',
+            'languages.*.language_id.integer' => 'Language ID must be an integer.',
+            'languages.*.language_id.in' => 'Invalid language ID.',
+
+            'languages.*.name.required' => 'Title is required.',
+            'languages.*.name.string' => 'Title must be a valid string.',
+
+            'languages.*.description.required' => 'Description is required.',
+            'languages.*.description.string' => 'Description must be a valid string.',
 
             'lgdstatecode.required' => 'LGD state code is required.',
-
+            'lgdstatecode.numeric' => 'LGD state code must be a number.',
             'lgdstatecode.unique' => 'This LGD state code already exists.',
 
-            'name.required' => 'Name is required.',
-
-            'name.array' => 'Title must be provided in the correct format.',
-
-            'name.*.required' => 'Title is required.',
-
-            'name.*.string' => 'Title must be a valid string.',
-
-            'description.required' => 'Description is required.',
-
-            'description.array' => 'Description must be provided in the correct format.',
-
-            'description.*.required' => 'Description is required.',
-
-            'description.*.string' => 'Description must be a valid string.',
-
-            'lgdstatecode.numeric' => 'LGD state code must be a number.',
-
+            'status.required' => 'Status is required.',
             'status.boolean' => 'Status must be a boolean value.',
         ];
     }
+
+    // public function messages(): array
+    // {
+    //     return [
+
+    //         'lgdstatecode.required' => 'LGD state code is required.',
+
+    //         'lgdstatecode.unique' => 'This LGD state code already exists.',
+
+    //         'name.required' => 'Name is required.',
+
+    //         'name.array' => 'Title must be provided in the correct format.',
+
+    //         'name.*.required' => 'Title is required.',
+
+    //         'name.*.string' => 'Title must be a valid string.',
+
+    //         'description.required' => 'Description is required.',
+
+    //         'description.array' => 'Description must be provided in the correct format.',
+
+    //         'description.*.required' => 'Description is required.',
+
+    //         'description.*.string' => 'Description must be a valid string.',
+
+    //         'lgdstatecode.numeric' => 'LGD state code must be a number.',
+
+    //         'status.boolean' => 'Status must be a boolean value.',
+    //     ];
+    // }
 }

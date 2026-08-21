@@ -5,9 +5,9 @@ namespace Modules\Admin\Http\Controllers\MasterManagement;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Modules\Admin\Services\MasterManagement\StateService;
 use Modules\Admin\Requests\MasterManagement\StoreStateRequest;
 use Modules\Admin\Requests\MasterManagement\UpdateStateRequest;
+use Modules\Admin\Services\MasterManagement\StateService;
 
 class StateController extends Controller
 {
@@ -29,10 +29,10 @@ class StateController extends Controller
 
         $maxLimit = config('pagination.max_limit');
 
-        $limit = (int) $request->input('per_page',$defaultLimit);
+        $limit = (int) $request->input('per_page', $defaultLimit);
         $search = $request->input('search');
-        $sort_column =  $request->input('sort_column');
-        $sort_direction =  $request->input('sort_direction');
+        $sort_column = $request->input('sort_column');
+        $sort_direction = $request->input('sort_direction');
 
         $limit = min($limit, $maxLimit);
 
@@ -48,7 +48,7 @@ class StateController extends Controller
 
     public function getAllStates(Request $request)
     {
-       
+
         $states = $this->service->getAllStates();
 
         return $this->successResponse(
@@ -77,9 +77,9 @@ class StateController extends Controller
         );
     }
 
-     /* ------------------------------------------------------------------
-     * CREATE State
-     * ---------------------------------------------------------------- */
+    /* ------------------------------------------------------------------
+    * CREATE State
+    * ---------------------------------------------------------------- */
 
     public function store(StoreStateRequest $request)
     {
@@ -96,14 +96,38 @@ class StateController extends Controller
     /* ------------------------------------------------------------------
      * UPDATE State
      * ---------------------------------------------------------------- */
+    public function update(UpdateStateRequest $request, string $public_id)
+    {
+        try {
+            // \Log::info('StateController update reached', [
+            //     'public_id' => $public_id,
+            //     'data' => $request->validated(),
+            // ]);
 
-    public function update(UpdateStateRequest $request, string $publicId) {
+            $data = $request->validated();
 
-        $state = $this->service->updateState($request->validated(), $publicId);
+            return $this->service->updateState(
+                $data,
+                $public_id
+            );
 
-        return $this->successResponse(
-            $state,
-            'State updated successfully.'
-        );
+        } catch (\Throwable $e) {
+            // \Log::error('State update failed', [
+            //     'message' => $e->getMessage(),
+            //     'exception' => get_class($e),
+            //     'file' => $e->getFile(),
+            //     'line' => $e->getLine(),
+            //     'trace' => $e->getTraceAsString(),
+            // ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ], 500);
+        }
     }
 }

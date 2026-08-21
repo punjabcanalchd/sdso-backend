@@ -2,9 +2,9 @@
 
 namespace Modules\Admin\Repositories\MasterManagement;
 
+use App\Enums\StatusEnum;
 use App\Models\States;
 use App\Models\StatesDescription;
-use App\Enums\StatusEnum;
 
 class StateRepository
 {
@@ -15,14 +15,16 @@ class StateRepository
     public function getAll(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
     {
         $query = States::with('description');
+
         // Search in both English & Punjabi
-        if (!empty($search)) {
+
+        if (! empty($search)) {
             $query->whereHas('description', function ($q) use ($search) {
                 $q->where('name', 'ILIKE', "%{$search}%");
             });
         }
         $sort_direction = strtolower($sort_direction ?? 'asc');
-        if (!in_array($sort_direction, ['asc', 'desc'])) {
+        if (! in_array($sort_direction, ['asc', 'desc'])) {
             $sort_direction = 'asc';
         }
         /*
@@ -39,7 +41,7 @@ class StateRepository
 
             $query->select('states.*')->orderBy('sd.name', $sort_direction);
 
-        } else if($sort_column === 'name_pb') {
+        } elseif ($sort_column === 'name_pb') {
 
             $query->leftJoin('states_descriptions as sd', function ($join) {
                 $join->on('sd.lgdstatecode', '=', 'states.lgdstatecode')
@@ -68,7 +70,8 @@ class StateRepository
     public function findByPublicId(string $publicId): States
     {
         $state = States::findByPublicId($publicId);
-        abort_if(!$state, 404, 'State not found.');
+        abort_if(! $state, 404, 'State not found.');
+
         return $state;
     }
 
@@ -81,14 +84,19 @@ class StateRepository
         return States::create($data);
     }
 
-    public function createDescriptions(States $state, array $translations): void {
-        foreach ($translations['name'] as $languageId => $name) {
+    public function createDescriptions(
+        States $state,
+        array $languages
+    ): void {
+
+        foreach ($languages as $language) {
+
             StatesDescription::create([
                 'state_id' => $state->state_id,
                 'lgdstatecode' => $state->lgdstatecode,
-                'language_id' => $languageId,
-                'name' => $name,
-                'description' => $translations['description'][$languageId] ?? null,
+                'language_id' => $language['language_id'],
+                'name' => $language['name'],
+                'description' => $language['description'] ?? null,
             ]);
         }
     }
@@ -99,29 +107,47 @@ class StateRepository
 
     public function update(string $publicId, array $data): States
     {
+
         $state = $this->findByPublicId($publicId);
         $state->update($data);
+
         return $state;
     }
 
-    public function updatePageWithDescriptions(string $publicId, array $stateData, array $descriptions): States {
+    public function updatePageWithDescriptions(
+        string $publicId,
+        array $stateData,
+        array $descriptions
+    ): States {
 
-        $state= States::findByPublicId($publicId);
+        $state = $this->findByPublicId($publicId);
 
-        $state->update($stateData);
-        
-        StatesDescription::where('lgdstatecode', $stateData['lgdstatecode'])->delete();
+        $oldLgdStateCode = $state->lgdstatecode;
+        $newLgdStateCode = $stateData['lgdstatecode'];
 
+        // Update main state
+        $state->update([
+            'lgdstatecode' => $newLgdStateCode,
+            'status' => $stateData['status'],
+        ]);
+
+        // Update descriptions
         foreach ($descriptions as $description) {
 
-            StatesDescription::create([
-                'lgdstatecode' => $stateData['lgdstatecode'],
-                'language_id' => $description['language_id'],
-                'name' => $description['name'],
-                'description' => $description['description']
-            ]);
+            StatesDescription::updateOrCreate(
+                [
+                    'lgdstatecode' => $oldLgdStateCode,
+                    'language_id' => $description['language_id'],
+                ],
+                [
+                    'lgdstatecode' => $newLgdStateCode,
+                    'name' => $description['name'],
+                    'description' => $description['description'],
+                ]
+            );
         }
-        return $state;
+
+        return $state->fresh();
     }
 
     /* ------------------------------------------------------------------
@@ -131,6 +157,7 @@ class StateRepository
     public function delete(string $publicId): bool
     {
         $state = $this->findByPublicId($publicId);
+
         return $state->delete();
     }
 }

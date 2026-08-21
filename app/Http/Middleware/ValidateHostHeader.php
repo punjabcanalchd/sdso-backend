@@ -36,16 +36,21 @@ class ValidateHostHeader
 
     public function handle(Request $request, Closure $next)
     {
+
         $host = $request->getHost();
         $allowedHosts = config('security.allowed_domains');
 
-        \Log::info('Host Validation', [
+        $isAllowed = in_array($host, $allowedHosts, true);
+
+        \Log::info('Host Validation DEBUG', [
             'host' => $host,
             'allowedHosts' => $allowedHosts,
-            'env' => env('ALLOWED_DOMAINS'),
+            'isAllowed' => $isAllowed,
+            'hostType' => gettype($host),
+            'allowedType' => gettype($allowedHosts),
         ]);
 
-        if (! in_array($host, $allowedHosts, true)) {
+        if (! $isAllowed) {
             return response()->json([
                 'message' => 'Forbidden: Invalid Host Header',
                 'host' => $host,
@@ -53,6 +58,27 @@ class ValidateHostHeader
             ], 403);
         }
 
+        \Log::info('Host Validation PASSED');
+
         return $next($request);
+        // $host = $request->getHost();
+        // $allowedHosts = config('security.allowed_domains');
+
+        // \Log::info('Host Validation START', [
+        //     'host' => $host,
+        //     'allowedHosts' => $allowedHosts,
+        //     'url' => $request->fullUrl(),
+        //     'method' => $request->method(),
+        // ]);
+
+        // if (! in_array($host, $allowedHosts, true)) {
+        //     return response()->json([
+        //         'message' => 'Forbidden: Invalid Host Header',
+        //         'host' => $host,
+        //         'allowed' => $allowedHosts,
+        //     ], 403);
+        // }
+
+        // return $next($request);
     }
 }
