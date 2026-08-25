@@ -74,6 +74,17 @@ class DistrictRepository
     }
 
     /* ------------------------------------------------------------------
+     * GET District BY State ID
+     * ---------------------------------------------------------------- */
+
+    public function getDistrictsByState(int $publicId): Districts
+    {
+
+        $districts = Districts::where('state_id', $publicId)->get();
+        return $districts;
+    }
+
+    /* ------------------------------------------------------------------
      * CREATE State
      * ---------------------------------------------------------------- */
 

@@ -3,6 +3,8 @@
 namespace Modules\Admin\Repositories\MasterManagement;
 
 use App\Models\Divisions;
+use App\Models\DivisionsDescription;
+use App\Enums\StatusEnum;
 
 class DivisionRepository
 {
@@ -53,6 +55,11 @@ class DivisionRepository
         return $query->paginate($limit);
     }
 
+    public function getAllDivisions()
+    {
+        return Divisions::with('description')->where('status', StatusEnum::ACTIVE->value)->get();
+    }
+
     /* ------------------------------------------------------------------
      * GET SINGLE Division BY PUBLIC ID
      * ---------------------------------------------------------------- */
@@ -65,6 +72,17 @@ class DivisionRepository
     }
 
     /* ------------------------------------------------------------------
+     * GET Divisions BY Circle ID
+     * ---------------------------------------------------------------- */
+
+    public function getDivisionsByCircle(int $publicId): Divisions
+    {
+
+        $divisions = Divisions::where('circle_id', $publicId)->get();
+        return $divisions;
+    }
+
+    /* ------------------------------------------------------------------
      * CREATE Division
      * ---------------------------------------------------------------- */
 
@@ -73,14 +91,46 @@ class DivisionRepository
         return Divisions::create($data);
     }
 
+    public function createDescriptions(Divisions $division, array $translations): void {
+        foreach ($translations['name'] as $languageId => $name) {
+            DivisionsDescription::create([
+                'division_id' => $division->division_id,
+                'language_id' => $languageId,
+                'name' => $name,
+                'description' => $translations['description'][$languageId] ?? null,
+            ]);
+        }
+    }
+
     /* ------------------------------------------------------------------
-     * UPDATE Division
+     * UPDATE Circle
      * ---------------------------------------------------------------- */
 
     public function update(string $publicId, array $data): Divisions
     {
         $division = $this->findByPublicId($publicId);
         $division->update($data);
+        return $division;
+    }
+
+    public function updatePageWithDescriptions(string $publicId, array $divisionData, array $descriptions): Divisions {
+
+        $division= Divisions::findByPublicId($publicId);
+
+
+        $division->update($divisionData);
+        
+        DivisionsDescription::where('division_id', $division->division_id)->delete();
+
+        foreach ($descriptions as $description) {
+
+            DivisionsDescription::create([
+                'division_id' => $division->division_id,
+                'language_id' => $description['language_id'],
+                'name' => $description['name'],
+                'description' => $description['description']
+            ]);
+        }
         return $division;
     }
 

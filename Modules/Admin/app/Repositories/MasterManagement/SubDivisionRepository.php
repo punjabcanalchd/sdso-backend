@@ -3,6 +3,9 @@
 namespace Modules\Admin\Repositories\MasterManagement;
 
 use App\Models\SubDivisions;
+use App\Models\SubDivisionsDescription;
+use App\Enums\StatusEnum;
+
 
 class SubDivisionRepository
 {
@@ -53,6 +56,11 @@ class SubDivisionRepository
         return $query->paginate($limit);
     }
 
+    public function getAllSubDivisions()
+    {
+        return SubDivisions::with('description')->where('status', StatusEnum::ACTIVE->value)->get();
+    }
+
     /* ------------------------------------------------------------------
      * GET SINGLE SubDivision BY PUBLIC ID
      * ---------------------------------------------------------------- */
@@ -65,6 +73,17 @@ class SubDivisionRepository
     }
 
     /* ------------------------------------------------------------------
+     * GET SubDivision BY Division ID
+     * ---------------------------------------------------------------- */
+
+    public function getSubdivisionsByDivision(int $publicId): SubDivisions
+    {
+
+        $subdivisions = SubDivisions::where('division_id', $publicId)->get();
+        return $subdivisions;
+    }
+
+    /* ------------------------------------------------------------------
      * CREATE SubDivision
      * ---------------------------------------------------------------- */
 
@@ -73,14 +92,38 @@ class SubDivisionRepository
         return SubDivisions::create($data);
     }
 
+    public function createDescriptions(SubDivisions $subdivision, array $translations): void {
+        foreach ($translations['name'] as $languageId => $name) {
+            SubDivisionsDescription::create([
+                'subdivision_id' => $subdivision->subdivision_id,
+                'language_id' => $languageId,
+                'name' => $name,
+                'description' => $translations['description'][$languageId] ?? null,
+            ]);
+        }
+    }
+
     /* ------------------------------------------------------------------
      * UPDATE SubDivision
      * ---------------------------------------------------------------- */
 
-    public function update(string $publicId, array $data): SubDivisions
-    {
-        $subdivision = $this->findByPublicId($publicId);
-        $subdivision->update($data);
+    public function updatePageWithDescriptions(string $publicId, array $subdivisionData, array $descriptions): SubDivisions {
+
+        $subdivision= SubDivisions::findByPublicId($publicId);
+
+        $subdivision->update($subdivisionData);
+        
+        SubDivisionsDescription::where('subdivision_id', $subdivision->subdivision_id)->delete();
+
+        foreach ($descriptions as $description) {
+
+            SubDivisionsDescription::create([
+                'subdivision_id' => $subdivision->subdivision_id,
+                'language_id' => $description['language_id'],
+                'name' => $description['name'],
+                'description' => $description['description']
+            ]);
+        }
         return $subdivision;
     }
 

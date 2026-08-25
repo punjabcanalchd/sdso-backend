@@ -27,6 +27,17 @@ class OfficeHierarchyService
         return $officeHierarchies;
     }
 
+    public function getAllOfficeLevels()
+    {
+        $officelevels = $this->repository->getAllOfficeLevels();
+        $officelevels->transform(function ($officelevel) {
+            return $this->formatResponse($officelevel);
+        });
+
+        return $officelevels;
+    }
+
+
     /* ------------------------------------------------------------------
      * GET SINGLE Office Hierarchy
      * ---------------------------------------------------------------- */

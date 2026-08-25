@@ -84,10 +84,7 @@ class StateRepository
         return States::create($data);
     }
 
-    public function createDescriptions(
-        States $state,
-        array $languages
-    ): void {
+    public function createDescriptions(States $state,array $languages): void {
 
         foreach ($languages as $language) {
 
@@ -105,20 +102,8 @@ class StateRepository
      * UPDATE State
      * ---------------------------------------------------------------- */
 
-    public function update(string $publicId, array $data): States
+    public function update(string $publicId,array $stateData,array $descriptions): States 
     {
-
-        $state = $this->findByPublicId($publicId);
-        $state->update($data);
-
-        return $state;
-    }
-
-    public function updatePageWithDescriptions(
-        string $publicId,
-        array $stateData,
-        array $descriptions
-    ): States {
 
         $state = $this->findByPublicId($publicId);
 

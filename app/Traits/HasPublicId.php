@@ -2,40 +2,67 @@
 
 namespace App\Traits;
 
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Contracts\Encryption\DecryptException;
-
+use Hashids\Hashids;
 
 trait HasPublicId
 {
-    /**
-     * Public encrypted identifier
-     */
-    public function getPublicIdAttribute(): string
+    protected function getHashidsInstance(): Hashids
     {
-        $primaryKey = $this->getKeyName();
-
-        return urlencode(
-            Crypt::encryptString(
-                (string) $this->{$primaryKey}
-            )
+        return new Hashids(
+            config('app.key'),
+            20
         );
     }
 
     /**
-     * Find model by encrypted public ID
-     * Returns null if the public_id is invalid or tampered.
+     * Get public ID for current model.
      */
-    public static function findByPublicId(
-        string $publicId
-    ): ?self {
+    public function getPublicIdAttribute(): string
+    {
+        return $this->getHashidsInstance()->encode(
+            $this->getKey()
+        );
+    }
 
-        try {
-            $id = Crypt::decryptString(urldecode($publicId));
-        } catch (DecryptException) {
+    /**
+     * Encode database ID to public ID.
+     */
+    public function encodeKey(int|string $key): string
+    {
+        return $this->getHashidsInstance()->encode((int) $key);
+    }
+
+    /**
+     * Decode public ID to database ID.
+     */
+    public function decode(string $string): int
+    {
+        if (is_numeric($string)) {
+            return (int) $string;
+        }
+
+        $decoded = $this->getHashidsInstance()->decode($string);
+
+        if (empty($decoded)) {
+            abort(404, 'Something went wrong');
+        }
+
+        return (int) $decoded[0];
+    }
+
+    /**
+     * Find model using public ID.
+     */
+    public static function findByPublicId(string $publicId): ?self
+    {
+        $instance = new static();
+
+        $decoded = $instance->getHashidsInstance()->decode($publicId);
+
+        if (empty($decoded)) {
             return null;
         }
 
-        return static::find($id);
+        return static::find($decoded[0]);
     }
 }

@@ -48,6 +48,16 @@ class OfficeHierarchyController extends Controller
         );
     }
 
+    public function getAllOfficeLevels(Request $request)
+    {
+        $officelevels = $this->service->getAllOfficeLevels();
+
+        return $this->successResponse(
+            $officelevels,
+            'Data fetched successfully.'
+        );
+    }
+
     /**
      * Get Office Hierarchy by id
      */

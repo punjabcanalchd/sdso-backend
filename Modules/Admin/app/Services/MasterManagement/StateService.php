@@ -75,7 +75,7 @@ class StateService
 
             $descriptions = $data['languages'] ?? [];
 
-            return $this->repository->updatePageWithDescriptions(
+            return $this->repository->update(
                 $publicId,
                 $stateData,
                 $descriptions

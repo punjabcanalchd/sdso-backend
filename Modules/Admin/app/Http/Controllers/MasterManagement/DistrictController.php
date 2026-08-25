@@ -80,6 +80,20 @@ class DistrictController extends Controller
         );
     }
 
+    /**
+     * Get Districts by State
+     */
+    public function getDistrictsByState(string $publicId)
+    {
+        $districts = $this->service->getDistrictsByState($publicId);
+
+        return $this->successResponse(
+            $districts,
+            'Districts fetched successfully.'
+        );
+    }
+
+
      /* ------------------------------------------------------------------
      * CREATE District
      * ---------------------------------------------------------------- */

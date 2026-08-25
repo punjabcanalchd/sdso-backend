@@ -82,6 +82,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
 
     Route::prefix('office_hierarchy')->group(function () {
         Route::get('/', [OfficeHierarchyController::class, 'index'])->name('admin.office_hierarchy ');
+        Route::get('/all', [OfficeHierarchyController::class, 'getAllOfficeLevels'])->name('admin.get_all_office_levels');
         Route::get('/{public_id}', [OfficeHierarchyController::class, 'show'])->name('admin.get_office_hierarchy_by_public_id');
         Route::post('/', [OfficeHierarchyController::class, 'store'])->name('admin.create_new_office_hierarchy');
         Route::post('/{public_id}/update', [OfficeHierarchyController::class, 'update'])->name('admin.update_office_hierarchy_details');
@@ -90,23 +91,34 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::prefix('designation')->group(function () {
         Route::get('/', [DesignationController::class, 'index'])->name('admin.designation ');
         Route::get('/{public_id}', [DesignationController::class, 'show'])->name('admin.get_designation_by_public_id');
-         Route::post('/', [DesignationController::class, 'store'])->name('admin.create_new_designation');
+        Route::post('/', [DesignationController::class, 'store'])->name('admin.create_new_designation');
         Route::post('/{public_id}/update', [DesignationController::class, 'update'])->name('admin.update_designation_details');
     });
 
     Route::prefix('circles')->group(function () {
         Route::get('/', [CircleController::class, 'index'])->name('admin.circle ');
+        Route::get('/all', [CircleController::class, 'getAllCircles'])->name('admin.get_all_circles');
         Route::get('/{public_id}', [CircleController::class, 'show'])->name('admin.get_circle_by_public_id');
+        Route::post('/', [CircleController::class, 'store'])->name('admin.create_new_circle');
+        Route::post('/{public_id}/update', [CircleController::class, 'update'])->name('admin.update_circle_details');
     });
 
     Route::prefix('divisions')->group(function () {
         Route::get('/', [DivisionController::class, 'index'])->name('admin.divisions ');
+        Route::get('/all', [DivisionController::class, 'getAllDivisions'])->name('admin.get_all_divisions');
         Route::get('/{public_id}', [DivisionController::class, 'show'])->name('admin.get_division_by_public_id');
+        Route::post('/', [DivisionController::class, 'store'])->name('admin.create_new_division');
+        Route::post('/{public_id}/update', [DivisionController::class, 'update'])->name('admin.update_division_details');
+        Route::get('/{public_id}/getdivisions', [DivisionController::class, 'getDivisionsByCircle'])->name('admin.get_divisions_by_circle');
     });
 
     Route::prefix('subdivisions')->group(function () {
         Route::get('/', [SubDivisionController::class, 'index'])->name('admin.subdivisions ');
+        Route::get('/all', [SubDivisionController::class, 'getAllDivisions'])->name('admin.get_all_subdivisions');
         Route::get('/{public_id}', [SubDivisionController::class, 'show'])->name('admin.get_subdivision_by_public_id');
+        Route::post('/', [SubDivisionController::class, 'store'])->name('admin.create_new_subdivision');
+        Route::post('/{public_id}/update', [SubDivisionController::class, 'update'])->name('admin.update_subdivision_details');
+        Route::get('/{public_id}/getsubdivisions', [SubDivisionController::class, 'getSubdivisionsByDivision'])->name('admin.get_subdivisions_by_division');
     });
 
     Route::prefix('offices')->group(function () {

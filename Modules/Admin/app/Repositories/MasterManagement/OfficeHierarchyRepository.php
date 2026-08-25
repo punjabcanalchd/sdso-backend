@@ -4,6 +4,7 @@ namespace Modules\Admin\Repositories\MasterManagement;
 
 use App\Models\OfficeHierarchies;
 use App\Models\OfficeHierarchiesDescription;
+use App\Enums\StatusEnum;
 
 class OfficeHierarchyRepository
 {
@@ -53,6 +54,11 @@ class OfficeHierarchyRepository
         }
 
         return $query->paginate($limit);
+    }
+
+    public function getAllOfficeLevels()
+    {
+        return OfficeHierarchies::with('description')->where('status', StatusEnum::ACTIVE->value)->get();
     }
 
     /* ------------------------------------------------------------------

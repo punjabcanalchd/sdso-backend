@@ -6,10 +6,12 @@ use Modules\Admin\Repositories\MasterManagement\DistrictRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Districts;
+use App\Traits\HasPublicId;
 
 
 class DistrictService
 {
+    use HasPublicId;
     protected DistrictRepository $repository;
 
     public function __construct(DistrictRepository $repository) {
@@ -34,6 +36,15 @@ class DistrictService
         });
 
         return $districts;
+    }
+
+    /* ------------------------------------------------------------------
+     * GET Districts By State
+     * ---------------------------------------------------------------- */
+    public function getDistrictsByState(string $publicId) {
+        $state_id = (int) $this->decode($publicId);
+        $districts = $this->repository->getDistrictsByState($state_id);
+        return $this->formatResponse($districts);
     }
 
     /* ------------------------------------------------------------------

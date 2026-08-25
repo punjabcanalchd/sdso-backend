@@ -3,6 +3,8 @@
 namespace Modules\Admin\Repositories\MasterManagement;
 
 use App\Models\Circles;
+use App\Models\CirclesDescription;
+use App\Enums\StatusEnum;
 
 class CircleRepository
 {
@@ -53,6 +55,11 @@ class CircleRepository
         return $query->paginate($limit);
     }
 
+    public function getAllCircles()
+    {
+        return Circles::with('description')->where('status', StatusEnum::ACTIVE->value)->get();
+    }
+
     /* ------------------------------------------------------------------
      * GET SINGLE Circle BY PUBLIC ID
      * ---------------------------------------------------------------- */
@@ -73,6 +80,17 @@ class CircleRepository
         return Circles::create($data);
     }
 
+    public function createDescriptions(Circles $circle, array $translations): void {
+        foreach ($translations['name'] as $languageId => $name) {
+            CirclesDescription::create([
+                'circle_id' => $circle->circle_id,
+                'language_id' => $languageId,
+                'name' => $name,
+                'description' => $translations['description'][$languageId] ?? null,
+            ]);
+        }
+    }
+
     /* ------------------------------------------------------------------
      * UPDATE Circle
      * ---------------------------------------------------------------- */
@@ -81,6 +99,26 @@ class CircleRepository
     {
         $circle = $this->findByPublicId($publicId);
         $circle->update($data);
+        return $circle;
+    }
+
+    public function updatePageWithDescriptions(string $publicId, array $circleData, array $descriptions): Circles {
+
+        $circle= Circles::findByPublicId($publicId);
+
+        $circle->update($circleData);
+        
+        CirclesDescription::where('circle_id', $circle->circle_id)->delete();
+
+        foreach ($descriptions as $description) {
+
+            CirclesDescription::create([
+                'circle_id' => $circle->circle_id,
+                'language_id' => $description['language_id'],
+                'name' => $description['name'],
+                'description' => $description['description']
+            ]);
+        }
         return $circle;
     }
 

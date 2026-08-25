@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Modules\Admin\Services\MasterManagement\DivisionService;
+use Modules\Admin\Requests\MasterManagement\StoreDivisionRequest;
+use Modules\Admin\Requests\MasterManagement\UpdateDivisionRequest;
 
 class DivisionController extends Controller
 {
@@ -46,6 +48,16 @@ class DivisionController extends Controller
         );
     }
 
+    public function getAllDivisions(Request $request)
+    {
+        $divisions = $this->service->getAllDivisions();
+
+        return $this->successResponse(
+            $divisions,
+            'Divisions fetched successfully.'
+        );
+    }
+
     /**
      * Get Division by id
      */
@@ -63,6 +75,49 @@ class DivisionController extends Controller
         return $this->successResponse(
             $division,
             'Division fetched successfully.'
+        );
+    }
+
+    /**
+     * Get Division by Circle
+     */
+    public function getDivisionsByCircle(string $publicId)
+    {
+        $divisions = $this->service->getDivisionsByCircle($publicId);
+
+        return $this->successResponse(
+            $divisions,
+            'Divisions fetched successfully.'
+        );
+    }
+
+     /* ------------------------------------------------------------------
+     * CREATE Division
+     * ---------------------------------------------------------------- */
+
+    public function store(StoreDivisionRequest $request)
+    {
+
+        $division = $this->service->createDivision($request->validated());
+
+        return $this->successResponse(
+            $division,
+            'Division created successfully.',
+            201
+        );
+    }
+
+    /* ------------------------------------------------------------------
+     * UPDATE Division
+     * ---------------------------------------------------------------- */
+
+    public function update(UpdateDivisionRequest $request, string $publicId) {
+
+        $division = $this->service->updateDivision($request->validated(), $publicId);
+
+        return $this->successResponse(
+            $division,
+            'Division updated successfully.'
         );
     }
 }
