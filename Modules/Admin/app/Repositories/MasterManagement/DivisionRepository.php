@@ -75,7 +75,7 @@ class DivisionRepository
      * GET Divisions BY Circle ID
      * ---------------------------------------------------------------- */
 
-    public function getDivisionsByCircle(int $publicId): Divisions
+    public function getDivisionsByCircle(int $publicId)
     {
 
         $divisions = Divisions::where('circle_id', $publicId)->get();

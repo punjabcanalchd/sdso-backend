@@ -114,7 +114,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
 
     Route::prefix('subdivisions')->group(function () {
         Route::get('/', [SubDivisionController::class, 'index'])->name('admin.subdivisions ');
-        Route::get('/all', [SubDivisionController::class, 'getAllDivisions'])->name('admin.get_all_subdivisions');
+        Route::get('/all', [SubDivisionController::class, 'getAllSubDivisions'])->name('admin.get_all_subdivisions');
         Route::get('/{public_id}', [SubDivisionController::class, 'show'])->name('admin.get_subdivision_by_public_id');
         Route::post('/', [SubDivisionController::class, 'store'])->name('admin.create_new_subdivision');
         Route::post('/{public_id}/update', [SubDivisionController::class, 'update'])->name('admin.update_subdivision_details');

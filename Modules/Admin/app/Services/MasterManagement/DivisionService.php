@@ -56,8 +56,11 @@ class DivisionService
      * ---------------------------------------------------------------- */
     public function getDivisionsByCircle(string $publicId) {
         $circle_id = (int) $this->decode($publicId);
-        $subdivisions = $this->repository->getDivisionsByCircle($circle_id);
-        return $this->formatResponse($subdivisions);
+        $divisions = $this->repository->getDivisionsByCircle($circle_id);
+        $divisions->transform(function ($division) {
+            return $this->formatResponse($division);
+        });
+        return $divisions;
     }
 
     private function formatResponse($division)

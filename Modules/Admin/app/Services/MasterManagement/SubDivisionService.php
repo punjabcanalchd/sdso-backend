@@ -54,7 +54,10 @@ class SubDivisionService
     public function getSubdivisionsByDivision(string $publicId) {
         $division_id = (int) $this->decode($publicId);
         $subdivisions = $this->repository->getSubdivisionsByDivision($division_id);
-        return $this->formatResponse($subdivisions);
+        $subdivisions->transform(function ($subdivision) {
+            return $this->formatResponse($subdivision);
+        });
+        return $subdivisions;
     }
 
     private function formatResponse($subdivision)

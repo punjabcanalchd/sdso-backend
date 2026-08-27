@@ -76,7 +76,7 @@ class SubDivisionRepository
      * GET SubDivision BY Division ID
      * ---------------------------------------------------------------- */
 
-    public function getSubdivisionsByDivision(int $publicId): SubDivisions
+    public function getSubdivisionsByDivision(int $publicId)
     {
 
         $subdivisions = SubDivisions::where('division_id', $publicId)->get();
