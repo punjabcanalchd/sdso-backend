@@ -57,7 +57,8 @@ class PageRepository
         return Page::create($data);
     }
 
-    public function createDescriptions(int $pageId, array $translations): void {
+    public function createDescriptions(int $pageId, array $translations): void
+    {
         foreach ($translations['title'] as $languageId => $title) {
             PageDescription::create([
                 'page_id' => $pageId,
@@ -83,10 +84,11 @@ class PageRepository
         return $page;
     }
 
-    public function updatePageWithDescriptions(Page $page, array $pageData, array $descriptions): Page {
+    public function updatePageWithDescriptions(Page $page, array $pageData, array $descriptions): Page
+    {
 
         $page->update($pageData);
-        
+
         PageDescription::where('page_id', $page->page_id)->delete();
 
         foreach ($descriptions as $description) {

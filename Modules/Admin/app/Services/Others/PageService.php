@@ -2,12 +2,12 @@
 
 namespace Modules\Admin\Services\Others;
 
-use App\Models\Page;
-use Modules\Admin\Repositories\Others\PageRepository;
 use App\Models\ImageResizer;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
+use App\Models\Page;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Modules\Admin\Repositories\Others\PageRepository;
 
 class PageService
 {
@@ -24,15 +24,19 @@ class PageService
         $pages->getCollection()->transform(function ($page) {
             return $this->formatPage($page);
         });
+
         return $pages;
     }
 
     public function getPageByPublicId(string $publicId)
     {
         $page = Page::findByPublicId($publicId);
-        abort_if(! $page, 404, 'Page not found.');
 
-        return $page;
+        abort_if(! $page, 404, 'Page not found.');
+        $page->load('descriptions');
+
+        return $this->formatPage($page);
+        // return $page;
     }
 
     public function createPage(array $data): Page
@@ -42,7 +46,7 @@ class PageService
             $data['slug'] = Str::slug($data['slug']);
 
             if (isset($data['page_banner']) && $data['page_banner'] instanceof UploadedFile) {
-                $fileName = Str::uuid() . '.' . $data['page_banner']->getClientOriginalExtension();
+                $fileName = Str::uuid().'.'.$data['page_banner']->getClientOriginalExtension();
 
                 ImageResizer::store($data['page_banner'], 'uploads', $fileName);
 
@@ -77,7 +81,7 @@ class PageService
 
     public function updatePage(Page $page, array $data): Page
     {
-
+        dd($page);
         $data['slug'] = Str::slug($data['slug']);
 
         $titles = $data['title'] ?? [];
@@ -88,7 +92,7 @@ class PageService
 
         if (isset($data['page_banner']) && $data['page_banner'] instanceof UploadedFile) {
 
-            $fileName = Str::uuid() . '.' . $data['page_banner']->getClientOriginalExtension();
+            $fileName = Str::uuid().'.'.$data['page_banner']->getClientOriginalExtension();
             ImageResizer::store($data['page_banner'], 'uploads', $fileName);
             $data['page_banner'] = $fileName;
 
@@ -141,12 +145,43 @@ class PageService
         $english = $page->descriptions->firstWhere('language_id', 1);
         $punjabi = $page->descriptions->firstWhere('language_id', 2);
 
+        // return [
+        //     'public_id' => $page->public_id,
+        //     'name_en' => $english?->title,
+        //     'name_pb' => $punjabi?->title,
+        //     'created_at' => $page->created_at,
+        //     'status' => $page->status,
+        // ];
+
         return [
             'public_id' => $page->public_id,
-            'name_en'   => $english?->title,
-            'name_pb'   => $punjabi?->title,
-            'created_at'=> $page->created_at,
-            'status'    => $page->status,
+
+            // English
+            'name_en' => $english?->title,
+            'description_en' => $english?->description,
+            'meta_title_en' => $english?->meta_title,
+            'meta_description_en' => $english?->meta_description,
+            'meta_keyword_en' => $english?->meta_keyword,
+
+            // Punjabi
+            'name_pb' => $punjabi?->title,
+            'description_pb' => $punjabi?->description,
+            'meta_title_pb' => $punjabi?->meta_title,
+            'meta_description_pb' => $punjabi?->meta_description,
+            'meta_keyword_pb' => $punjabi?->meta_keyword,
+
+            // Page fields
+            'page_type' => $page->page_type,
+            'parent_id' => $page->parent_id,
+            'slug' => $page->slug,
+            'sort_order' => $page->sort_order,
+            'external_url' => $page->external_url,
+            'page_banner' => $page->page_banner,
+            'show_on_header' => $page->show_on_header,
+            'show_on_footer' => $page->show_on_footer,
+
+            'created_at' => $page->created_at,
+            'status' => $page->status,
         ];
     }
 }

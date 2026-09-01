@@ -3,12 +3,12 @@
 namespace Modules\Admin\Http\Controllers\Others;
 
 use App\Http\Controllers\Controller;
+use App\Models\Page;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Modules\Admin\Services\Others\PageService;
 use Modules\Admin\Requests\Others\StorePageRequest;
 use Modules\Admin\Requests\Others\UpdatePageRequest;
-use App\Models\Page;
+use Modules\Admin\Services\Others\PageService;
 
 class PageController extends Controller
 {
@@ -69,7 +69,6 @@ class PageController extends Controller
     /**
      * Create page
      */
-
     public function store(StorePageRequest $request)
     {
         $page = $this->service->createPage($request->validated());
@@ -84,21 +83,36 @@ class PageController extends Controller
     /**
      * Update page
      */
-
-    public function update(UpdatePageRequest $request,  Page $page)
+    public function update(UpdatePageRequest $request, Page $page)
     {
-        $page = $this->service->updatePage($page, $request->validated());
+        try {
 
-        return $this->successResponse(
-            $page,
-            'Page updated successfully.'
-        );
+    dd($request->validated());
+
+    $page = $this->service->updatePage(
+        $page,
+        $request->validated()
+    );
+
+    return $this->successResponse(
+        $page,
+        'Page updated successfully.'
+    );
+
+} catch (\Throwable $e) {
+
+    dd([
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+    ]);
+}
+       
     }
 
     /**
      * Delete page
      */
-
     public function destroy(Page $page)
     {
         // Delete the page using the service
