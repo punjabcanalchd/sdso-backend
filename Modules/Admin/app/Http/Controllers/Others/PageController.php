@@ -87,7 +87,6 @@ class PageController extends Controller
     {
         try {
 
-    dd($request->validated());
 
     $page = $this->service->updatePage(
         $page,

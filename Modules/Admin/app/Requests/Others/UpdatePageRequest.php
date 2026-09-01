@@ -6,9 +6,11 @@ use App\Http\Requests\BaseRequest;
 use App\Validation\Rules\FileRules;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\Rule;
+use App\Traits\HasPublicId;
 
 class UpdatePageRequest extends BaseRequest
 {
+    use HasPublicId;
     public function authorize(): bool
     {
         return true;
@@ -25,24 +27,21 @@ class UpdatePageRequest extends BaseRequest
         // Get page_id from route
         $publicId = $this->route('public_id');
         $pageId = 0;
-        // echo '';
-        dd($publicId);
         if ($publicId) {
             try {
-                $pageId = (int) Crypt::decryptString(urldecode($publicId));
+                $pageId = (int) $this->decode($publicId);
             } catch (\Exception $e) {
                 $pageId = 0;
             }
         }
-
         return [
             'slug' => [
                 // 'required',
                 'string',
                 'max:255',
 
-                // Rule::unique('pages', 'slug')
-                //     ->ignore($pageId, 'page_id'),
+                Rule::unique('pages', 'slug')
+                    ->ignore($pageId, 'page_id'),
             ],
 
             'title' => ['required', 'array'],
