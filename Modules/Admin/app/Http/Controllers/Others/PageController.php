@@ -83,30 +83,24 @@ class PageController extends Controller
     /**
      * Update page
      */
-    public function update(UpdatePageRequest $request, Page $page)
+    public function update(UpdatePageRequest $request, string $public_id)
     {
-        try {
+        // dd($public_id);
+        // try {
+        $page = $this->service->updatePage(
+            $public_id,
+            $request->validated()
+        );
 
+        return $this->successResponse(
+            $public_id,
+            'Page updated successfully.'
+        );
 
-    $page = $this->service->updatePage(
-        $page,
-        $request->validated()
-    );
+        // } catch (\Throwable $e) {
 
-    return $this->successResponse(
-        $page,
-        'Page updated successfully.'
-    );
-
-} catch (\Throwable $e) {
-
-    dd([
-        'message' => $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine(),
-    ]);
-}
-       
+        //     dd();
+        // }
     }
 
     /**

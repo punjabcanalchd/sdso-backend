@@ -3,14 +3,14 @@
 namespace Modules\Admin\Requests\Others;
 
 use App\Http\Requests\BaseRequest;
-use App\Validation\Rules\FileRules;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Validation\Rule;
 use App\Traits\HasPublicId;
+use App\Validation\Rules\FileRules;
+use Illuminate\Validation\Rule;
 
 class UpdatePageRequest extends BaseRequest
 {
     use HasPublicId;
+
     public function authorize(): bool
     {
         return true;
@@ -34,9 +34,10 @@ class UpdatePageRequest extends BaseRequest
                 $pageId = 0;
             }
         }
+
         return [
             'slug' => [
-                // 'required',
+                'required',
                 'string',
                 'max:255',
 
@@ -52,6 +53,18 @@ class UpdatePageRequest extends BaseRequest
 
             'description.*' => ['required', 'string'],
 
+            'meta_title' => ['nullable', 'array'],
+
+            'meta_title.*' => ['nullable', 'string'],
+
+            'meta_description' => ['nullable', 'array'],
+
+            'meta_description.*' => ['nullable', 'string'],
+
+            'meta_keyword' => ['nullable', 'array'],
+
+            'meta_keyword.*' => ['nullable', 'string'],
+
             'page_banner' => FileRules::image(5, ['jpg', 'jpeg', 'png', 'webp'], 1366, 350, false),
         ];
     }
@@ -66,7 +79,7 @@ class UpdatePageRequest extends BaseRequest
     {
         return [
 
-            // 'slug.required' => 'Slug is required.',
+            'slug.required' => 'Slug is required.',
 
             // 'slug.unique' => 'This slug already exists.',
 

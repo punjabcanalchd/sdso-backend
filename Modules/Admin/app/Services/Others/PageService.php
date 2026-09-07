@@ -4,6 +4,7 @@ namespace Modules\Admin\Services\Others;
 
 use App\Models\ImageResizer;
 use App\Models\Page;
+use App\Traits\HasPublicId;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -11,6 +12,8 @@ use Modules\Admin\Repositories\Others\PageRepository;
 
 class PageService
 {
+    use HasPublicId;
+
     protected PageRepository $repository;
 
     public function __construct(PageRepository $repository)
@@ -43,16 +46,27 @@ class PageService
     {
         return DB::transaction(function () use ($data) {
 
+            // Normalize slug
             $data['slug'] = Str::slug($data['slug']);
 
-            if (isset($data['page_banner']) && $data['page_banner'] instanceof UploadedFile) {
-                $fileName = Str::uuid().'.'.$data['page_banner']->getClientOriginalExtension();
+            // Handle page banner
+            if (
+                isset($data['page_banner']) &&
+                $data['page_banner'] instanceof UploadedFile
+            ) {
+                $fileName = Str::uuid().'.'.
+                    $data['page_banner']->getClientOriginalExtension();
 
-                ImageResizer::store($data['page_banner'], 'uploads', $fileName);
+                ImageResizer::store(
+                    $data['page_banner'],
+                    'uploads',
+                    $fileName
+                );
 
                 $data['page_banner'] = $fileName;
             }
 
+            // Keep multilingual fields separately
             $translations = [
                 'title' => $data['title'] ?? [],
                 'description' => $data['description'] ?? [],
@@ -61,6 +75,7 @@ class PageService
                 'meta_keyword' => $data['meta_keyword'] ?? [],
             ];
 
+            // Remove only translation fields from tbl_pages data
             unset(
                 $data['title'],
                 $data['description'],
@@ -69,31 +84,52 @@ class PageService
                 $data['meta_keyword']
             );
 
-            // Repository handles database operation
+            // Make sure page-level fields are present
+            $data['sort_order'] = $data['sort_order'] ?? 0;
+            $data['page_type'] = $data['page_type'] ?? 1;
+
+            // Create page
             $page = $this->repository->create($data);
 
-            // Repository handles translation database operation
-            $this->repository->createDescriptions($page->page_id, $translations);
+            // Create English/Punjabi descriptions + meta
+            $this->repository->createDescriptions(
+                $page->page_id,
+                $translations
+            );
 
             return $page;
         });
     }
 
-    public function updatePage(Page $page, array $data): Page
+    public function updatePage(string $publicId, array $data): Page
     {
-        dd($page);
+        // Decrypt public ID
+        $pageId = (int) $this->decode($publicId);
+
+        $page = Page::where('page_id', $pageId)->firstOrFail();
+
         $data['slug'] = Str::slug($data['slug']);
 
         $titles = $data['title'] ?? [];
         $descriptions = $data['description'] ?? [];
+
         $metaTitles = $data['meta_title'] ?? [];
         $metaDescriptions = $data['meta_description'] ?? [];
         $metaKeywords = $data['meta_keyword'] ?? [];
 
-        if (isset($data['page_banner']) && $data['page_banner'] instanceof UploadedFile) {
+        if (
+            isset($data['page_banner']) &&
+            $data['page_banner'] instanceof UploadedFile
+        ) {
+            $fileName = Str::uuid().'.'.
+                $data['page_banner']->getClientOriginalExtension();
 
-            $fileName = Str::uuid().'.'.$data['page_banner']->getClientOriginalExtension();
-            ImageResizer::store($data['page_banner'], 'uploads', $fileName);
+            ImageResizer::store(
+                $data['page_banner'],
+                'uploads',
+                $fileName
+            );
+
             $data['page_banner'] = $fileName;
 
         } else {
@@ -108,11 +144,12 @@ class PageService
             $data['meta_keyword']
         );
 
-        $descriptions = [];
+        // IMPORTANT: use a different variable
+        $descriptionData = [];
 
         foreach ($titles as $languageId => $title) {
 
-            $descriptions[] = [
+            $descriptionData[] = [
                 'language_id' => $languageId,
                 'title' => $title,
                 'description' => $descriptions[$languageId] ?? null,
@@ -122,17 +159,77 @@ class PageService
             ];
         }
 
-        DB::transaction(function () use ($page, $data, $descriptions) {
-
+        DB::transaction(function () use (
+            $page,
+            $data,
+            $descriptionData
+        ) {
             $this->repository->updatePageWithDescriptions(
                 $page,
                 $data,
-                $descriptions
+                $descriptionData
             );
         });
 
         return $page->fresh();
     }
+
+    // public function updatePage(string $publicId, array $data): Page
+    // {
+
+    //     $data['slug'] = Str::slug($data['slug']);
+
+    //     $titles = $data['title'] ?? [];
+    //     $descriptions = $data['description'] ?? [];
+    //     $metaTitles = $data['meta_title'] ?? [];
+    //     $metaDescriptions = $data['meta_description'] ?? [];
+    //     $metaKeywords = $data['meta_keyword'] ?? [];
+
+    //     dd($data);
+
+    //     if (isset($data['page_banner']) && $data['page_banner'] instanceof UploadedFile) {
+
+    //         $fileName = Str::uuid().'.'.$data['page_banner']->getClientOriginalExtension();
+    //         ImageResizer::store($data['page_banner'], 'uploads', $fileName);
+    //         $data['page_banner'] = $fileName;
+
+    //     } else {
+    //         unset($data['page_banner']);
+    //     }
+
+    //     unset(
+    //         $data['title'],
+    //         $data['description'],
+    //         $data['meta_title'],
+    //         $data['meta_description'],
+    //         $data['meta_keyword']
+    //     );
+
+    //     $descriptions = [];
+
+    //     foreach ($titles as $languageId => $title) {
+
+    //         $descriptions[] = [
+    //             'language_id' => $languageId,
+    //             'title' => $title,
+    //             'description' => $descriptions[$languageId] ?? null,
+    //             'meta_title' => $metaTitles[$languageId] ?? null,
+    //             'meta_description' => $metaDescriptions[$languageId] ?? null,
+    //             'meta_keyword' => $metaKeywords[$languageId] ?? null,
+    //         ];
+    //     }
+
+    //     DB::transaction(function () use ($page, $data, $descriptions) {
+
+    //         $this->repository->updatePageWithDescriptions(
+    //             $page,
+    //             $data,
+    //             $descriptions
+    //         );
+    //     });
+
+    //     return $page->fresh();
+    // }
 
     public function deletePage(string $publicId): void
     {
