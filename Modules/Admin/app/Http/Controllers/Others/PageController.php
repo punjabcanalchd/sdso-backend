@@ -104,6 +104,37 @@ class PageController extends Controller
     }
 
     /**
+     * Update page status
+     */
+    public function updateStatus(Request $request, string $public_id)
+    {
+
+        $request->validate([
+            'status' => ['required', 'boolean'],
+        ]);
+
+        $page = $this->service->updateStatus(
+            $public_id,
+            $request->boolean('status')
+        );
+
+        if (! $page) {
+            return $this->errorResponse(
+                'Page not found.',
+                404
+            );
+        }
+
+        return $this->successResponse(
+            [
+                'public_id' => $page->public_id,
+                'status' => $page->status,
+            ],
+            'Page status updated successfully.'
+        );
+    }
+
+    /**
      * Delete page
      */
     public function destroy(Page $page)

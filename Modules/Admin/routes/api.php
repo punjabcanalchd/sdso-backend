@@ -61,6 +61,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::get('/{public_id}', [PageController::class, 'show'])->name('admin.get_page_by_public_id');
         Route::post('/', [PageController::class, 'store'])->name('admin.create_new_page');
         Route::post('/{public_id}/update', [PageController::class, 'update'])->name('admin.update_page_details');
+        Route::post('/{public_id}/status', [PageController::class, 'updateStatus']);
         Route::post('/{public_id}/delete', [PageController::class, 'destroy'])->name('admin.delete_page');
     });
 

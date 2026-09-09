@@ -174,62 +174,22 @@ class PageService
         return $page->fresh();
     }
 
-    // public function updatePage(string $publicId, array $data): Page
-    // {
+    public function updateStatus(string $public_id, bool $status)
+    {
 
-    //     $data['slug'] = Str::slug($data['slug']);
+        $pageId = (int) $this->decode($public_id);
 
-    //     $titles = $data['title'] ?? [];
-    //     $descriptions = $data['description'] ?? [];
-    //     $metaTitles = $data['meta_title'] ?? [];
-    //     $metaDescriptions = $data['meta_description'] ?? [];
-    //     $metaKeywords = $data['meta_keyword'] ?? [];
+        $page = Page::where('page_id', $pageId)->first();
 
-    //     dd($data);
+        if (! $page) {
+            return null;
+        }
 
-    //     if (isset($data['page_banner']) && $data['page_banner'] instanceof UploadedFile) {
+        $page->status = $status;
+        $page->save();
 
-    //         $fileName = Str::uuid().'.'.$data['page_banner']->getClientOriginalExtension();
-    //         ImageResizer::store($data['page_banner'], 'uploads', $fileName);
-    //         $data['page_banner'] = $fileName;
-
-    //     } else {
-    //         unset($data['page_banner']);
-    //     }
-
-    //     unset(
-    //         $data['title'],
-    //         $data['description'],
-    //         $data['meta_title'],
-    //         $data['meta_description'],
-    //         $data['meta_keyword']
-    //     );
-
-    //     $descriptions = [];
-
-    //     foreach ($titles as $languageId => $title) {
-
-    //         $descriptions[] = [
-    //             'language_id' => $languageId,
-    //             'title' => $title,
-    //             'description' => $descriptions[$languageId] ?? null,
-    //             'meta_title' => $metaTitles[$languageId] ?? null,
-    //             'meta_description' => $metaDescriptions[$languageId] ?? null,
-    //             'meta_keyword' => $metaKeywords[$languageId] ?? null,
-    //         ];
-    //     }
-
-    //     DB::transaction(function () use ($page, $data, $descriptions) {
-
-    //         $this->repository->updatePageWithDescriptions(
-    //             $page,
-    //             $data,
-    //             $descriptions
-    //         );
-    //     });
-
-    //     return $page->fresh();
-    // }
+        return $page;
+    }
 
     public function deletePage(string $publicId): void
     {
