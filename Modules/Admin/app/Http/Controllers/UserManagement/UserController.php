@@ -34,11 +34,19 @@ class UserController extends Controller
         $sort_column =  $request->input('sort_column');
         $sort_direction =  $request->input('sort_direction');
 
+        $filters = [
+            'circle_id'     => $request->input('circle_id'),
+            'division_id'   => $request->input('division_id'),
+            'subdivision_id'=> $request->input('subdivision_id'),
+            'officecode'    => $request->input('officecode'),
+            'role_id'       => $request->input('role_id'),
+        ];
+
         $limit = min($limit, $maxLimit);
 
         $limit = max($limit, 1);
 
-        $users = $this->service->getUsers($limit, $search, $sort_column, $sort_direction);
+        $users = $this->service->getUsers($limit, $search, $sort_column, $sort_direction, $filters);
 
         return $this->paginatedResponse(
             $users,

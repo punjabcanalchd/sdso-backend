@@ -6,6 +6,7 @@ use App\Http\Requests\BaseRequest;
 use App\Validation\Rules\CommonRules;
 use App\Validation\Rules\SecurityRules;
 use App\Helpers\RSAHelper;
+use Illuminate\Validation\Rule;
 use App\Validation\Patterns\RegexPatterns;
 use Illuminate\Support\Facades\Crypt;
 
@@ -82,7 +83,9 @@ class StoreUserRequest extends BaseRequest
 
                 ...CommonRules::email(),
 
-                'unique:users,email'
+                Rule::unique('users', 'email')->where(function ($query) {
+                    return $query->where('locked', false);
+                }),
 
             ],
 
@@ -114,7 +117,9 @@ class StoreUserRequest extends BaseRequest
 
                 ...CommonRules::phone(),
 
-                'unique:users,mobile_number'
+                Rule::unique('users', 'mobile_number')->where(function ($query) {
+                    return $query->where('locked', false);
+                }),
 
             ],
 
@@ -141,19 +146,25 @@ class StoreUserRequest extends BaseRequest
                 'integer'
 
             ],
-
-            'office_district' => [
+            'district_code' => [
                 'nullable',
                 'integer',
                 // Must reference a district whose state_code = 3
-                'exists:districts,id,state_code,3',
+                'exists:districts,lgddistcode,lgdstatecode,3',
             ],
-            'district_code' => [
-                'required',
-                'integer',
-                // Must reference a district whose state_code = 3
-                'exists:districts,district_code,state_code,3',
+            'officecode' => [
+             'nullable',
+            'string',
             ],
+            'hrmscode' =>
+             ['nullable',
+              'integer'
+              ],
+            'officelevelcode' => ['nullable', 'string'],
+            'circle_id' => ['nullable', 'string'],
+            'division_id' => ['nullable', 'string'],
+            'subdivision_id' => ['nullable', 'string'],
+            'retirementdate' => ['nullable', 'date'],
 
             'is_ip_caf_user' => [
 

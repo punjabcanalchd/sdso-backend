@@ -21,9 +21,9 @@ class UserService
      * GET ALL USERS
      * ---------------------------------------------------------------- */
 
-    public function getUsers(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
+    public function getUsers(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction, array $filters = [])
     {
-        $users = $this->repository->getAll($limit,$search,$sort_column,$sort_direction);
+        $users = $this->repository->getAll($limit, $search, $sort_column, $sort_direction, $filters);
         
         $users->getCollection()->transform(function ($user) {
             return $this->formatUser($user);
@@ -49,12 +49,21 @@ class UserService
             'name' => $user->name,
             'hrmscode' => $user->hrmscode,
             'role' => $user->mainRole ? $user->mainRole->name : null,
+            'selected_roles_names' => $user->roles ? $user->roles->pluck('name')->toArray() : [],
             'email' => $user->email,
             'created_at' => $user->created_at,
-            'office' => $user->office->officename ?? null,
+            'office'          => $user->office->officename ?? null,
+            'officecode'      => $user->officecode ? \App\Models\Office::find($user->officecode)?->public_id : null,
+            'officelevelcode' => $user->officelevelcode ? \App\Models\OfficeHierarchies::find($user->officelevelcode)?->public_id : null,
+            'district_code'   => $user->officecode ? \App\Models\Office::find($user->officecode)?->lgddistcode : null,
+            'circle_id'       => $user->circle_id ? \App\Models\Circles::find($user->circle_id)?->public_id : null,
+            'division_id'     => $user->division_id ? \App\Models\Divisions::find($user->division_id)?->public_id : null,
+            'subdivision_id'  => $user->subdivision_id ? \App\Models\SubDivisions::find($user->subdivision_id)?->public_id : null,
+            'retirementdate'  => $user->retirementdate,
             'mobileNumber' => $user->mobile_number,
             'designation' => $user->designation,
             'status' => $user->status,
+            'locked' => (bool) $user->locked,
         ];
     }
 
@@ -87,18 +96,48 @@ class UserService
             }
             $data['password_updated_at'] = now();
 
-        // Set office_district from district_code (already validated in StoreUserRequest)
-        if (!empty($data['district_code'])) {
-            $data['office_district'] = $data['district_code'];
-        }
-
         // Strip keys that don't belong on the users table before passing to create()
         $additionalRoleIds = $data['additional_role_ids'] ?? [];
         unset($data['additional_role_ids'], $data['district_code']);
+            // Resolve officecode from public_id
+            if (!empty($data['officecode'])) {
+                $office = \App\Models\Office::findByPublicId($data['officecode']);
+                $data['officecode'] = $office ? $office->officecode : null;
+            }
+            if (!empty($data['officelevelcode'])) {
+                $officeHierarchy = \App\Models\OfficeHierarchies::findByPublicId($data['officelevelcode']);
+                $data['officelevelcode'] = $officeHierarchy ? $officeHierarchy->officelevelcode : null;
+            }
+            
+            // Decode dropdown public_ids to integers using their respective models
+            if (!empty($data['circle_id'])) {
+                $circle = \App\Models\Circles::findByPublicId($data['circle_id']);
+                $data['circle_id'] = $circle ? $circle->circle_id : null;
+            }
+            if (!empty($data['division_id'])) {
+                $division = \App\Models\Divisions::findByPublicId($data['division_id']);
+                $data['division_id'] = $division ? $division->division_id : null;
+            }
+            if (!empty($data['subdivision_id'])) {
+                $subdivision = \App\Models\SubDivisions::findByPublicId($data['subdivision_id']);
+                $data['subdivision_id'] = $subdivision ? $subdivision->subdivision_id : null;
+            }
+            // Check if a locked user exists with the same email
+            $existingLockedUser = \App\Models\User::where('email', $data['email'])
+                ->where('locked', true)
+                ->first();
 
-            // Create user with main role ID set directly
-            $user = $this->repository->create($data);
-
+            if ($existingLockedUser) {
+                $data['locked'] = false;
+                $data['status'] = true; // ensure it is active
+                $user = $this->repository->update($existingLockedUser->public_id, $data);
+                
+                // Clear out old additional roles as we are recycling the user
+                \App\Models\AdditionalRole::where('user_id', $user->id)->delete();
+            } else {
+                $data['locked'] = false;
+                $user = $this->repository->create($data);
+            }
             // Handle optional additional roles array (write to additional_roles table)
             if (!empty($additionalRoleIds)) {
                 $roles = Role::whereIn('id', $additionalRoleIds)->get();
@@ -107,12 +146,13 @@ class UserService
                     AdditionalRole::create([
                         'user_id' => $user->id,
                         'role_id' => $role->id,
-                        'deleted' => 0,
+                        'status' => 1,
+                        'officecode' => $data['officecode'] ?? null, 
                     ]);
                 }
             }
 
-            // Sync Spatie model_has_roles from source of truth (role_id + non-deleted additional_roles)
+            // Sync Spatie model_has_roles from source of truth (role_id + active additional_roles)
             $this->resyncSpatieRoles($user);
 
             // Invalidate permission map cache when the user's roles are assigned.
@@ -166,19 +206,40 @@ class UserService
             }
             unset($data['first_name'], $data['middle_name'], $data['last_name']);
 
-            // Update password if present
-            if (isset($data['password'])) {
-                $data['password'] = Hash::make($data['password']);
+            // Update password if present and not empty
+            if (!empty($data['password'])) {
+                $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
+            } else {
+                unset($data['password']);
             }
 
-            // Set office_district from district_code (already validated in UpdateUserRequest)
-            if (!empty($data['district_code'])) {
-                $data['office_district'] = $data['district_code'];
-            }
 
             // Strip keys that don't belong on the users table before passing to update()
             $incomingAdditionalRoleIds = array_key_exists('additional_role_ids', $data) ? $data['additional_role_ids'] : false;
             unset($data['additional_role_ids'], $data['district_code']);
+            // Resolve officecode from public_id
+            if (!empty($data['officecode'])) {
+                $office = \App\Models\Office::findByPublicId($data['officecode']);
+                $data['officecode'] = $office ? $office->officecode : null;
+            }
+            if (!empty($data['officelevelcode'])) {
+                $officeHierarchy = \App\Models\OfficeHierarchies::findByPublicId($data['officelevelcode']);
+                $data['officelevelcode'] = $officeHierarchy ? $officeHierarchy->officelevelcode : null;
+            }
+
+            // Decode dropdown public_ids to integers using their respective models
+            if (!empty($data['circle_id'])) {
+                $circle = \App\Models\Circles::findByPublicId($data['circle_id']);
+                $data['circle_id'] = $circle ? $circle->circle_id : null;
+            }
+            if (!empty($data['division_id'])) {
+                $division = \App\Models\Divisions::findByPublicId($data['division_id']);
+                $data['division_id'] = $division ? $division->division_id : null;
+            }
+            if (!empty($data['subdivision_id'])) {
+                $subdivision = \App\Models\SubDivisions::findByPublicId($data['subdivision_id']);
+                $data['subdivision_id'] = $subdivision ? $subdivision->subdivision_id : null;
+            }
 
             // Update the user record (including role_id column)
             $user = $this->repository->update($publicId, $data);
@@ -199,7 +260,7 @@ class UserService
                         // Insert or reactivate the additional_roles entry (no duplicates)
                         AdditionalRole::withoutGlobalScopes()->updateOrCreate(
                             ['user_id' => $user->id, 'role_id' => $role->id],
-                            ['deleted' => 0]
+                            ['status' => 1,  'officecode' => $data['officecode'] ?? $user->officecode]
                         );
                     }
                 }
@@ -208,11 +269,11 @@ class UserService
                 AdditionalRole::withoutGlobalScopes()
                     ->where('user_id', $user->id)
                     ->whereNotIn('role_id', $additionalRoleIds)
-                    ->update(['deleted' => 1]);
+                    ->update(['status' => 0]);
             }
 
             // Rebuild Spatie model_has_roles from source of truth:
-            // users.role_id  +  additional_roles where deleted = 0
+            // users.role_id  +  additional_roles where status = 1
             $this->resyncSpatieRoles($user);
 
             // Invalidate permission map cache when the user's roles are updated.
@@ -236,10 +297,17 @@ class UserService
         return $user;
     }
 
-    public function deleteUser(string $publicId): bool {
-
-        return $this->repository->delete($publicId);
+       public function deleteUser(string $publicId): bool {
+        $user = $this->repository->findByPublicId($publicId);
+        
+        $user->status = false;
+        $user->locked = true;
+        $user->email = $user->email;
+        $user->save();
+        
+        return true;
     }
+
 
     /* ------------------------------------------------------------------
      * PRIVATE HELPERS
@@ -248,7 +316,7 @@ class UserService
     /**
      * Rebuild Spatie's model_has_roles for a user from the two sources of truth:
      *   1. users.role_id          → main role
-     *   2. additional_roles table → non-deleted additional roles (deleted = 0)
+     *   2. additional_roles table → active additional roles (status = 1)
      *
      * Called after any mutation of the user's main role or additional roles
      * so that model_has_roles never goes out of sync.
@@ -265,10 +333,10 @@ class UserService
             $roleIds[] = $user->role_id;
         }
 
-        // 2. All non-deleted additional roles (bypass global scope to be explicit)
+        // 2. All active additional roles (bypass global scope to be explicit)
         $additionalRoleIds = AdditionalRole::withoutGlobalScopes()
             ->where('user_id', $user->id)
-            ->where('deleted', 0)
+            ->where('status', 1)
             ->pluck('role_id')
             ->toArray();
 

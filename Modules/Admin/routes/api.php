@@ -124,6 +124,8 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::prefix('offices')->group(function () {
         Route::get('/', [OfficeController::class, 'index'])->name('admin.offices ');
         Route::get('/{public_id}', [OfficeController::class, 'show'])->name('admin.get_office_by_public_id');
+        Route::get('/{public_id}/getoffices', [OfficeController::class, 'getOfficesByHierarchy'])->name('admin.get_offices_by_hierarchy');
+
     });
 
     // Menu routes

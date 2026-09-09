@@ -15,17 +15,18 @@ class AdditionalRole extends Model
     protected $fillable = [
         'role_id',
         'user_id',
-        'deleted',
+        'status',
+        'officecode',
     ];
 
     /**
      * The "booted" method of the model.
-     * Applies a global scope to exclude rows where deleted = 1.
+     * Applies a global scope to exclude rows where status = 0.
      */
     protected static function booted()
     {
-        static::addGlobalScope('notDeleted', function (Builder $builder) {
-            $builder->where('deleted', 0);
+        static::addGlobalScope('activeOnly', function (Builder $builder) {
+            $builder->where('status', 1);
         });
     }
 

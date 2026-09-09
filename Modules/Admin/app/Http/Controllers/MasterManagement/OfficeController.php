@@ -65,4 +65,17 @@ class OfficeController extends Controller
             'Office fetched successfully.'
         );
     }
+
+    /**
+     * Get Offices by Subdivision
+     */
+    public function getOfficesByHierarchy(string $publicId)
+    {
+        $offices = $this->service->getOfficesByHierarchy($publicId);
+
+        return $this->successResponse(
+            $offices,
+            'Offices fetched successfully.'
+        );
+    }
 }

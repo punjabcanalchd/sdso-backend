@@ -93,4 +93,14 @@ class OfficeRepository
         $office = $this->findByPublicId($publicId);
         return $office->delete();
     }
+
+    /* ------------------------------------------------------------------
+     * GET OFFICES BY SUBDIVISION HIERARCHY
+     * ---------------------------------------------------------------- */
+    public function getOfficesByHierarchy(int $subdivision_id)
+    {
+        return Office::with(['description'])
+                     ->where('subdivision_id', $subdivision_id)
+                     ->get();
+    }
 }

@@ -56,12 +56,16 @@ class UpdateUserRequest extends BaseRequest
         $realUserId = 0;
         $publicId = $this->route('public_id');
         if ($publicId) {
-            try {
-                $realUserId = (int) Crypt::decryptString(urldecode($publicId));
-            } catch (\Exception $e) {
-                $realUserId = 0;
-            }
-        }
+            // try {
+            //     $realUserId = (int) Crypt::decryptString(urldecode($publicId));
+            // } catch (\Exception $e) {
+            //     $realUserId = 0;
+            // }
+          
+                    $user = \App\Models\User::findByPublicId($publicId);
+                    $realUserId = $user ? $user->id : 0;
+            
+    }
 
         return [
 
@@ -103,15 +107,29 @@ class UpdateUserRequest extends BaseRequest
             'additional_role_ids'   => ['sometimes', 'array', 'distinct'],
             'additional_role_ids.*' => ['integer', 'exists:roles,id'],
 
-            'district_code' => ['sometimes', 'nullable', 'integer', 'exists:districts,district_code,state_code,3'],
+            'district_code' => ['sometimes', 'nullable', 'integer', 'exists:districts,lgddistcode,lgdstatecode,3'],
 
-            'office_district' => ['sometimes', 'nullable', 'integer', 'exists:districts,id,state_code,3'],
-
-            'password' => ['sometimes', ...CommonRules::password(), 'confirmed'],
+            'password' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'min:8',
+                'max:50',
+                new \App\Validation\Rules\StrongPasswordRule(),
+                'confirmed'
+            ],
 
             'mobile_password' => ['sometimes', 'nullable', 'string', 'min:4', 'max:255'],
 
             'applicant_type' => ['sometimes', 'nullable', 'integer'],
+
+            'officelevelcode' => ['sometimes', 'nullable', 'string'],
+            'officecode' => ['sometimes', 'nullable', 'string'],
+            'circle_id' => ['sometimes', 'nullable', 'string'],
+            'division_id' => ['sometimes', 'nullable', 'string'],
+            'subdivision_id' => ['sometimes', 'nullable', 'string'],
+            'hrmscode' => ['sometimes', 'nullable', 'integer'],
+            'retirementdate' => ['sometimes', 'nullable', 'date'],
 
             'current_user_role' => ['sometimes', 'nullable', 'integer'],
 
@@ -120,6 +138,7 @@ class UpdateUserRequest extends BaseRequest
             'designation' => ['sometimes', 'nullable', 'string', 'max:255'],
 
             'status' => ['sometimes', 'boolean'],
+            'locked' => ['sometimes', 'boolean'],
 
         ];
     }
