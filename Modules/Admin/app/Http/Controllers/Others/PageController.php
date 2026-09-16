@@ -30,7 +30,7 @@ class PageController extends Controller
         $defaultLimit = config('pagination.default_limit');
         $maxLimit = config('pagination.max_limit');
 
-        $limit = (int) $request->get('limit', $defaultLimit);
+        $limit = (int) $request->get('per_page', $defaultLimit);
         $limit = min($limit, $maxLimit);
         $limit = max($limit, 1);
 
