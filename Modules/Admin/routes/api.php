@@ -21,7 +21,7 @@ use Modules\Admin\Http\Controllers\PermissionController;
 use Modules\Admin\Http\Controllers\RoleController;
 use Modules\Admin\Http\Controllers\UserManagement\UserController;
 use Modules\Admin\Http\Controllers\UserRoleController;
-// use Modules\Admin\Http\Controllers\AdditionalRoleController;
+use Modules\Admin\Http\Controllers\AdditionalRoleController;
 use Modules\Admin\Http\Controllers\Others\NoticeboardController;
 
 
@@ -176,14 +176,14 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::get('/{public_id}', [ActivityLogsController::class, 'show'])->name('admin.activity-logs-by-public-id');
     });
 
-    // //additional-roles
-    // Route::prefix('additional-roles')->group(function () {
-    // Route::get('/', [AdditionalRoleController::class, 'index'])->name('admin.get_additional_roles');
-    // Route::get('/{public_id}', [AdditionalRoleController::class, 'show'])->name('admin.get_additional_role');
-    // Route::post('/', [AdditionalRoleController::class, 'store'])->name('admin.create_additional_role');
-    // Route::post('/{public_id}/update', [AdditionalRoleController::class, 'update'])->name('admin.update_additional_role');
-    // Route::post('/{public_id}/delete', [AdditionalRoleController::class, 'destroy'])->name('admin.delete_additional_role');
-    // });
+    //additional-roles
+    Route::prefix('additional-roles')->group(function () {
+    Route::get('/', [AdditionalRoleController::class, 'index'])->name('admin.get_additional_roles');
+    Route::get('/{public_id}', [AdditionalRoleController::class, 'show'])->name('admin.get_additional_role');
+    Route::post('/', [AdditionalRoleController::class, 'store'])->name('admin.create_additional_role');
+    Route::post('/{public_id}/update', [AdditionalRoleController::class, 'update'])->name('admin.update_additional_role');
+    Route::post('/{public_id}/delete', [AdditionalRoleController::class, 'destroy'])->name('admin.delete_additional_role');
+    });
 
     // Noticeboard routes
     Route::prefix('noticeboard')->group(function () {

@@ -37,17 +37,20 @@ class NoticeboardController extends Controller
             $english = $item->descriptions->firstWhere('language_id', 1);
             $punjabi = $item->descriptions->firstWhere('language_id', 2);
 
-            return [
+                    return [
                 'id' => $item->template_id,
-                'name_en' => $english?->message ?? $item->name,
+                'name_en' => $item->name,
+                'description_en' => $english?->message ?? '',
                 'name_pb' => $punjabi?->message ?? '',
+                'description_pb' => $punjabi?->message ?? '',
                 'category_id' => $item->category_name,
                 'category_name' => $item->category?->name ?? 'N/A',
                 'publish_date' => $item->publish_date,
                 'upload_notice' => $item->upload_notice,
-                'status' => $item->status,
+                'status' => $item->status ? 1 : 0,
                 'created_at' => $item->created_at?->format('Y-m-d H:i:s'),
             ];
+
         });
 
         return $this->paginatedResponse($paginated, 'Notice board list fetched successfully.');
@@ -84,19 +87,20 @@ class NoticeboardController extends Controller
             'status' => $request->boolean('status', true),
         ]);
 
-        NoticeboardTemplateDescription::create([
+             NoticeboardTemplateDescription::create([
             'template_id' => $notice->template_id,
             'language_id' => 1,
-            'message' => $request->input('name_en'),
+            'message' => $request->input('description_en', $request->input('name_en')),
         ]);
 
-        if ($request->filled('name_pb')) {
+        if ($request->filled('description_pb') || $request->filled('name_pb')) {
             NoticeboardTemplateDescription::create([
                 'template_id' => $notice->template_id,
                 'language_id' => 2,
-                'message' => $request->input('name_pb'),
+                'message' => $request->input('description_pb', $request->input('name_pb')),
             ]);
         }
+
 
         return $this->successResponse($notice, 'Notice created successfully.', 201);
     }
@@ -128,15 +132,16 @@ class NoticeboardController extends Controller
 
         NoticeboardTemplateDescription::updateOrCreate(
             ['template_id' => $notice->template_id, 'language_id' => 1],
-            ['message' => $request->input('name_en')]
+            ['message' => $request->input('description_en', $request->input('name_en'))]
         );
 
-        if ($request->filled('name_pb')) {
+        if ($request->filled('description_pb') || $request->filled('name_pb')) {
             NoticeboardTemplateDescription::updateOrCreate(
                 ['template_id' => $notice->template_id, 'language_id' => 2],
-                ['message' => $request->input('name_pb')]
+                ['message' => $request->input('description_pb', $request->input('name_pb'))]
             );
         }
+
 
         return $this->successResponse($notice, 'Notice updated successfully.');
     }

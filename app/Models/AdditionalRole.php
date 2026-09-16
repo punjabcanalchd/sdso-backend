@@ -22,7 +22,7 @@ class AdditionalRole extends Model
         'status',
         'officecode',
     ];
-
+   protected $appends = ['public_id'];
     /**
      * The "booted" method of the model.
      * Applies a global scope to exclude rows where status = 0.
@@ -57,4 +57,13 @@ class AdditionalRole extends Model
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
     }
+    /**
+     * Get the office associated with this additional role.
+     */
+     public function office(): BelongsTo
+    {
+        return $this->belongsTo(Office::class, 'officecode', 'officecode');
+    }
 }
+
+
