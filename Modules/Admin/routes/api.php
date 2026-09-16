@@ -21,6 +21,9 @@ use Modules\Admin\Http\Controllers\PermissionController;
 use Modules\Admin\Http\Controllers\RoleController;
 use Modules\Admin\Http\Controllers\UserManagement\UserController;
 use Modules\Admin\Http\Controllers\UserRoleController;
+// use Modules\Admin\Http\Controllers\AdditionalRoleController;
+use Modules\Admin\Http\Controllers\Others\NoticeboardController;
+
 
 // Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
 //     Route::apiResource('admins', AdminController::class)->names('admin');
@@ -172,5 +175,25 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::get('/', [ActivityLogsController::class, 'index'])->name('admin.activity-logs');
         Route::get('/{public_id}', [ActivityLogsController::class, 'show'])->name('admin.activity-logs-by-public-id');
     });
+
+    // //additional-roles
+    // Route::prefix('additional-roles')->group(function () {
+    // Route::get('/', [AdditionalRoleController::class, 'index'])->name('admin.get_additional_roles');
+    // Route::get('/{public_id}', [AdditionalRoleController::class, 'show'])->name('admin.get_additional_role');
+    // Route::post('/', [AdditionalRoleController::class, 'store'])->name('admin.create_additional_role');
+    // Route::post('/{public_id}/update', [AdditionalRoleController::class, 'update'])->name('admin.update_additional_role');
+    // Route::post('/{public_id}/delete', [AdditionalRoleController::class, 'destroy'])->name('admin.delete_additional_role');
+    // });
+
+    // Noticeboard routes
+    Route::prefix('noticeboard')->group(function () {
+    Route::get('/', [NoticeboardController::class, 'index'])->name('admin.noticeboard.index');
+    Route::get('/categories', [NoticeboardController::class, 'getCategories'])->name('admin.noticeboard.categories');
+    Route::post('/', [NoticeboardController::class, 'store'])->name('admin.noticeboard.store');
+    Route::post('/{id}/update', [NoticeboardController::class, 'update'])->name('admin.noticeboard.update');
+    Route::post('/{id}/status', [NoticeboardController::class, 'updateStatus'])->name('admin.noticeboard.status');
+    // Route::post('/{id}/delete', [NoticeboardController::class, 'destroy'])->name('admin.noticeboard.delete');
+    });
+
 
 });
