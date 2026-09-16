@@ -37,12 +37,21 @@ class NoticeboardController extends Controller
             $english = $item->descriptions->firstWhere('language_id', 1);
             $punjabi = $item->descriptions->firstWhere('language_id', 2);
 
-                    return [
+            $englishData = json_decode($english?->message, true);
+            $punjabiData = json_decode($punjabi?->message, true);
+
+            $name_en = is_array($englishData) ? ($englishData['title'] ?? $item->name) : $item->name;
+            $desc_en = is_array($englishData) ? ($englishData['description'] ?? '') : ($english?->message ?? '');
+
+            $name_pb = is_array($punjabiData) ? ($punjabiData['title'] ?? '') : ($punjabi?->message ?? '');
+            $desc_pb = is_array($punjabiData) ? ($punjabiData['description'] ?? '') : '';
+
+            return [
                 'id' => $item->template_id,
-                'name_en' => $item->name,
-                'description_en' => $english?->message ?? '',
-                'name_pb' => $punjabi?->message ?? '',
-                'description_pb' => $punjabi?->message ?? '',
+                'name_en' => $name_en,
+                'description_en' => $desc_en,
+                'name_pb' => $name_pb,
+                'description_pb' => $desc_pb,
                 'category_id' => $item->category_name,
                 'category_name' => $item->category?->name ?? 'N/A',
                 'publish_date' => $item->publish_date,
@@ -50,8 +59,8 @@ class NoticeboardController extends Controller
                 'status' => $item->status ? 1 : 0,
                 'created_at' => $item->created_at?->format('Y-m-d H:i:s'),
             ];
-
         });
+
 
         return $this->paginatedResponse($paginated, 'Notice board list fetched successfully.');
     }
@@ -87,17 +96,24 @@ class NoticeboardController extends Controller
             'status' => $request->boolean('status', true),
         ]);
 
-             NoticeboardTemplateDescription::create([
+             $englishMessage = json_encode([
+            'title' => $request->input('name_en', ''),
+            'description' => $request->input('description_en', ''),
+        ]);
+        NoticeboardTemplateDescription::create([
             'template_id' => $notice->template_id,
             'language_id' => 1,
-            'message' => $request->input('description_en', $request->input('name_en')),
+            'message' => $englishMessage,
         ]);
-
-        if ($request->filled('description_pb') || $request->filled('name_pb')) {
+        if ($request->filled('name_pb') || $request->filled('description_pb')) {
+            $punjabiMessage = json_encode([
+                'title' => $request->input('name_pb', ''),
+                'description' => $request->input('description_pb', ''),
+            ]);
             NoticeboardTemplateDescription::create([
                 'template_id' => $notice->template_id,
                 'language_id' => 2,
-                'message' => $request->input('description_pb', $request->input('name_pb')),
+                'message' => $punjabiMessage,
             ]);
         }
 
@@ -130,17 +146,28 @@ class NoticeboardController extends Controller
 
         $notice->update($updateData);
 
+               $englishMessage = json_encode([
+            'title' => $request->input('name_en', ''),
+            'description' => $request->input('description_en', ''),
+        ]);
+
         NoticeboardTemplateDescription::updateOrCreate(
             ['template_id' => $notice->template_id, 'language_id' => 1],
-            ['message' => $request->input('description_en', $request->input('name_en'))]
+            ['message' => $englishMessage]
         );
 
-        if ($request->filled('description_pb') || $request->filled('name_pb')) {
+        if ($request->filled('name_pb') || $request->filled('description_pb')) {
+            $punjabiMessage = json_encode([
+                'title' => $request->input('name_pb', ''),
+                'description' => $request->input('description_pb', ''),
+            ]);
+
             NoticeboardTemplateDescription::updateOrCreate(
                 ['template_id' => $notice->template_id, 'language_id' => 2],
-                ['message' => $request->input('description_pb', $request->input('name_pb'))]
+                ['message' => $punjabiMessage]
             );
         }
+
 
 
         return $this->successResponse($notice, 'Notice updated successfully.');
