@@ -4,7 +4,8 @@ namespace App\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log  
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 use App\Models\NotificationToken;
 
 /**
@@ -16,7 +17,7 @@ use App\Models\NotificationToken;
 class NotificationLog extends Model
 {
     //use Loggable; //for creating log
-    use HasFactory;
+    use HasFactory, LogsActivity;
   
 
     /**
@@ -28,5 +29,13 @@ class NotificationLog extends Model
         'user_id',
         'notification_text',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 	
 }

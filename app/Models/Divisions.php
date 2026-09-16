@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasPublicId;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Divisions extends Model
 {
-    use HasPublicId;
-    use HasFactory;
+    use HasFactory, HasPublicId, LogsActivity;
     protected $primaryKey = 'division_id';
 
     protected $fillable = [
@@ -54,6 +55,14 @@ class Divisions extends Model
     public function circle()
     {
         return $this->belongsTo(Circles::class, 'circle_id', 'circle_id');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 
 }

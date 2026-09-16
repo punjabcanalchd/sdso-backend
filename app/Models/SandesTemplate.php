@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log; // for creating log
-use Yungts97\LaravelUserActivityLog\Traits\Loggable;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * SandesTemplate
@@ -16,7 +17,7 @@ use Yungts97\LaravelUserActivityLog\Traits\Loggable;
 class SandesTemplate extends Model
 {
     // use Loggable; //for creating log
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $primaryKey = 'template_id';
 
@@ -120,5 +121,13 @@ class SandesTemplate extends Model
                 'error' => $e->getMessage(),
             ];
         }
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

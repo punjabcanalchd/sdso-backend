@@ -10,10 +10,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Crypt;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, HasPublicId, HasRoles;
+    use HasFactory, HasPublicId, HasRoles, LogsActivity;
 
     protected $fillable = [
         'name',
@@ -188,5 +190,13 @@ class User extends Authenticatable implements JWTSubject
             define('default_language',1);
         }
         return $this->hasOne(OfficeHierarchiesDescription::class,'officelevelcode','officelevelcode')->where('language_id','=',default_language);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

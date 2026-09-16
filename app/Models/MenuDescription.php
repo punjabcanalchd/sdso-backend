@@ -4,9 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class MenuDescription extends Model
 {
+
+    use LogsActivity;
     /**
      * The table associated with the model.
      *
@@ -38,5 +42,13 @@ class MenuDescription extends Model
     public function menu(): BelongsTo
     {
         return $this->belongsTo(Menu::class, 'menu_id', 'menu_id');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

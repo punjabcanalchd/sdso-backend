@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log  
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions; 
 
 /**
  * SandesTemplateDescription
@@ -15,7 +16,7 @@ use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log
 class SandesTemplateDescription extends Model
 {
     //use Loggable; //for creating log
-    use HasFactory;
+    use HasFactory, LogsActivity;
     public $timestamps = false;
 
     /**
@@ -29,4 +30,12 @@ class SandesTemplateDescription extends Model
         'subject',
         'message',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 }

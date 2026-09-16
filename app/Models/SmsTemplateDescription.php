@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log  
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
 * SMS template description
@@ -15,7 +16,7 @@ use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log
 class SmsTemplateDescription extends Model
 {
     //use Loggable; //for creating log
-    use HasFactory;
+    use HasFactory, LogsActivity;
     public $timestamps = false;
 
     /**
@@ -28,4 +29,12 @@ class SmsTemplateDescription extends Model
         'language_id',
         'message',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 }

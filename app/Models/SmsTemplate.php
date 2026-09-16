@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 // for creating log
 use Illuminate\Support\Facades\Log;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable;
-
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 /**
  * SMS template
  *
@@ -16,25 +16,11 @@ use Yungts97\LaravelUserActivityLog\Traits\Loggable;
 class SmsTemplate extends Model
 {
     // use Loggable; //for creating log
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $primaryKey = 'template_id';
 
     protected $smsURL = '';
-
-    // protected $otpUserName = 'pbwrda.otp';
-
-    // protected $otpPin = 'H0%26xS3%25eO5';
-
-    // protected $smsUserName = 'pbwrda.otp';
-
-    // protected $smsPin = 'H0%26xS3%25eO5';
-
-    // protected $signature = 'PBWRDA';
-
-    // protected $dltEntityId = '1401459960000046848';
-
-    // protected $dltTemplateId = '1407165900230697564';
 
     /**
      * The attributes that are mass assignable.
@@ -136,24 +122,6 @@ class SmsTemplate extends Model
     }
 
     /**
-     * Send SMS For Applicant Registration
-     *
-     * Message : Dear {name}, thanks for registering with PWRDA. Please use your PAN as Username for Login. From PWRDA
-     */
-    public static function ApplicantRegistration($SMS_data)
-    {
-        $user_name = $SMS_data['user_name'];
-        $user_mobile = $SMS_data['user_mobile'];
-        $smsDetails = SmsTemplate::getSMSDetails(config('services.sms.entity_id'));
-
-        if (! empty($smsDetails)) {
-            $message = $smsDetails['description']['message'];
-            $message = str_replace(['{name}'], [$user_name], $message);
-            $purpose = $smsDetails['name'];
-        }
-    }
-
-    /**
      * Send SMS For OTP
      *
      * Message : {OTP} is your OTP for authentication. Do not share this OTP to anyone for security reasons. From PWRDA
@@ -182,66 +150,12 @@ class SmsTemplate extends Model
         return $functionResponse;
     }
 
-    // public static function SendSMS($user_mobile, $message, $template_id)
-    // {
 
-    //     $username = 'pbwrda.sms';
-
-    //     if ($template_id == '1407165900230697564') { // otp id
-    //         $username = 'pbwrda.otp';
-    //     }
-
-    //     $pin = 'H0%26xS3%25eO5';
-    //     $mnumber = $user_mobile;
-    //     $message = urlencode($message);
-    //     $signature = 'PBWRDA';
-    //     $dlt_entity_id = '1401459960000046848';
-    //     $dlt_template_id = $template_id;
-
-    //     // $data = "username=$username&pin=$pin&mnumber=$mnumber&message=$message&signature=$signature&dlt_entity_id=$dlt_entity_id&dlt_template_id=$dlt_template_id";
-
-    //     $data = 'username='.$username.'&pin='.$pin.'&mnumber='.$mnumber.'&message='.$message.'&signature='.$signature.'&dlt_entity_id='.$dlt_entity_id.'&dlt_template_id='.$dlt_template_id;
-
-    //     $url = 'https://asmsgw.sms.gov.in/failsafe/MLink';
-    //     if (App::environment('production') && env('IS_SCHEDULER') === true) {
-    //         $url = 'https://smsgw.sms.gov.in/failsafe/MLink';
-    //     }
-
-    //     $urldata = $url.'?'.$data;
-
-    //     // dd($urldata);
-
-    //     $ch = curl_init();
-
-    //     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-    //     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-    //     // Check if cURL initialization was successful
-    //     if ($ch === false) {
-    //         return false;
-    //     }
-
-    //     curl_setopt($ch, CURLOPT_URL, $urldata);
-    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-    //     $resp = curl_exec($ch);
-
-    //     // Execute cURL request
-    //     $error_n = '';
-
-    //     // Check for errors
-    //     if ($resp === false) {
-    //         $error_n = 'Curl error: '.curl_error($ch);
-    //     } else {
-    //         // Output the response
-    //         $error_n = $resp;
-    //     }
-
-    //     //  dd($error_n);
-
-    //     curl_close($ch);
-
-    //     // var_dump($resp);
-    //     return $resp;
-    // }
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 }

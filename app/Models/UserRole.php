@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasPublicId;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class UserRole extends Model
 {
-    use HasFactory;
-    use HasPublicId;
+    use HasFactory, HasPublicId, LogsActivity;
 
     protected $primaryKey = 'role_id';
 
@@ -30,5 +31,13 @@ class UserRole extends Model
     public function users()
     {
         return $this->hasMany(User::class);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

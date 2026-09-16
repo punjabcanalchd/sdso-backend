@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasPublicId;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Designation extends Model
 {
-    use HasFactory, HasPublicId;
+    use HasFactory, HasPublicId, LogsActivity;
     protected $primaryKey = 'desigcode';      
     protected $fillable = [         
     'desigsenioritylevel',
@@ -40,5 +42,13 @@ class Designation extends Model
             }
         }
         return $return;
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

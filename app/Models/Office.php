@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasPublicId;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 
 class Office extends Model
 {  
-    use HasFactory, HasPublicId;
+    use HasFactory, HasPublicId, LogsActivity;
     protected $primaryKey = 'officecode';      
     protected $fillable = [         
     'lgdstatecode',
@@ -85,6 +87,14 @@ class Office extends Model
     public function officeHierarchy()
     {
         return $this->belongsTo(OfficeHierarchies::class, 'officelevelcode', 'officelevelcode');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 
 }

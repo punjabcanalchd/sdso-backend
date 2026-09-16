@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasPublicId;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class AdminPage extends Model
 {
-    use HasPublicId;
+    use HasPublicId, LogsActivity;
 
     /**
      * The table associated with the model.
@@ -69,5 +71,13 @@ class AdminPage extends Model
     public function children()
     {
         return $this->hasMany(AdminPage::class, 'parent_id')->orderBy('sort_order');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

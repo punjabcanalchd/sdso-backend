@@ -77,10 +77,9 @@ class DistrictRepository
      * GET District BY State ID
      * ---------------------------------------------------------------- */
 
-    public function getDistrictsByState(int $publicId): Districts
+    public function getDistrictsByState(int $publicId)
     {
-
-        $districts = Districts::where('state_id', $publicId)->get();
+        $districts = Districts::where('lgdstatecode', $publicId)->get();
         return $districts;
     }
 

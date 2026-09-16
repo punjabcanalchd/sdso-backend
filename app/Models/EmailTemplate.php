@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 use Auth;
 use App\Models\User;
@@ -18,7 +19,7 @@ use App\Mail\Email;
 class EmailTemplate extends Model
 {
     //use Loggable; //for creating log
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
 
     protected $primaryKey = 'template_id';
@@ -130,6 +131,14 @@ class EmailTemplate extends Model
             return true;
         }
         return false;
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }
 

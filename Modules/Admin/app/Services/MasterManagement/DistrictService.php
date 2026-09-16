@@ -44,7 +44,11 @@ class DistrictService
     public function getDistrictsByState(string $publicId) {
         $state_id = (int) $this->decode($publicId);
         $districts = $this->repository->getDistrictsByState($state_id);
-        return $this->formatResponse($districts);
+        $districts->transform(function ($district) {
+            return $this->formatResponse($district);
+        });
+
+        return $districts;
     }
 
     /* ------------------------------------------------------------------
@@ -71,6 +75,7 @@ class DistrictService
             'created_at'=> $district->created_at,
             'lgdstatecode'=> $district->lgdstatecode,
             'lgddistcode'=> $district->lgddistcode,
+            'lgddistcode_enc'=> $district->lgddistcode ? $this->encodeKey($district->lgddistcode) : null,
             'status'    => $district->status,
         ];
     }

@@ -5,9 +5,12 @@ namespace Modules\Admin\Services\MasterManagement;
 use App\Models\States;
 use Illuminate\Support\Facades\DB;
 use Modules\Admin\Repositories\MasterManagement\StateRepository;
+use App\Traits\HasPublicId;
 
 class StateService
 {
+
+    use HasPublicId;
     protected StateRepository $repository;
 
     public function __construct(StateRepository $repository)
@@ -95,6 +98,7 @@ class StateService
             'description_en' => $english?->description,
             'description_pb' => $punjabi?->description,
             'lgdstatecode' => $state->lgdstatecode,
+            'lgdstatecode_enc' => $this->encodeKey($state->lgdstatecode),
             'created_at' => $state->created_at,
             'status' => $state->status,
         ];

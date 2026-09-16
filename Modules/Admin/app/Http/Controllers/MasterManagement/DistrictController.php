@@ -50,7 +50,6 @@ class DistrictController extends Controller
 
     public function getAllDistricts(Request $request)
     {
-       
         $districts = $this->service->getAllDistricts();
 
         return $this->successResponse(

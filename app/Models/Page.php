@@ -6,10 +6,12 @@ use App\Traits\HasPublicId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Page extends Model
 {
-    use HasPublicId;
+    use HasPublicId, LogsActivity;
 
     /**
      * The table associated with the model.
@@ -106,5 +108,13 @@ class Page extends Model
     public function punjabiDescription()
     {
         return $this->hasOne(PageDescription::class, 'page_id', 'page_id')->where('language_id', 2);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

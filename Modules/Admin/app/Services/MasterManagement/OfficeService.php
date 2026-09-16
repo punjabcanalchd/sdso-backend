@@ -10,17 +10,42 @@ use App\Traits\HasPublicId;
 class OfficeService
 {
     use HasPublicId;
-
     protected OfficeRepository $repository;
 
     public function __construct(OfficeRepository $repository) {
         $this->repository = $repository;
     }
 
-    public function getOffices(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
+    public function get(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
     {
-        $offices = $this->repository->getAll($limit,$search,$sort_column,$sort_direction);
+        $offices = $this->repository->get($limit,$search,$sort_column,$sort_direction);
         $offices->getCollection()->transform(function ($office) {
+            return $this->formatResponse($office);
+        });
+
+        return $offices;
+    }
+
+    /**
+     * Get all without pagination
+    */
+    public function getAll()
+    {
+        $data = $this->repository->getAll();
+        $data->transform(function ($dataTranform) {
+            return $this->formatResponse($dataTranform);
+        });
+
+        return $data;
+    }
+
+    /* ------------------------------------------------------------------
+     * Get Offices By District
+     * ---------------------------------------------------------------- */
+    public function getOffficesByDistrict(string $publicId) {
+        $district_id = (int) $this->decode($publicId);
+        $offices = $this->repository->getOffficesByDistrict($district_id);
+        $offices->transform(function ($office) {
             return $this->formatResponse($office);
         });
 
@@ -31,7 +56,7 @@ class OfficeService
      * GET SINGLE USER
      * ---------------------------------------------------------------- */
 
-    public function getOffice(string $publicId) {
+    public function getByPublicId(string $publicId) {
         $office = $this->repository->findByPublicId($publicId);
         return $this->formatResponse($office);
     }

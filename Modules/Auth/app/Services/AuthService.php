@@ -68,6 +68,12 @@ class AuthService
             ];
         }
 
+        activity()->causedBy($user)->event('login')
+        ->withProperties([
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ])->log('login');
+
         $user->load('role');
 
         return [
@@ -153,7 +159,21 @@ class AuthService
      */
     public function logout(): bool
     {
+        $user = auth('api')->user();
+
+        if ($user) {
+            activity()
+                ->causedBy($user)
+                ->event('logout')
+                ->withProperties([
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ])
+                ->log('logout');
+        }
+
         auth('api')->logout();
+
         return true;
     }
     

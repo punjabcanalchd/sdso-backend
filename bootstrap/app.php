@@ -4,7 +4,9 @@ use App\Http\Middleware\TrustHosts;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-
+use App\Exceptions\ApiExceptionHandler;
+use Throwable;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -42,6 +44,13 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
     })
-->withExceptions(function (Exceptions $exceptions) {
-})
+    ->withExceptions(function (Exceptions $exceptions): void {
+
+        $exceptions->render(function (Throwable $e, Request $request) {
+
+            return app(ApiExceptionHandler::class)->render($request, $e);
+
+        });
+
+    })
     ->create();

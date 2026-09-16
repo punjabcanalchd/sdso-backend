@@ -4,7 +4,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log 
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 
 
@@ -15,8 +16,7 @@ use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log
  */
 class EmailLog extends Model
 {
-    //use Loggable; //for creating log
-    use HasFactory;
+    use HasFactory, LogsActivity;
     protected $table =  'email_logs';
     
     /**
@@ -58,6 +58,14 @@ class EmailLog extends Model
         }else{
             return null;
         }
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }
 ?>

@@ -38,9 +38,37 @@ class OfficeController extends Controller
 
         $limit = max($limit, 1);
 
-        $offices = $this->service->getOffices($limit, $search, $sort_column, $sort_direction);
+        $offices = $this->service->get($limit, $search, $sort_column, $sort_direction);
 
         return $this->paginatedResponse(
+            $offices,
+            'Offices fetched successfully.'
+        );
+    }
+
+    /**
+     * Get all without pagination
+    */
+
+    public function getAll(Request $request)
+    {
+       
+        $data = $this->service->getAll();
+
+        return $this->successResponse(
+            $data,
+            'Data fetched successfully.'
+        );
+    }
+
+    /**
+     * Get Offices By District
+     */
+    public function getOffficesByDistrict(string $publicId)
+    {
+        $offices = $this->service->getOffficesByDistrict($publicId);
+
+        return $this->successResponse(
             $offices,
             'Offices fetched successfully.'
         );
@@ -51,7 +79,7 @@ class OfficeController extends Controller
      */
     public function show(string $publicId)
     {
-        $office = $this->service->getOffice($publicId);
+        $office = $this->service->getByPublicId($publicId);
 
         if (! $office) {
             return $this->errorResponse(

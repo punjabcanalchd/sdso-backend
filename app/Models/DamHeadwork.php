@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; //for creating log
+use App\Traits\HasPublicId;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class DamHeadwork extends Model
 {
-    use Loggable; //for creating log
-    use HasFactory;
+    use HasFactory, HasPublicId, LogsActivity;
     protected $table = 'damheadworks';
     protected $primaryKey = 'damhwcode';
     protected $fillable = [
@@ -19,6 +20,9 @@ class DamHeadwork extends Model
         'officecode',
         'entitycode',
         'status',
+    ];
+    protected $appends = [
+        'public_id',
     ];
     
     public function description()
@@ -45,5 +49,23 @@ class DamHeadwork extends Model
             }
         }
         return $return;
+    }
+
+    public function district()
+    {
+        return $this->belongsTo(Districts::class, 'lgddistcode', 'lgddistcode');
+    }
+
+    public function office()
+    {
+        return $this->belongsTo(Office::class, 'officecode', 'officecode');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

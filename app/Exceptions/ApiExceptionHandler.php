@@ -70,9 +70,11 @@ class ApiExceptionHandler
                 "ip" => $this->getClientIp(),
             ];
 
-            Mail::to("punjabcanalchd@gmail.com")->send(
-                new ExceptionOccured($content)
-            );
+            if (config("app.exception_email")) {
+                Mail::to(config("app.exception_email"))->send(
+                    new ExceptionOccured($content)
+                );
+            }
         } catch (Throwable $exception) {
             Log::error($exception);
         }
@@ -84,6 +86,7 @@ class ApiExceptionHandler
     protected function addLog(Throwable $exception): void
     {
         try {
+
             $model = new ExceptionLog();
             $model->message = strval($exception->getMessage());
             $model->line = $exception->getLine();
@@ -94,6 +97,7 @@ class ApiExceptionHandler
             $model->status = 0;
             $model->save();
         } catch (Throwable $e) {
+            dd($e);
             Log::error($e);
         }
     }

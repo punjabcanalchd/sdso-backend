@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasPublicId;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Circles extends Model
 {
-    use HasPublicId;
-    use HasFactory;
+    use HasFactory, HasPublicId, LogsActivity;
+
     protected $primaryKey = 'circle_id';
     protected $fillable = [
         'lgdstatecode',
@@ -51,5 +53,13 @@ class Circles extends Model
     public function state()
     {
         return $this->belongsTo(States::class, 'lgdstatecode', 'lgdstatecode');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

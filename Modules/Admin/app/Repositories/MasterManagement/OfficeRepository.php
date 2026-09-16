@@ -3,6 +3,7 @@
 namespace Modules\Admin\Repositories\MasterManagement;
 
 use App\Models\Office;
+use App\Enums\StatusEnum;
 
 class OfficeRepository
 {
@@ -10,7 +11,7 @@ class OfficeRepository
      * GET ALL Offices
      * ---------------------------------------------------------------- */
 
-    public function getAll(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
+    public function get(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
     {
         $query = Office::with(['description']);
         // Search in both English & Punjabi
@@ -51,6 +52,25 @@ class OfficeRepository
         }
 
         return $query->paginate($limit);
+    }
+
+    /**
+     * Get all without pagination
+    */
+
+    public function getAll()
+    {
+        return Office::with('description')->where('status', StatusEnum::ACTIVE->value)->get();
+    }
+
+    /* ------------------------------------------------------------------
+     * GET Offices By District ID
+     * ---------------------------------------------------------------- */
+
+    public function getOffficesByDistrict(int $publicId)
+    {
+        $offices = Office::where('lgddistcode', $publicId)->get();
+        return $offices;
     }
 
     /* ------------------------------------------------------------------

@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class PageDescription extends Model
 {
+    use LogsActivity;
     protected $table = 'pages_descriptions';
 
     protected $primaryKey = 'description_id';
@@ -26,5 +29,13 @@ class PageDescription extends Model
     public function page(): BelongsTo
     {
         return $this->belongsTo(Page::class, 'page_id', 'page_id');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

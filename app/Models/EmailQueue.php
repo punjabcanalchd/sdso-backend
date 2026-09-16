@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * Email Queue
@@ -14,7 +15,7 @@ use Yungts97\LaravelUserActivityLog\Traits\Loggable;
  */
 class EmailQueue extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
     //use Loggable;
 
     protected $fillable = [
@@ -59,5 +60,13 @@ class EmailQueue extends Model
         ]);
 
         return $email?->id;
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

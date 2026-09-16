@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasPublicId;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class States extends Model
 {    
-    use HasFactory, HasPublicId;    
+    use HasFactory, HasPublicId, LogsActivity;    
     protected $primaryKey = 'state_id';      
     protected $fillable = [
     'lgdstatecode', 
@@ -60,5 +62,13 @@ class States extends Model
             'lgdstatecode',
             'lgdstatecode'
         )->where('language_id', default_language);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

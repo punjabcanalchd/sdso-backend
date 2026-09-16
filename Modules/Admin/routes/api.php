@@ -11,6 +11,10 @@ use Modules\Admin\Http\Controllers\MasterManagement\OfficeController;
 use Modules\Admin\Http\Controllers\MasterManagement\OfficeHierarchyController;
 use Modules\Admin\Http\Controllers\MasterManagement\StateController;
 use Modules\Admin\Http\Controllers\MasterManagement\SubDivisionController;
+use Modules\Admin\Http\Controllers\SDSO\DamHeadWorksController;
+use Modules\Admin\Http\Controllers\SDSO\DamHeadWorksReadingController;
+use Modules\Admin\Http\Controllers\Logs\ExceptionLogsController;
+use Modules\Admin\Http\Controllers\Logs\ActivityLogsController;
 use Modules\Admin\Http\Controllers\MenuController;
 use Modules\Admin\Http\Controllers\Others\PageController;
 use Modules\Admin\Http\Controllers\PermissionController;
@@ -79,6 +83,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::get('/{public_id}', [DistrictController::class, 'show'])->name('admin.get_district_by_public_id');
         Route::post('/', [DistrictController::class, 'store'])->name('admin.create_new_district');
         Route::post('/{public_id}/update', [DistrictController::class, 'update'])->name('admin.update_district_details');
+        Route::post('/{public_id}/get-districts', [DistrictController::class, 'getDistrictsByState'])->name('admin.get_districts_by_state');
     });
 
     Route::prefix('office_hierarchy')->group(function () {
@@ -124,9 +129,26 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
 
     Route::prefix('offices')->group(function () {
         Route::get('/', [OfficeController::class, 'index'])->name('admin.offices ');
+        Route::get('/all', [OfficeController::class, 'getAll'])->name('admin.get_all_offices');
         Route::get('/{public_id}', [OfficeController::class, 'show'])->name('admin.get_office_by_public_id');
         Route::get('/{public_id}/getoffices', [OfficeController::class, 'getOfficesByHierarchy'])->name('admin.get_offices_by_hierarchy');
+        Route::post('/{public_id}/get-offices', [OfficeController::class, 'getOffficesByDistrict'])->name('admin.get_offices_by_district');
+    });
 
+    Route::prefix('dam-headworks')->group(function () {
+        Route::get('/', [DamHeadWorksController::class, 'index'])->name('admin.dam_headworks');
+        Route::get('/all', [DamHeadWorksController::class, 'getAll'])->name('admin.get_all_dam_headworks');
+        Route::get('/{public_id}', [DamHeadWorksController::class, 'show'])->name('admin.get_dam_headworks_by_public_id');
+        Route::post('/', [DamHeadWorksController::class, 'store'])->name('admin.create_new_dam_headworks');
+        Route::post('/{public_id}/update', [DamHeadWorksController::class, 'update'])->name('admin.update_dam_headworks_details');
+    });
+
+    Route::prefix('dam-headworks-readings')->group(function () {
+        Route::get('/', [DamHeadWorksReadingController::class, 'index'])->name('admin.dam_headworks_readings');
+        Route::get('/all', [DamHeadWorksReadingController::class, 'getAll'])->name('admin.get_all_dam_headworks_readings');
+        Route::get('/{public_id}', [DamHeadWorksReadingController::class, 'show'])->name('admin.get_dam_headworks_reading_by_public_id');
+        Route::post('/', [DamHeadWorksReadingController::class, 'store'])->name('admin.create_new_dam_headworks_reading');
+        Route::post('/{public_id}/update', [DamHeadWorksReadingController::class, 'update'])->name('admin.update_dam_headworks_reading_details');
     });
 
     // Menu routes
@@ -140,4 +162,15 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::post('/{public_id}/status', [MenuController::class, 'updateStatus'])->name('admin.update_menu_status');
         Route::post('/{public_id}/delete', [MenuController::class, 'destroy'])->name('admin.delete_menu');
     });
+
+    Route::prefix('exception-logs')->group(function () {
+        Route::get('/', [ExceptionLogsController::class, 'index'])->name('admin.exception-logs');
+        Route::get('/{public_id}', [ExceptionLogsController::class, 'show'])->name('admin.exception-logs-by-public-id');
+    });
+
+    Route::prefix('activity-logs')->group(function () {
+        Route::get('/', [ActivityLogsController::class, 'index'])->name('admin.activity-logs');
+        Route::get('/{public_id}', [ActivityLogsController::class, 'show'])->name('admin.activity-logs-by-public-id');
+    });
+
 });
