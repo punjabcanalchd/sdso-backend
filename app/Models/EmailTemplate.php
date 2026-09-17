@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+use App\Traits\HasPublicId;
 
 use Auth;
 use App\Models\User;
@@ -19,7 +20,7 @@ use App\Mail\Email;
 class EmailTemplate extends Model
 {
     //use Loggable; //for creating log
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, HasPublicId;
 
 
     protected $primaryKey = 'template_id';
@@ -32,6 +33,9 @@ class EmailTemplate extends Model
     protected $fillable = [
         'name',
         'status',
+    ];
+      protected $appends = [
+        'public_id',
     ];
 
     /**

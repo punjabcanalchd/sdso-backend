@@ -25,6 +25,8 @@ use Modules\Admin\Http\Controllers\UserManagement\UserController;
 use Modules\Admin\Http\Controllers\UserRoleController;
 use Modules\Admin\Http\Controllers\AdditionalRoleController;
 use Modules\Admin\Http\Controllers\Others\NoticeboardController;
+use Modules\Admin\Http\Controllers\Others\EmailTemplateController;
+
 
 
 // Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
@@ -238,6 +240,13 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::post('/{id}/status', [NoticeboardController::class, 'updateStatus'])->name('admin.noticeboard.status');
     // Route::post('/{id}/delete', [NoticeboardController::class, 'destroy'])->name('admin.noticeboard.delete');
     });
+
+    //emailtemplates
+     Route::prefix('email-templates')->group(function () {
+     Route::get('/', [EmailTemplateController::class, 'index'])->name('admin.email_templates.index');
+     Route::post('/{id}/status', [EmailTemplateController::class, 'updateStatus'])->name('admin.email_templates.status');
+    });
+
 
 
 });
