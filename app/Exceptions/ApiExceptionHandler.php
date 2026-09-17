@@ -27,6 +27,10 @@ class ApiExceptionHandler
             return null;
         }
 
+        if ($e instanceof ValidationException) {
+            return null;
+        }
+
         $this->handleException($e);
 
         $status = $this->resolveStatusCode($e);
@@ -38,10 +42,6 @@ class ApiExceptionHandler
             "message" => $message,
             "code" => $status,
         ];
-    
-        if ($e instanceof ValidationException) {
-            $response["errors"] = $e->errors();
-        }
 
         if (config("app.debug")) {
             $response["exception"] = class_basename($e);

@@ -12,12 +12,14 @@ class ExceptionLogsRepository
 
     public function get(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
     {
-        $query = new ExceptionLog();
+        $query = ExceptionLog::query();
         if (!empty($search)) {
-            $query->where('message', 'ILIKE', "%{$search}%")
-            ->orWhere('body', 'ILIKE', "%{$search}%")
-            ->orWhere('ip', 'ILIKE', "%{$search}%")
-            ->orWhere('url', 'ILIKE', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('message', 'ILIKE', "%{$search}%")
+                    ->orWhere('body', 'ILIKE', "%{$search}%")
+                    ->orWhere('ip', 'ILIKE', "%{$search}%")
+                    ->orWhere('url', 'ILIKE', "%{$search}%");
+            });
         }
         $sort_direction = strtolower($sort_direction ?? 'asc');
         if (!in_array($sort_direction, ['asc', 'desc'])) {

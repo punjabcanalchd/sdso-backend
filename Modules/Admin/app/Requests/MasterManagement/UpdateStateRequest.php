@@ -5,9 +5,11 @@ namespace Modules\Admin\Requests\MasterManagement;
 use App\Http\Requests\BaseRequest;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\Rule;
+use App\Traits\HasPublicId;
 
 class UpdateStateRequest extends BaseRequest
 {
+    use HasPublicId;
     public function authorize(): bool
     {
         return true;
@@ -26,9 +28,7 @@ class UpdateStateRequest extends BaseRequest
 
         if ($publicId) {
             try {
-                $stateId = (int) Crypt::decryptString(
-                    urldecode($publicId)
-                );
+                $stateId = $this->decode($publicId);
             } catch (\Exception $e) {
                 \Log::error('State ID decryption failed', [
                     'public_id' => $publicId,
@@ -36,7 +36,6 @@ class UpdateStateRequest extends BaseRequest
                 ]);
             }
         }
-
         return [
             'languages' => [
                 'required',

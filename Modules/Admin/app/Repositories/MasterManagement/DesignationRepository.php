@@ -16,7 +16,7 @@ class DesignationRepository
         $query = Designation::with(['description']);
         // Search in both English & Punjabi
         if (!empty($search)) {
-            $query->whereHas('designation', function ($q) use ($search) {
+            $query->whereHas('description', function ($q) use ($search) {
                 $q->where('designation', 'ILIKE', "%{$search}%");
             });
         }
@@ -36,7 +36,7 @@ class DesignationRepository
                     ->where('sd.language_id', 1); // English
             });
 
-            $query->select('designations.*')->orderBy('sd.officelevel', $sort_direction);
+            $query->select('designations.*')->orderBy('sd.designation', $sort_direction);
 
         } else if($sort_column === 'name_pb') {
 
@@ -45,7 +45,7 @@ class DesignationRepository
                     ->where('sd.language_id', 2); // Punjabi
             });
 
-            $query->select('designations.*')->orderBy('sd.officelevel', $sort_direction);
+            $query->select('designations.*')->orderBy('sd.designation', $sort_direction);
 
         } else {
             $query->orderBy($sort_column ?: 'desigcode', $sort_direction);
