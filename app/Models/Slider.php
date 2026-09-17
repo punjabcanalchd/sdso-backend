@@ -4,12 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable; // for creating log
+use App\Traits\HasPublicId;
 
 class Slider extends Model
 {
-    use HasFactory;
-    // use Loggable;
+    use HasFactory, HasPublicId;
 
     protected $primaryKey = 'slider_id';
 
@@ -17,10 +16,11 @@ class Slider extends Model
         'name',
         'status',
     ];
+   
+    protected $appends = [
+        'public_id',
+    ];
 
-    /**
-     * Get slider images.
-     */
     public function images()
     {
         return $this->hasMany(

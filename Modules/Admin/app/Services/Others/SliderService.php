@@ -5,11 +5,15 @@ namespace Modules\Admin\Services\Others;
 use App\Models\ApplicationStat;
 use App\Models\Setting;
 use App\Models\Slider;
+use App\Traits\HasPublicId;
 use Modules\Admin\Repositories\Others\SliderRepository;
 
 class SliderService
 {
-    public function __construct(
+
+ use HasPublicId;
+
+ public function __construct(
         protected SliderRepository $sliderRepository
     ) {}
 
@@ -30,45 +34,15 @@ class SliderService
         );
     }
 
-    // public function getPaginatedSliders(): array
-    // {
-    //     $pagination = defined('website_pagination')
-    //         ? website_pagination
-    //         : 30;
-
-    //     $results = $this->sliderRepository->paginate($pagination);
-
-    // $enableGifBanner = ApplicationStat::where(
-    //     'config_key',
-    //     'enable_gif_banner'
-    // )
-    //     ->where('stats_id', 1)
-    //     ->first();
-
-    // $tourismBanner = Setting::where(
-    //     'config_key',
-    //     'tourism_slider'
-    // )->first();
-
-    // $homeBanner = Setting::where(
-    //     'config_key',
-    //     'home_slider'
-    // )->first();
-
-    //     return [
-    //         'results' => $results,
-    //         // 'enable_gif_banner' => $enableGifBanner,
-    //         // 'tourism_slider_id' => $tourismBanner?->config_value,
-    //         // 'home_slider_id' => $homeBanner?->config_value,
-    //     ];
-    // }
-
+   
     /**
-     * Get slider by ID.
+     * Get slider by public ID.
      */
-    public function getSlider(int $id): Slider
+    public function getSliderByPublicId(string $public_id): Slider
     {
-        $slider = $this->sliderRepository->findById($id);
+        $sliderId = (int) $this->decode($public_id);
+
+        $slider = $this->sliderRepository->findById($sliderId);
 
         if (! $slider) {
             abort(404, 'Slider not found.');
@@ -76,6 +50,20 @@ class SliderService
 
         return $slider;
     }
+
+    // /**
+    //  * Get slider by ID.
+    //  */
+    // public function getSlider(int $id): Slider
+    // {
+    //     $slider = $this->sliderRepository->findById($id);
+
+    //     if (! $slider) {
+    //         abort(404, 'Slider not found.');
+    //     }
+
+    //     return $slider;
+    // }
 
     /**
      * Create slider.
@@ -88,14 +76,30 @@ class SliderService
     /**
      * Update slider.
      */
-    public function updateSlider(int $id, array $data): Slider
-    {
-        $slider = $this->getSlider($id);
-
+    public function updateSliderByPublicId(int $public_id, array $data): Slider
+    {              
+        $sliderId = (int) $this->decode($public_id);
+        $slider = $this->sliderRepository->findById($sliderId);
         return $this->sliderRepository->update(
             $slider,
             $data
         );
+    }
+
+     public function updateStatus(string $public_id, bool $status)
+    {   
+        $sliderId = (int) $this->decode($public_id);
+      
+        $slider = Slider::where('slider_id', $sliderId)->first();
+       
+        if (! $slider) {
+            return null;
+        }
+
+        $slider->status = $status;
+        $slider->save();
+
+        return $slider;
     }
 
     /**

@@ -1,8 +1,9 @@
 <?php
 
-namespace Modules\Admin\Requests\Other\slider;
+namespace Modules\Admin\Requests\Others\Slider;
 
 use Illuminate\Foundation\Http\FormRequest;
+
 
 class StoreSliderRequest extends FormRequest
 {

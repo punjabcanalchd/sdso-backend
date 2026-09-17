@@ -78,42 +78,27 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
 
     Route::prefix('sliders')->group(function () {
         // List
-        Route::get('/', [SliderController::class, 'index']);
-        // Create
-        Route::post('/', [SliderController::class, 'store']);
-
-        // Details
-        Route::get('/{public_id}', [SliderController::class, 'show']);
-
-        // Update
-        Route::post('/{public_id}/update', [SliderController::class, 'update']);
-
-        // Status
-        Route::post('/{public_id}/status', [SliderController::class, 'updateStatus']);
-        // Delete
-        Route::post('/{public_id}/delete', [SliderController::class,            'destroy',
-        ]);
+        Route::get('/', [SliderController::class, 'index']);  // Create
+        Route::post('/', [SliderController::class, 'store']); // Details
+        Route::get('/{public_id}', [SliderController::class, 'show']);  // Update
+        Route::post('/{public_id}/update', [SliderController::class, 'update']); // Status
+        Route::post('/{public_id}/status', [SliderController::class, 'updateStatus']);  // Delete
+        Route::post('/{public_id}/delete', [SliderController::class, 'destroy' ]);
     });
 
     // SliderImage
-
     Route::prefix('slider-image')->group(function () {
 
         // List slider images
         Route::get('/{slider_id}', [SliderImageController::class, 'index'])->name('slider-image-admin');
-
         // Create form
         Route::get('/{slider_id}/create', [SliderImageController::class, 'create'])->name('slider-image-create');
-
         // Store
         Route::post('/{slider_id}', [SliderImageController::class, 'store'])->name('slider-image-store');
-
         // Edit form
         Route::get('/edit/{id}', [SliderImageController::class,  'edit'])->name('slider-image-edit');
-
         // Update
         Route::post('/update/{id}', [SliderImageController::class, 'update'])->name('slider-image-update');
-
         // Delete
         Route::post('/delete/{id}', [SliderImageController::class, 'destroy'])->name('slider-image-delete');
     });

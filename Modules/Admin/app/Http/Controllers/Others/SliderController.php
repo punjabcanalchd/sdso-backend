@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Slider;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Modules\Admin\Requests\Slider\StoreSliderRequest;
-use Modules\Admin\Requests\Slider\UpdateSliderRequest;
+use Modules\Admin\Requests\Others\Slider\StoreSliderRequest;
+use Modules\Admin\Requests\Others\Slider\UpdateSliderRequest;
 use Modules\Admin\Services\Others\SliderService;
 
 class SliderController extends Controller
@@ -85,10 +85,7 @@ class SliderController extends Controller
     /**
      * Update slider
      */
-    public function update(
-        UpdateSliderRequest $request,
-        string $public_id
-    ) {
+    public function update( UpdateSliderRequest $request, string $public_id) {
         $slider = $this->service->updateSliderByPublicId(
             $public_id,
             $request->validated()
@@ -110,19 +107,18 @@ class SliderController extends Controller
     /**
      * Update status
      */
-    public function updateStatus(
-        Request $request,
-        string $public_id
-    ) {
+    public function updateStatus(Request $request,  string $public_id ) {
+
         $request->validate([
             'status' => ['required', 'boolean'],
         ]);
+     
 
         $slider = $this->service->updateStatus(
             $public_id,
             $request->boolean('status')
         );
-
+       
         if (! $slider) {
             return $this->errorResponse(
                 'Slider not found.',
