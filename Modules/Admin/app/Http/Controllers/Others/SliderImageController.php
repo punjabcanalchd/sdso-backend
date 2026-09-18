@@ -12,16 +12,10 @@ class SliderImageController extends Controller
 {
     protected SliderImageService $service;
 
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct(
-        SliderImageService $service
-    ) {
+    public function __construct(SliderImageService $service)
+    {
         $this->service = $service;
-
         $this->middleware('nocache');
-
         $this->middleware([
             'auth',
             'common.header',
@@ -29,28 +23,16 @@ class SliderImageController extends Controller
         ]);
     }
 
-    /**
-     * Display slider images.
-     */
     public function index($slider_id)
     {
-        $decryptId = $this->service->decryptSliderId(
-            $slider_id
-        );
+        $decryptId = $this->service->decryptSliderId($slider_id);
+        $slider = $this->service->getSlider($decryptId);
 
-        $slider = $this->service->getSlider(
-            $decryptId
-        );
+        $pagination = defined('website_pagination') && !empty(website_pagination)
+            ? website_pagination
+            : 30;
 
-        $pagination = defined('website_pagination')
-            && ! empty(website_pagination)
-                ? website_pagination
-                : 30;
-
-        $results = $this->service->getSliderImages(
-            $decryptId,
-            $pagination
-        );
+        $results = $this->service->getSliderImages($decryptId, $pagination);
 
         return view('admin.slider-image.index', [
             'results' => $results,
@@ -58,19 +40,10 @@ class SliderImageController extends Controller
         ]);
     }
 
-    /**
-     * Show create form.
-     */
     public function create($slider_id)
     {
-        $decryptId = $this->service->decryptSliderId(
-            $slider_id
-        );
-
-        $slider = $this->service->getSlider(
-            $decryptId
-        );
-
+        $decryptId = $this->service->decryptSliderId($slider_id);
+        $slider = $this->service->getSlider($decryptId);
         $pages = $this->service->getPages();
 
         return view('admin.slider-image.create', [
@@ -80,22 +53,12 @@ class SliderImageController extends Controller
         ]);
     }
 
-    /**
-     * Store slider image.
-     */
-    public function store(
-        Request $request,
-        $slider_id
-    ) {
-        $decryptId = $this->service->decryptSliderId(
-            $slider_id
-        );
-
+    public function store(Request $request, $slider_id)
+    {
+        $decryptId = $this->service->decryptSliderId($slider_id);
         $this->service->getSlider($decryptId);
 
-        $request->validate(
-            $this->rules()
-        );
+        $request->validate($this->rules());
 
         $this->service->create(
             $decryptId,
@@ -104,27 +67,14 @@ class SliderImageController extends Controller
         );
 
         return redirect()
-            ->route(
-                'slider-image-admin',
-                $slider_id
-            )
-            ->with(
-                'success',
-                'Your record has been added successfully.'
-            );
+            ->route('slider-image-admin', $slider_id)
+            ->with('success', 'Your record has been added successfully.');
     }
 
-    /**
-     * Show edit form.
-     */
     public function edit($id)
     {
         $model = $this->service->getByPublicId($id);
-
-        $slider = $this->service->getSlider(
-            $model->slider_id
-        );
-
+        $slider = $this->service->getSlider($model->slider_id);
         $pages = $this->service->getPages();
 
         return view('admin.slider-image.edit', [
@@ -134,18 +84,11 @@ class SliderImageController extends Controller
         ]);
     }
 
-    /**
-     * Update slider image.
-     */
-    public function update(
-        Request $request,
-        $id
-    ) {
+    public function update(Request $request, $id)
+    {
         $model = $this->service->getByPublicId($id);
 
-        $request->validate(
-            $this->rules($model->id)
-        );
+        $request->validate($this->rules($model->id));
 
         $this->service->update(
             $model,
@@ -153,48 +96,25 @@ class SliderImageController extends Controller
             $request->file('image_name')
         );
 
-        $sliderId = $this->service->encryptSliderId(
-            $model->slider_id
-        );
+        $sliderId = $this->service->encryptSliderId($model->slider_id);
 
         return redirect()
-            ->route(
-                'slider-image-admin',
-                $sliderId
-            )
-            ->with(
-                'success',
-                'Your record has been updated successfully.'
-            );
+            ->route('slider-image-admin', $sliderId)
+            ->with('success', 'Your record has been updated successfully.');
     }
 
-    /**
-     * Delete slider image.
-     */
     public function destroy($id)
     {
         $model = $this->service->getByPublicId($id);
-
-        $sliderId = $this->service->encryptSliderId(
-            $model->slider_id
-        );
+        $sliderId = $this->service->encryptSliderId($model->slider_id);
 
         $this->service->delete($model);
 
         return redirect()
-            ->route(
-                'slider-image-admin',
-                $sliderId
-            )
-            ->with(
-                'success',
-                'Your data has been deleted successfully'
-            );
+            ->route('slider-image-admin', $sliderId)
+            ->with('success', 'Your data has been deleted successfully');
     }
 
-    /**
-     * Validation rules.
-     */
     protected function rules($id = null): array
     {
         if (! $id) {
