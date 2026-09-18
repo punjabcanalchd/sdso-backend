@@ -26,6 +26,7 @@ use Modules\Admin\Http\Controllers\UserRoleController;
 use Modules\Admin\Http\Controllers\AdditionalRoleController;
 use Modules\Admin\Http\Controllers\Others\NoticeboardController;
 use Modules\Admin\Http\Controllers\Others\EmailTemplateController;
+use Modules\Admin\Http\Controllers\Others\TranslationController;
 
 
 
@@ -228,10 +229,15 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
 
     //emailtemplates
      Route::prefix('email-templates')->group(function () {
-     Route::get('/', [EmailTemplateController::class, 'index'])->name('admin.email_templates.index');
-     Route::post('/{id}/status', [EmailTemplateController::class, 'updateStatus'])->name('admin.email_templates.status');
+      Route::get('/', [EmailTemplateController::class, 'index'])->name('admin.email_templates.index');
+      Route::post('/{id}/status', [EmailTemplateController::class, 'updateStatus'])->name('admin.email_templates.status');
+     });
+
+    // Translations
+    Route::prefix('translations')->group(function () {
+        Route::get('/', [TranslationController::class, 'index'])->name('admin.translations.index');
+        Route::post('/update', [TranslationController::class, 'update'])->name('admin.translations.update');
+        Route::post('/{key_id}/update', [TranslationController::class, 'updateSingle'])->name('admin.translations.update_single');
     });
-
-
 
 });
