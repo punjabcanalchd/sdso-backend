@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasPublicId;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -11,7 +12,7 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class Office extends Model
 {  
-    use HasFactory, HasPublicId, LogsActivity;
+    use HasFactory, HasPublicId, LogsActivity, SoftDeletes;
     protected $primaryKey = 'officecode';      
     protected $fillable = [         
     'lgdstatecode',

@@ -3,6 +3,7 @@
 namespace Modules\Admin\Repositories\MasterManagement;
 
 use App\Models\Office;
+use App\Models\OfficeDescription;
 use App\Enums\StatusEnum;
 
 class OfficeRepository
@@ -93,6 +94,18 @@ class OfficeRepository
         return Office::create($data);
     }
 
+    public function createDescriptions(Office $office, array $translations): void
+    {
+        foreach ($translations['name'] as $languageId => $name) {
+            OfficeDescription::create([
+                'officecode'    => $office->officecode,
+                'language_id'   => $languageId,
+                'officename'    => $name,
+                'officeaddress' => $translations['description'][$languageId] ?? null,
+            ]);
+        }
+    }
+
     /* ------------------------------------------------------------------
      * UPDATE Office
      * ---------------------------------------------------------------- */
@@ -104,6 +117,25 @@ class OfficeRepository
         return $office;
     }
 
+    public function updateOfficeWithDescriptions(string $publicId, array $officeData, array $descriptions): Office
+    {
+        $office = $this->findByPublicId($publicId);
+        $office->update($officeData);
+
+        OfficeDescription::where('officecode', $office->officecode)->delete();
+
+        foreach ($descriptions as $desc) {
+            OfficeDescription::create([
+                'officecode'    => $office->officecode,
+                'language_id'   => $desc['language_id'],
+                'officename'    => $desc['officename'],
+                'officeaddress' => $desc['officeaddress'] ?? null,
+            ]);
+        }
+
+        return $office;
+    }
+
     /* ------------------------------------------------------------------
      * DELETE Office
      * ---------------------------------------------------------------- */
@@ -111,7 +143,10 @@ class OfficeRepository
     public function delete(string $publicId): bool
     {
         $office = $this->findByPublicId($publicId);
-        return $office->delete();
+        $office->status = 0;
+        $office->save();
+        $office->description()->delete();
+        return (bool) $office->delete();
     }
 
     /* ------------------------------------------------------------------

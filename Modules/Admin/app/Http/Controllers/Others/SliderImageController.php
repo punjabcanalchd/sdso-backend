@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\Http\Controllers;
+namespace Modules\Admin\Http\Controllers\Others;
 
 use App\Http\Controllers\Controller;
 use App\Models\SliderImage;

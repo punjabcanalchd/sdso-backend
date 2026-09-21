@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Modules\Admin\Services\MasterManagement\OfficeService;
+use Modules\Admin\Requests\MasterManagement\StoreOfficeRequest;
+use Modules\Admin\Requests\MasterManagement\UpdateOfficeRequest;
 
 class OfficeController extends Controller
 {
@@ -104,6 +106,49 @@ class OfficeController extends Controller
         return $this->successResponse(
             $offices,
             'Offices fetched successfully.'
+        );
+    }
+
+    /* ------------------------------------------------------------------
+     * CREATE Office
+     * ---------------------------------------------------------------- */
+
+    public function store(StoreOfficeRequest $request)
+    {
+        $office = $this->service->createOffice($request->validated());
+
+        return $this->successResponse(
+            $office,
+            'Office created successfully.',
+            201
+        );
+    }
+
+    /* ------------------------------------------------------------------
+     * UPDATE Office
+     * ---------------------------------------------------------------- */
+
+    public function update(UpdateOfficeRequest $request, string $publicId)
+    {
+        $office = $this->service->updateOffice($request->validated(), $publicId);
+
+        return $this->successResponse(
+            $office,
+            'Office updated successfully.'
+        );
+    }
+
+    /* ------------------------------------------------------------------
+     * DELETE Office (Soft Delete)
+     * ---------------------------------------------------------------- */
+
+    public function destroy(string $publicId)
+    {
+        $this->service->deleteOffice($publicId);
+
+        return $this->successResponse(
+            null,
+            'Office deleted successfully.'
         );
     }
 }

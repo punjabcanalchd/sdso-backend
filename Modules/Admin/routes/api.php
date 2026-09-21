@@ -20,7 +20,7 @@ use Modules\Admin\Http\Controllers\Others\PageController;
 use Modules\Admin\Http\Controllers\Others\SliderController;
 use Modules\Admin\Http\Controllers\PermissionController;
 use Modules\Admin\Http\Controllers\RoleController;
-use Modules\Admin\Http\Controllers\SliderImageController;
+use Modules\Admin\Http\Controllers\Others\SliderImageController;
 use Modules\Admin\Http\Controllers\UserManagement\UserController;
 use Modules\Admin\Http\Controllers\UserRoleController;
 use Modules\Admin\Http\Controllers\AdditionalRoleController;
@@ -166,6 +166,9 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::get('/', [OfficeController::class, 'index'])->name('admin.offices ');
         Route::get('/all', [OfficeController::class, 'getAll'])->name('admin.get_all_offices');
         Route::get('/{public_id}', [OfficeController::class, 'show'])->name('admin.get_office_by_public_id');
+        Route::post('/', [OfficeController::class, 'store'])->name('admin.create_new_office');
+        Route::post('/{public_id}/update', [OfficeController::class, 'update'])->name('admin.update_office_details');
+        Route::post('/{public_id}/delete', [OfficeController::class, 'destroy'])->name('admin.delete_office');
         Route::get('/{public_id}/getoffices', [OfficeController::class, 'getOfficesByHierarchy'])->name('admin.get_offices_by_hierarchy');
         Route::post('/{public_id}/get-offices', [OfficeController::class, 'getOffficesByDistrict'])->name('admin.get_offices_by_district');
     });
