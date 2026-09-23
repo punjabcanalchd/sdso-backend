@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+use App\Traits\HasPublicId;
+
 /**
  * SMS template
  *
@@ -16,9 +18,13 @@ use Spatie\Activitylog\Support\LogOptions;
 class SmsTemplate extends Model
 {
     // use Loggable; //for creating log
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, HasPublicId;
 
     protected $primaryKey = 'template_id';
+
+    protected $appends = [
+        'public_id',
+    ];
 
     protected $smsURL = '';
 

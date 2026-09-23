@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log; // for creating log
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+use App\Traits\HasPublicId;
 
 /**
  * SandesTemplate
@@ -17,9 +18,13 @@ use Spatie\Activitylog\Support\LogOptions;
 class SandesTemplate extends Model
 {
     // use Loggable; //for creating log
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, HasPublicId;
 
     protected $primaryKey = 'template_id';
+
+    protected $appends = [
+        'public_id',
+    ];
 
     protected $fillable = [
         'name',

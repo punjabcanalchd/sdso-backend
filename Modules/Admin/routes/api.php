@@ -26,6 +26,8 @@ use Modules\Admin\Http\Controllers\UserRoleController;
 use Modules\Admin\Http\Controllers\AdditionalRoleController;
 use Modules\Admin\Http\Controllers\Others\NoticeboardController;
 use Modules\Admin\Http\Controllers\Others\EmailTemplateController;
+use Modules\Admin\Http\Controllers\Others\SmsTemplateController;
+use Modules\Admin\Http\Controllers\Others\SandesTemplateController;
 use Modules\Admin\Http\Controllers\Others\TranslationController;
 
 
@@ -234,6 +236,18 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
      Route::prefix('email-templates')->group(function () {
       Route::get('/', [EmailTemplateController::class, 'index'])->name('admin.email_templates.index');
       Route::post('/{id}/status', [EmailTemplateController::class, 'updateStatus'])->name('admin.email_templates.status');
+     });
+
+    //sms templates
+     Route::prefix('sms-templates')->group(function () {
+      Route::get('/', [SmsTemplateController::class, 'index'])->name('admin.sms_templates.index');
+      Route::post('/{id}/status', [SmsTemplateController::class, 'updateStatus'])->name('admin.sms_templates.status');
+     });
+
+    //sandes templates
+     Route::prefix('sandes-templates')->group(function () {
+      Route::get('/', [SandesTemplateController::class, 'index'])->name('admin.sandes_templates.index');
+      Route::post('/{id}/status', [SandesTemplateController::class, 'updateStatus'])->name('admin.sandes_templates.status');
      });
 
     // Translations
