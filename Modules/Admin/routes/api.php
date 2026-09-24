@@ -29,7 +29,7 @@ use Modules\Admin\Http\Controllers\Others\EmailTemplateController;
 use Modules\Admin\Http\Controllers\Others\SmsTemplateController;
 use Modules\Admin\Http\Controllers\Others\SandesTemplateController;
 use Modules\Admin\Http\Controllers\Others\MediaCategoryController;
-use Modules\Admin\Http\Controllers\Others\CategoryController;
+use Modules\Admin\Http\Controllers\Others\NoticeboardCategoryController;
 use Modules\Admin\Http\Controllers\Others\TranslationController;
 
 
@@ -261,9 +261,9 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
 
     //noticeboard categories
      Route::prefix('noticeboard-categories')->group(function () {
-      Route::get('/', [CategoryController::class, 'index'])->name('admin.noticeboard_categories.index');
-      Route::post('/{id}/status', [CategoryController::class, 'updateStatus'])->name('admin.noticeboard_categories.status');
-      Route::post('/{id}/display-home', [CategoryController::class, 'updateDisplayOnHome'])->name('admin.noticeboard_categories.display_home');
+      Route::get('/', [NoticeboardCategoryController::class, 'index'])->name('admin.noticeboard_categories.index');
+      Route::post('/{id}/status', [NoticeboardCategoryController::class, 'updateStatus'])->name('admin.noticeboard_categories.status');
+      Route::post('/{id}/display-home', [NoticeboardCategoryController::class, 'updateDisplayOnHome'])->name('admin.noticeboard_categories.display_home');
      });
 
     // Translations
