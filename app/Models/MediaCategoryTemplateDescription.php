@@ -7,23 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-/**
- * Noticeboard Category Description
- *
- * @mixin Builder
- */
-class CategoryTemplateDescription extends Model
+class MediaCategoryTemplateDescription extends Model
 {
     use HasFactory, LogsActivity;
 
-    public $timestamps = false;
-     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */ 
+    protected $table = 'media_category_template_descriptions';
+    protected $primaryKey = 'id';
+
     protected $fillable = [
-        'template_id',
+        'mediacat_id',
         'language_id',
         'message',
     ];

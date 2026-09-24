@@ -3,11 +3,11 @@
 namespace Modules\Admin\Http\Controllers\Others;
 
 use App\Http\Controllers\Controller;
-use App\Models\CategoryTemplate;
+use App\Models\MediaCategoryTemplate;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
-class CategoryController extends Controller
+class MediaCategoryController extends Controller
 {
     use ApiResponse;
 
@@ -15,10 +15,10 @@ class CategoryController extends Controller
     {
         $limit = (int) $request->get('per_page', 25);
         $search = $request->get('search');
-        $sortColumn = $request->get('sort_column', 'template_id');
+        $sortColumn = $request->get('sort_column', 'mediacat_id');
         $sortDirection = $request->get('sort_direction', 'desc');
 
-        $query = CategoryTemplate::with('descriptions');
+        $query = MediaCategoryTemplate::with('descriptions');
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
@@ -29,11 +29,11 @@ class CategoryController extends Controller
             });
         }
 
-        $allowedSorts = ['name', 'status', 'display_on_home_page', 'created_at', 'template_id'];
+        $allowedSorts = ['name', 'status', 'display_on_home_page', 'created_at', 'mediacat_id'];
         if (in_array($sortColumn, $allowedSorts)) {
             $query->orderBy($sortColumn, strtolower($sortDirection) === 'asc' ? 'asc' : 'desc');
         } else {
-            $query->orderBy('template_id', 'desc');
+            $query->orderBy('mediacat_id', 'desc');
         }
 
         $paginated = $query->paginate($limit);
@@ -43,8 +43,8 @@ class CategoryController extends Controller
             $punjabi = $item->descriptions->firstWhere('language_id', 2);
 
             return [
-                'id'                   => $item->public_id ?? (string) $item->template_id,
-                'template_id'          => $item->template_id,
+                'id'                   => $item->public_id ?? (string) $item->mediacat_id,
+                'mediacat_id'          => $item->mediacat_id,
                 'name'                 => $item->name,
                 'name_en'              => $english?->message ?? $item->name,
                 'name_pb'              => $punjabi?->message ?? '',
@@ -54,15 +54,15 @@ class CategoryController extends Controller
             ];
         });
 
-        return $this->paginatedResponse($paginated, 'Noticeboard categories fetched successfully.');
+        return $this->paginatedResponse($paginated, 'Media categories fetched successfully.');
     }
 
     public function updateStatus(Request $request, $id)
     {
-        $category = CategoryTemplate::findByPublicId($id) ?? CategoryTemplate::find($id);
+        $category = MediaCategoryTemplate::findByPublicId($id) ?? MediaCategoryTemplate::find($id);
 
         if (!$category) {
-            return $this->errorResponse('Category not found.', 404);
+            return $this->errorResponse('Media category not found.', 404);
         }
 
         $category->status = (bool) $request->input('status', false);
@@ -73,10 +73,10 @@ class CategoryController extends Controller
 
     public function updateDisplayOnHome(Request $request, $id)
     {
-        $category = CategoryTemplate::findByPublicId($id) ?? CategoryTemplate::find($id);
+        $category = MediaCategoryTemplate::findByPublicId($id) ?? MediaCategoryTemplate::find($id);
 
         if (!$category) {
-            return $this->errorResponse('Category not found.', 404);
+            return $this->errorResponse('Media category not found.', 404);
         }
 
         $category->display_on_home_page = (bool) $request->input('display_on_home_page', false);

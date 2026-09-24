@@ -2,17 +2,32 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
+use App\Traits\HasPublicId;
 
 class CategoryTemplate extends Model
 {
+    use HasFactory, LogsActivity, HasPublicId;
+
     protected $table = 'category_templates';
     protected $primaryKey = 'template_id';
+
+    protected $appends = [
+        'public_id',
+    ];
 
     protected $fillable = [
         'name',
         'status',
         'display_on_home_page',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
+        'display_on_home_page' => 'boolean',
     ];
 
     /**
@@ -44,5 +59,13 @@ class CategoryTemplate extends Model
             }
         }
         return $return;
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 }

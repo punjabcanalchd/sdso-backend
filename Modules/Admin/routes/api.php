@@ -28,6 +28,8 @@ use Modules\Admin\Http\Controllers\Others\NoticeboardController;
 use Modules\Admin\Http\Controllers\Others\EmailTemplateController;
 use Modules\Admin\Http\Controllers\Others\SmsTemplateController;
 use Modules\Admin\Http\Controllers\Others\SandesTemplateController;
+use Modules\Admin\Http\Controllers\Others\MediaCategoryController;
+use Modules\Admin\Http\Controllers\Others\CategoryController;
 use Modules\Admin\Http\Controllers\Others\TranslationController;
 
 
@@ -248,6 +250,20 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
      Route::prefix('sandes-templates')->group(function () {
       Route::get('/', [SandesTemplateController::class, 'index'])->name('admin.sandes_templates.index');
       Route::post('/{id}/status', [SandesTemplateController::class, 'updateStatus'])->name('admin.sandes_templates.status');
+     });
+
+    //media categories
+     Route::prefix('media-categories')->group(function () {
+      Route::get('/', [MediaCategoryController::class, 'index'])->name('admin.media_categories.index');
+      Route::post('/{id}/status', [MediaCategoryController::class, 'updateStatus'])->name('admin.media_categories.status');
+      Route::post('/{id}/display-home', [MediaCategoryController::class, 'updateDisplayOnHome'])->name('admin.media_categories.display_home');
+     });
+
+    //noticeboard categories
+     Route::prefix('noticeboard-categories')->group(function () {
+      Route::get('/', [CategoryController::class, 'index'])->name('admin.noticeboard_categories.index');
+      Route::post('/{id}/status', [CategoryController::class, 'updateStatus'])->name('admin.noticeboard_categories.status');
+      Route::post('/{id}/display-home', [CategoryController::class, 'updateDisplayOnHome'])->name('admin.noticeboard_categories.display_home');
      });
 
     // Translations
