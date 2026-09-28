@@ -262,6 +262,10 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     //noticeboard categories
      Route::prefix('noticeboard-categories')->group(function () {
       Route::get('/', [NoticeboardCategoryController::class, 'index'])->name('admin.noticeboard_categories.index');
+      Route::post('/', [NoticeboardCategoryController::class, 'store'])->name('admin.noticeboard_categories.store');
+      Route::get('/{id}', [NoticeboardCategoryController::class, 'show'])->name('admin.noticeboard_categories.show');
+      Route::post('/{id}/update', [NoticeboardCategoryController::class, 'update'])->name('admin.noticeboard_categories.update');
+      Route::put('/{id}', [NoticeboardCategoryController::class, 'update'])->name('admin.noticeboard_categories.put_update');
       Route::post('/{id}/status', [NoticeboardCategoryController::class, 'updateStatus'])->name('admin.noticeboard_categories.status');
       Route::post('/{id}/display-home', [NoticeboardCategoryController::class, 'updateDisplayOnHome'])->name('admin.noticeboard_categories.display_home');
      });
