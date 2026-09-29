@@ -99,10 +99,6 @@ class StateController extends Controller
     public function update(UpdateStateRequest $request, string $public_id)
     {
         try {
-            // \Log::info('StateController update reached', [
-            //     'public_id' => $public_id,
-            //     'data' => $request->validated(),
-            // ]);
 
             $data = $request->validated();
 
@@ -112,14 +108,6 @@ class StateController extends Controller
             );
 
         } catch (\Throwable $e) {
-            // \Log::error('State update failed', [
-            //     'message' => $e->getMessage(),
-            //     'exception' => get_class($e),
-            //     'file' => $e->getFile(),
-            //     'line' => $e->getLine(),
-            //     'trace' => $e->getTraceAsString(),
-            // ]);
-
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -129,5 +117,18 @@ class StateController extends Controller
                 'trace' => $e->getTraceAsString(),
             ], 500);
         }
+    }
+
+    /**
+     * Delete a State.
+     */
+    public function destroy(string $public_id)
+    {
+        $this->service->delete($public_id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'State deleted successfully.',
+        ], 200);
     }
 }

@@ -120,4 +120,17 @@ class SubDivisionController extends Controller
             'Sub Division updated successfully.'
         );
     }
+
+    /**
+     * Delete a Sub Division.
+     */
+    public function destroy(string $public_id)
+    {
+        $this->service->delete($public_id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sub Division deleted successfully.',
+        ], 200);
+    }
 }

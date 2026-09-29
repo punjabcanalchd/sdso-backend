@@ -103,4 +103,9 @@ class StateService
             'status' => $state->status,
         ];
     }
+
+    public function delete(string $publicId)
+    {
+        return $this->repository->delete($publicId);
+    }
 }

@@ -114,6 +114,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::get('/{public_id}', [StateController::class, 'show'])->name('admin.get_state_by_public_id');
         Route::post('/', [StateController::class, 'store'])->name('admin.create_new_state');
         Route::post('/{public_id}/update', [StateController::class, 'update'])->name('admin.update_state_details');
+        Route::post('/{public_id}/delete', [StateController::class, 'destroy'])->name('admin.delete_state');
     });
 
     Route::prefix('districts')->group(function () {
@@ -123,6 +124,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::post('/', [DistrictController::class, 'store'])->name('admin.create_new_district');
         Route::post('/{public_id}/update', [DistrictController::class, 'update'])->name('admin.update_district_details');
         Route::post('/{public_id}/get-districts', [DistrictController::class, 'getDistrictsByState'])->name('admin.get_districts_by_state');
+        Route::post('/{public_id}/delete', [DistrictController::class, 'destroy'])->name('admin.delete_district');
     });
 
     Route::prefix('office_hierarchy')->group(function () {
@@ -131,6 +133,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::get('/{public_id}', [OfficeHierarchyController::class, 'show'])->name('admin.get_office_hierarchy_by_public_id');
         Route::post('/', [OfficeHierarchyController::class, 'store'])->name('admin.create_new_office_hierarchy');
         Route::post('/{public_id}/update', [OfficeHierarchyController::class, 'update'])->name('admin.update_office_hierarchy_details');
+        Route::post('/{public_id}/delete', [OfficeHierarchyController::class, 'destroy'])->name('admin.delete_office_hierarchy');
     });
 
     Route::prefix('designation')->group(function () {
@@ -138,6 +141,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::get('/{public_id}', [DesignationController::class, 'show'])->name('admin.get_designation_by_public_id');
         Route::post('/', [DesignationController::class, 'store'])->name('admin.create_new_designation');
         Route::post('/{public_id}/update', [DesignationController::class, 'update'])->name('admin.update_designation_details');
+        Route::post('/{public_id}/delete', [DesignationController::class, 'destroy'])->name('admin.delete_designation');
     });
 
     Route::prefix('circles')->group(function () {
@@ -146,6 +150,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::get('/{public_id}', [CircleController::class, 'show'])->name('admin.get_circle_by_public_id');
         Route::post('/', [CircleController::class, 'store'])->name('admin.create_new_circle');
         Route::post('/{public_id}/update', [CircleController::class, 'update'])->name('admin.update_circle_details');
+        Route::post('/{public_id}/delete', [CircleController::class, 'destroy'])->name('admin.delete_circle');
     });
 
     Route::prefix('divisions')->group(function () {
@@ -155,6 +160,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::post('/', [DivisionController::class, 'store'])->name('admin.create_new_division');
         Route::post('/{public_id}/update', [DivisionController::class, 'update'])->name('admin.update_division_details');
         Route::get('/{public_id}/getdivisions', [DivisionController::class, 'getDivisionsByCircle'])->name('admin.get_divisions_by_circle');
+        Route::post('/{public_id}/delete', [DivisionController::class, 'destroy'])->name('admin.delete_division');
     });
 
     Route::prefix('subdivisions')->group(function () {
@@ -164,6 +170,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::post('/', [SubDivisionController::class, 'store'])->name('admin.create_new_subdivision');
         Route::post('/{public_id}/update', [SubDivisionController::class, 'update'])->name('admin.update_subdivision_details');
         Route::get('/{public_id}/getsubdivisions', [SubDivisionController::class, 'getSubdivisionsByDivision'])->name('admin.get_subdivisions_by_division');
+        Route::post('/{public_id}/delete', [SubDivisionController::class, 'destroy'])->name('admin.delete_subdivision');
     });
 
     Route::prefix('offices')->group(function () {

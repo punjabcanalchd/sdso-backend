@@ -97,4 +97,17 @@ class DesignationController extends Controller
             'Designation updated successfully.'
         );
     }
+
+    /**
+     * Delete a Designation.
+     */
+    public function destroy(string $public_id)
+    {
+        $this->service->delete($public_id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Designation deleted successfully.',
+        ], 200);
+    }
 }

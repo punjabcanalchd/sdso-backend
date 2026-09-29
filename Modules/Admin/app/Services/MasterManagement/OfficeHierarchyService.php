@@ -120,4 +120,9 @@ class OfficeHierarchyService
         });
 
     }
+
+    public function delete(string $publicId)
+    {
+        return $this->repository->delete($publicId);
+    }
 }

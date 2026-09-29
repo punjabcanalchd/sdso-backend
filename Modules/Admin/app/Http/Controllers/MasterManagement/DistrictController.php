@@ -122,4 +122,17 @@ class DistrictController extends Controller
             'District updated successfully.'
         );
     }
+
+    /**
+     * Delete a District.
+     */
+    public function destroy(string $public_id)
+    {
+        $this->service->delete($public_id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'District deleted successfully.',
+        ], 200);
+    }
 }

@@ -108,4 +108,17 @@ class CircleController extends Controller
             'Circle updated successfully.'
         );
     }
+
+    /**
+     * Delete a Circle.
+     */
+    public function destroy(string $public_id)
+    {
+        $this->service->delete($public_id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Circle deleted successfully.',
+        ], 200);
+    }
 }

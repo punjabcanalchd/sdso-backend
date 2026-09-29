@@ -120,4 +120,17 @@ class DivisionController extends Controller
             'Division updated successfully.'
         );
     }
+
+    /**
+     * Delete a Division.
+     */
+    public function destroy(string $public_id)
+    {
+        $this->service->delete($public_id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Division deleted successfully.',
+        ], 200);
+    }
 }

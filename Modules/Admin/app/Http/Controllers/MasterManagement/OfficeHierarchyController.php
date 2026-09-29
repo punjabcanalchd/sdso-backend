@@ -107,4 +107,17 @@ class OfficeHierarchyController extends Controller
             'Office Hierarchy updated successfully.'
         );
     }
+
+    /**
+     * Delete a Office Hierarchy.
+     */
+    public function destroy(string $public_id)
+    {
+        $this->service->delete($public_id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Office Hierarchy deleted successfully.',
+        ], 200);
+    }
 }
