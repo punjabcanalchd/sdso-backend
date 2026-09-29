@@ -270,6 +270,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
      Route::prefix('noticeboard-categories')->group(function () {
       Route::get('/', [NoticeboardCategoryController::class, 'index'])->name('admin.noticeboard_categories.index');
       Route::post('/', [NoticeboardCategoryController::class, 'store'])->name('admin.noticeboard_categories.store');
+      Route::get('/dropdown', [NoticeboardCategoryController::class, 'dropdown'])->name('admin.noticeboard_categories.dropdown');
       Route::get('/{id}', [NoticeboardCategoryController::class, 'show'])->name('admin.noticeboard_categories.show');
       Route::post('/{id}/update', [NoticeboardCategoryController::class, 'update'])->name('admin.noticeboard_categories.update');
       Route::put('/{id}', [NoticeboardCategoryController::class, 'update'])->name('admin.noticeboard_categories.put_update');
