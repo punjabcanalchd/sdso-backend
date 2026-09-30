@@ -1,178 +1,117 @@
 <?php
-
 namespace Modules\Admin\Services\Others;
 
-use App\Models\ImageResizer;
-use App\Models\Page;
 use App\Models\Slider;
 use App\Models\SliderImage;
-use App\Repositories\Admin\Others\SliderImageRepository;
+use App\Traits\HasPublicId;
 use Illuminate\Http\UploadedFile;
+use Modules\Admin\Repositories\Others\SliderImageRepository;
 
 class SliderImageService
 {
-    protected SliderImageRepository $repository;
+    use HasPublicId;
 
-    public function __construct(
-        SliderImageRepository $repository
-    ) {
-        $this->repository = $repository;
-    }
+    public function __construct(protected SliderImageRepository $sliderImageRepository){}
 
-    /**
-     * Get slider.
-     */
-    public function getSlider(int $sliderId): Slider
+    public function getSliderByPublicId(string $publicId): Slider
     {
+        $sliderId=(int)$this->decode($publicId);
         return Slider::findOrFail($sliderId);
     }
 
-    /**
-     * Get slider images with pagination.
-     */
-    public function getSliderImages(
-        int $sliderId,
-        int $perPage = 30
-    ) {
-        return $this->repository->paginate(
-            $sliderId,
-            $perPage
-        );
-    }
-
-    /**
-     * Get active pages for dropdown.
-     */
-    public function getPages(): array
+    public function getSliderImages(int $sliderId,int $perPage=30)
     {
-        $pages = [];
-
-        $pageResults = Page::where('status', 1)
-            ->with('pageDescription')
-            ->get();
-
-        foreach ($pageResults as $page) {
-
-            if ($page->pageDescription) {
-                $pages[$page->page_id] =
-                    $page->pageDescription->title;
-            }
-        }
-
-        return $pages;
+        return $this->sliderImageRepository->paginate($sliderId,$perPage);
     }
 
-    /**
-     * Get slider image by encrypted ID.
-     */
-    public function getByPublicId(string $id): SliderImage
+     public function create(int $sliderId,array $data,?UploadedFile $image=null):SliderImage
     {
-        $decryptId = encrypt_decrypt_string(
-            'decrypt',
-            $id
-        );
+        // if($image){
+        //     $data['image_name']=$image->store('uploads/slider','public');
+        // }
 
-        return $this->repository->find(
-            (int) $decryptId
-        );
-    }
+        if($image){
+            $fileName=$image->hashName();
 
-    /**
-     * Create slider image.
-     */
-    public function create(
-        int $sliderId,
-        array $data,
-        ?UploadedFile $image = null
-    ): SliderImage {
-
-        $data['slider_id'] = $sliderId;
-
-        if ($image) {
-            $fileName = time().'-'.$image->getClientOriginalName();
-
-            $fileName = ImageResizer::store(
-                $image,
-                'uploads/slider',
+            $image->move(
+                public_path('uploads/slider'),
                 $fileName
             );
 
-            $data['image_name'] = $fileName;
+            $data['image_name']='uploads/slider/'.$fileName;
         }
 
-        return $this->repository->create($data);
+        $data['slider_id']=$sliderId;
+
+        return $this->sliderImageRepository->create($data);
     }
 
-    /**
-     * Update slider image.
-     */
-    public function update(
-        SliderImage $model,
-        array $data,
-        ?UploadedFile $image = null
-    ): SliderImage {
+    public function getById(int $id): SliderImage
+    {
+        return $this->sliderImageRepository->find($id);
+    }
 
-        if ($image) {
+    public function getByPublicId(string $publicId): SliderImage
+    {
+        $id = (int) $this->decode($publicId);
 
-            // Delete old image
-            if ($model->image_name) {
-                ImageResizer::deleteFile(
-                    $model->image_name
+        return $this->sliderImageRepository->find($id);
+    }
+
+        public function updateByPublicId(
+            string $publicId,
+            array $data,
+            Request $request
+        ): SliderImage {
+            $sliderImage = $this->getByPublicId($publicId);
+
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+
+                $fileName = time() . '_' . $file->getClientOriginalName();
+
+                $file->move(
+                    public_path('uploads/slider'),
+                    $fileName
                 );
+
+                $data['image_name'] = 'uploads/slider/' . $fileName;
             }
 
-            $fileName = time().'-'.$image->getClientOriginalName();
+            unset($data['image']);
 
-            $fileName = ImageResizer::store(
-                $image,
-                'uploads/slider',
-                $fileName
-            );
+            $sliderImage->update($data);
 
-            $data['image_name'] = $fileName;
+            return $sliderImage->fresh();
         }
 
-        $this->repository->update(
-            $model,
-            $data
+    public function update(
+    SliderImage $model,
+    array $data,
+    ?UploadedFile $file = null
+): SliderImage {
+    if ($file) {
+        $fileName = time() . '_' . $file->getClientOriginalName();
+
+        $file->move(
+            public_path('uploads/slider'),
+            $fileName
         );
 
-        return $model->refresh();
+        $data['image_name'] = 'uploads/slider/' . $fileName;
     }
 
-    /**
-     * Delete slider image.
-     */
-    public function delete(SliderImage $model): int
-    {
-        if ($model->image_name) {
-            ImageResizer::deleteFile(
-                $model->image_name
-            );
-        }
+    $model->update($data);
 
-        return $this->repository->delete($model);
+    return $model->fresh();
+}
+    
+    public function getSliderById(int $id): Slider
+    {
+        return Slider::findOrFail($id);
     }
-
-    /**
-     * Get encrypted slider ID.
-     */
-    public function encryptSliderId(int $sliderId): string
+    public function delete(SliderImage $model): bool
     {
-        return encrypt_decrypt_string(
-            'encrypt',
-            $sliderId
-        );
-    }
-
-    /**
-     * Decrypt slider ID.
-     */
-    public function decryptSliderId(string $sliderId): int
-    {
-        return (int) encrypt_decrypt_string(
-            'decrypt',
-            $sliderId
-        );
+        return $this->sliderImageRepository->delete($model);
     }
 }

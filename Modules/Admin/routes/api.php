@@ -91,22 +91,38 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::post('/{public_id}/delete', [SliderController::class, 'destroy' ]);
     });
 
+    
     // SliderImage
-    Route::prefix('slider-image')->group(function () {
+Route::prefix('slider-image')->group(function () {
 
-        // List slider images
-        Route::get('/{slider_id}', [SliderImageController::class, 'index'])->name('slider-image-admin');
-        // Create form
-        Route::get('/{slider_id}/create', [SliderImageController::class, 'create'])->name('slider-image-create');
-        // Store
-        Route::post('/{slider_id}', [SliderImageController::class, 'store'])->name('slider-image-store');
-        // Edit form
-        Route::get('/edit/{id}', [SliderImageController::class,  'edit'])->name('slider-image-edit');
-        // Update
-        Route::post('/update/{id}', [SliderImageController::class, 'update'])->name('slider-image-update');
-        // Delete
-        Route::post('/delete/{id}', [SliderImageController::class, 'destroy'])->name('slider-image-delete');
-    });
+    // Create form
+    Route::get('/{slider_id}/create', [SliderImageController::class, 'create'])
+        ->name('slider-image-create');
+
+    Route::get('/{slider_id}', [SliderImageController::class, 'index'])
+        ->name('slider-image-admin');
+
+    // Store
+    Route::post('/{slider_id}', [SliderImageController::class, 'store'])
+        ->name('slider-image-store');
+
+    // Get single slider image
+    // Get single slider image by image ID
+    Route::get('/edit/{image_id}', [SliderImageController::class, 'edit'])
+        ->name('slider-image-show');
+
+    // Update
+    Route::post('/{slider_id}/{image_id}/update', [SliderImageController::class, 'update'])
+        ->name('slider-image-update');
+
+    // Delete
+    Route::post('/{slider_id}/{image_id}/delete', [SliderImageController::class, 'destroy'])
+        ->name('slider-image-delete');
+
+    // Status
+    Route::post('/{slider_id}/{image_id}/status', [SliderImageController::class, 'status'])
+        ->name('slider-image-status');
+});
 
     Route::prefix('states')->group(function () {
         Route::get('/', [StateController::class, 'index'])->name('admin.states');

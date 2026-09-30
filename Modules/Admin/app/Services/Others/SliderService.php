@@ -42,7 +42,7 @@ class SliderService
     {
         $sliderId = (int) $this->decode($public_id);
 
-        $slider = $this->sliderRepository->findById($sliderId);
+        $slider = $this->sliderRepository->findById($sliderId);  
 
         if (! $slider) {
             abort(404, 'Slider not found.');
@@ -54,16 +54,16 @@ class SliderService
     // /**
     //  * Get slider by ID.
     //  */
-    // public function getSlider(int $id): Slider
-    // {
-    //     $slider = $this->sliderRepository->findById($id);
+    public function getSlider(int $id): Slider
+    {
+        $slider = $this->sliderRepository->findById($id);
 
-    //     if (! $slider) {
-    //         abort(404, 'Slider not found.');
-    //     }
+        if (! $slider) {
+            abort(404, 'Slider not found.');
+        }
 
-    //     return $slider;
-    // }
+        return $slider;
+    }
 
     /**
      * Create slider.

@@ -5,133 +5,145 @@ namespace Modules\Admin\Http\Controllers\Others;
 use App\Http\Controllers\Controller;
 use App\Models\SliderImage;
 use App\Rules\SafeImage;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Modules\Admin\Services\Others\SliderImageService;
+use Modules\Admin\App\Repositories\Others\SliderImageRepository;
 
 class SliderImageController extends Controller
 {
+    use ApiResponse;
+
     protected SliderImageService $service;
 
     public function __construct(SliderImageService $service)
     {
         $this->service = $service;
-        $this->middleware('nocache');
-        $this->middleware([
-            'auth',
-            'common.header',
-            'permissions',
-        ]);
     }
 
-    public function index($slider_id)
+    /**
+     * Get slider images.
+     */
+   public function index(Request $request, string $publicId)
+{
+    $slider = $this->service->getSliderByPublicId($publicId);
+
+    $defaultLimit = config('pagination.default_limit', 30);
+    $maxLimit = config('pagination.max_limit', 100);
+
+    $limit = (int) $request->get('per_page', $defaultLimit);
+    $limit = min($limit, $maxLimit);
+    $limit = max($limit, 1);
+
+    $results = $this->service->getSliderImages(
+        $slider->slider_id,
+        $limit
+    );
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Slider images fetched successfully.',
+        'data' => $results,
+        'addtionalDetails' => [],
+    ]);
+}
+   
+
+    /**
+     * Store slider image.
+     */
+    public function store(Request $request,string $publicId)
     {
-        $decryptId = $this->service->decryptSliderId($slider_id);
-        $slider = $this->service->getSlider($decryptId);
-
-        $pagination = defined('website_pagination') && !empty(website_pagination)
-            ? website_pagination
-            : 30;
-
-        $results = $this->service->getSliderImages($decryptId, $pagination);
-
-        return view('admin.slider-image.index', [
-            'results' => $results,
-            'slider' => $slider,
-        ]);
-    }
-
-    public function create($slider_id)
-    {
-        $decryptId = $this->service->decryptSliderId($slider_id);
-        $slider = $this->service->getSlider($decryptId);
-        $pages = $this->service->getPages();
-
-        return view('admin.slider-image.create', [
-            'model' => new SliderImage,
-            'slider' => $slider,
-            'page' => $pages,
-        ]);
-    }
-
-    public function store(Request $request, $slider_id)
-    {
-        $decryptId = $this->service->decryptSliderId($slider_id);
-        $this->service->getSlider($decryptId);
+        $slider=$this->service->getSliderByPublicId($publicId);
 
         $request->validate($this->rules());
 
-        $this->service->create(
-            $decryptId,
-            $request->except('image_name'),
-            $request->file('image_name')
+        $model=$this->service->create(
+            $slider->slider_id,
+            $request->except('image'),
+            $request->file('image')
         );
 
-        return redirect()
-            ->route('slider-image-admin', $slider_id)
-            ->with('success', 'Your record has been added successfully.');
-    }
-
-    public function edit($id)
-    {
-        $model = $this->service->getByPublicId($id);
-        $slider = $this->service->getSlider($model->slider_id);
-        $pages = $this->service->getPages();
-
-        return view('admin.slider-image.edit', [
-            'model' => $model,
-            'slider' => $slider,
-            'page' => $pages,
-        ]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $model = $this->service->getByPublicId($id);
-
-        $request->validate($this->rules($model->id));
-
-        $this->service->update(
+        return $this->successResponse(
             $model,
-            $request->except('image_name'),
-            $request->file('image_name')
+            'Slider image added successfully.',
+            201
         );
-
-        $sliderId = $this->service->encryptSliderId($model->slider_id);
-
-        return redirect()
-            ->route('slider-image-admin', $sliderId)
-            ->with('success', 'Your record has been updated successfully.');
     }
 
-    public function destroy($id)
+    /**
+     * Get slider image edit data.
+     */
+    public function edit(string $image_id)
+    {
+        $model = $this->service->getByPublicId($image_id);
+
+        return $this->successResponse(
+            $model,
+            'Slider image details fetched successfully.'
+        );
+    }
+
+
+    
+
+    /**
+     * Update slider image.
+     */
+    /**
+ * Update slider image.
+ */
+public function update( Request $request, string $slider_id, string $image_id) {
+    $model = $this->service->getByPublicId($image_id);
+
+    $request->validate($this->rules($model->id));
+
+    $model = $this->service->update(
+        $model,
+        $request->except('image'),
+        $request->file('image')
+    );
+
+    return $this->successResponse(
+        $model,
+        'Slider image updated successfully.'
+    );
+}
+    /**
+     * Delete slider image.
+     */
+    public function destroy(string $id)
     {
         $model = $this->service->getByPublicId($id);
-        $sliderId = $this->service->encryptSliderId($model->slider_id);
 
         $this->service->delete($model);
 
-        return redirect()
-            ->route('slider-image-admin', $sliderId)
-            ->with('success', 'Your data has been deleted successfully');
+        return $this->successResponse(
+            null,
+            'Slider image deleted successfully.'
+        );
     }
 
+    /**
+     * Validation rules.
+     */
     protected function rules($id = null): array
     {
         if (! $id) {
             return [
-                'image_name' => [
+                'image' => [
                     'required',
                     'mimes:jpeg,png,jpg',
-                    new SafeImage,
+                    // new SafeImage,
                 ],
             ];
         }
 
         return [
-            'image_name' => [
+            'image' => [
                 'nullable',
                 'mimes:jpeg,png,jpg',
-                new SafeImage,
+                // new SafeImage,
             ],
         ];
     }
