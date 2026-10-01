@@ -29,6 +29,7 @@ use Modules\Admin\Http\Controllers\Others\EmailTemplateController;
 use Modules\Admin\Http\Controllers\Others\SmsTemplateController;
 use Modules\Admin\Http\Controllers\Others\SandesTemplateController;
 use Modules\Admin\Http\Controllers\Others\MediaCategoryController;
+use Modules\Admin\Http\Controllers\Others\MediaGalleryController;
 use Modules\Admin\Http\Controllers\Others\NoticeboardCategoryController;
 use Modules\Admin\Http\Controllers\Others\TranslationController;
 
@@ -278,8 +279,21 @@ Route::prefix('slider-image')->group(function () {
     //media categories
      Route::prefix('media-categories')->group(function () {
       Route::get('/', [MediaCategoryController::class, 'index'])->name('admin.media_categories.index');
+      Route::get('/dropdown', [MediaCategoryController::class, 'dropdown'])->name('admin.media_categories.dropdown');
+      Route::post('/', [MediaCategoryController::class, 'store'])->name('admin.media_categories.store');
+      Route::get('/{id}', [MediaCategoryController::class, 'show'])->name('admin.media_categories.show');
+      Route::post('/{id}/update', [MediaCategoryController::class, 'update'])->name('admin.media_categories.update');
+      Route::put('/{id}', [MediaCategoryController::class, 'update'])->name('admin.media_categories.put_update');
       Route::post('/{id}/status', [MediaCategoryController::class, 'updateStatus'])->name('admin.media_categories.status');
       Route::post('/{id}/display-home', [MediaCategoryController::class, 'updateDisplayOnHome'])->name('admin.media_categories.display_home');
+     });
+
+    //media galleries
+     Route::prefix('media-galleries')->group(function () {
+      Route::get('/', [MediaGalleryController::class, 'index'])->name('admin.media_galleries.index');
+      Route::post('/', [MediaGalleryController::class, 'store'])->name('admin.media_galleries.store');
+      Route::post('/{id}/update', [MediaGalleryController::class, 'update'])->name('admin.media_galleries.update');
+      Route::delete('/{id}', [MediaGalleryController::class, 'destroy'])->name('admin.media_galleries.destroy');
      });
 
     //noticeboard categories
