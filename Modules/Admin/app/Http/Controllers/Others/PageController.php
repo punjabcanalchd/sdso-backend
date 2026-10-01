@@ -95,12 +95,7 @@ class PageController extends Controller
         return $this->successResponse(
             $public_id,
             'Page updated successfully.'
-        );
-
-        // } catch (\Throwable $e) {
-
-        //     dd();
-        // }
+        );      
     }
 
     /**
@@ -108,11 +103,9 @@ class PageController extends Controller
      */
     public function updateStatus(Request $request, string $public_id)
     {
-
         $request->validate([
             'status' => ['required', 'boolean'],
         ]);
-
         $page = $this->service->updateStatus(
             $public_id,
             $request->boolean('status')

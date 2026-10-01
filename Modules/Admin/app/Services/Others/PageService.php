@@ -191,63 +191,7 @@ class PageService
         return $page->fresh();
     }
 
-    // public function updatePage(string $publicId, array $data): Page
-    // {
-
-    //     $data['slug'] = Str::slug($data['slug']);
-
-    //     $titles = $data['title'] ?? [];
-    //     $descriptions = $data['description'] ?? [];
-    //     $metaTitles = $data['meta_title'] ?? [];
-    //     $metaDescriptions = $data['meta_description'] ?? [];
-    //     $metaKeywords = $data['meta_keyword'] ?? [];
-
-    //     dd($data);
-
-    //     if (isset($data['page_banner']) && $data['page_banner'] instanceof UploadedFile) {
-
-    //         $fileName = Str::uuid().'.'.$data['page_banner']->getClientOriginalExtension();
-    //         ImageResizer::store($data['page_banner'], 'uploads', $fileName);
-    //         $data['page_banner'] = $fileName;
-
-    //     } else {
-    //         unset($data['page_banner']);
-    //     }
-
-    //     unset(
-    //         $data['title'],
-    //         $data['description'],
-    //         $data['meta_title'],
-    //         $data['meta_description'],
-    //         $data['meta_keyword']
-    //     );
-
-    //     $descriptions = [];
-
-    //     foreach ($titles as $languageId => $title) {
-
-    //         $descriptions[] = [
-    //             'language_id' => $languageId,
-    //             'title' => $title,
-    //             'description' => $descriptions[$languageId] ?? null,
-    //             'meta_title' => $metaTitles[$languageId] ?? null,
-    //             'meta_description' => $metaDescriptions[$languageId] ?? null,
-    //             'meta_keyword' => $metaKeywords[$languageId] ?? null,
-    //         ];
-    //     }
-
-    //     DB::transaction(function () use ($page, $data, $descriptions) {
-
-    //         $this->repository->updatePageWithDescriptions(
-    //             $page,
-    //             $data,
-    //             $descriptions
-    //         );
-    //     });
-
-    //     return $page->fresh();
-    // }
-
+  
     public function deletePage(string $publicId): void
     {
         $page = $this->getPageByPublicId($publicId);
@@ -257,15 +201,7 @@ class PageService
     private function formatPage($page)
     {
         $english = $page->descriptions->firstWhere('language_id', 1);
-        $punjabi = $page->descriptions->firstWhere('language_id', 2);
-
-        // return [
-        //     'public_id' => $page->public_id,
-        //     'name_en' => $english?->title,
-        //     'name_pb' => $punjabi?->title,
-        //     'created_at' => $page->created_at,
-        //     'status' => $page->status,
-        // ];
+        $punjabi = $page->descriptions->firstWhere('language_id', 2);   
 
         return [
             'public_id' => $page->public_id,

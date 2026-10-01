@@ -112,9 +112,9 @@ public function update( Request $request, string $slider_id, string $image_id) {
     /**
      * Delete slider image.
      */
-    public function destroy(string $id)
+    public function destroy(string $slider_id, string $image_id)
     {
-        $model = $this->service->getByPublicId($id);
+        $model = $this->service->getByPublicId($image_id);
 
         $this->service->delete($model);
 
@@ -124,6 +124,43 @@ public function update( Request $request, string $slider_id, string $image_id) {
         );
     }
 
+    /**
+     * Update Status slider image.
+     */
+
+        public function status($slider_id, $image_id)
+        {
+            try {
+                $image = $this->service->getByPublicId($image_id);
+
+                if (!$image) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Slider image not found.'
+                    ], 404);
+                }
+
+                $image->status = $image->status == 1 ? 0 : 1;
+                $image->save();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => $image->status == 1
+                        ? 'Slider image activated successfully.'
+                        : 'Slider image deactivated successfully.',
+                    'data' => [
+                        'status' => $image->status
+                    ]
+                ]);
+
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to update slider image status.',
+                    'debug_message' => $e->getMessage()
+                ], 500);
+            }
+        }
     /**
      * Validation rules.
      */

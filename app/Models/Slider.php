@@ -29,4 +29,6 @@ class Slider extends Model
             'slider_id'
         );
     }
+
+    
 }

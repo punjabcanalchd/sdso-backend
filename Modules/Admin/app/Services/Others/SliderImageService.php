@@ -26,9 +26,6 @@ class SliderImageService
 
      public function create(int $sliderId,array $data,?UploadedFile $image=null):SliderImage
     {
-        // if($image){
-        //     $data['image_name']=$image->store('uploads/slider','public');
-        // }
 
         if($image){
             $fileName=$image->hashName();
@@ -58,9 +55,7 @@ class SliderImageService
         return $this->sliderImageRepository->find($id);
     }
 
-        public function updateByPublicId(
-            string $publicId,
-            array $data,
+    public function updateByPublicId(string $publicId, array $data,
             Request $request
         ): SliderImage {
             $sliderImage = $this->getByPublicId($publicId);
@@ -85,33 +80,47 @@ class SliderImageService
             return $sliderImage->fresh();
         }
 
-    public function update(
-    SliderImage $model,
-    array $data,
-    ?UploadedFile $file = null
-): SliderImage {
-    if ($file) {
-        $fileName = time() . '_' . $file->getClientOriginalName();
+    public function update(SliderImage $model, array $data,?UploadedFile $file = null): SliderImage
+    {
 
-        $file->move(
-            public_path('uploads/slider'),
-            $fileName
-        );
+        if ($file) {
+            $fileName = time() . '_' . $file->getClientOriginalName();
 
-        $data['image_name'] = 'uploads/slider/' . $fileName;
+            $file->move(
+                public_path('uploads/slider'),
+                $fileName
+            );
+
+            $data['image_name'] = 'uploads/slider/' . $fileName;
+        }
+
+        $model->update($data);
+
+        return $model->fresh();
     }
-
-    $model->update($data);
-
-    return $model->fresh();
-}
     
     public function getSliderById(int $id): Slider
     {
         return Slider::findOrFail($id);
     }
+
     public function delete(SliderImage $model): bool
     {
         return $this->sliderImageRepository->delete($model);
+    }
+
+
+    /**
+     * Update slider image status.
+     */
+    public function updateStatus( string $imagePublicId, int $status): SliderImage {
+
+        $image = $this->getByPublicId($imagePublicId);
+
+        $image->status = $status;
+
+        $image->save();
+
+        return $image->fresh();   
     }
 }
