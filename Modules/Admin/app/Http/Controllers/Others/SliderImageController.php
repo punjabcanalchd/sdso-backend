@@ -34,10 +34,12 @@ class SliderImageController extends Controller
     $limit = (int) $request->get('per_page', $defaultLimit);
     $limit = min($limit, $maxLimit);
     $limit = max($limit, 1);
+    $type = $request->get('type');
 
     $results = $this->service->getSliderImages(
         $slider->slider_id,
-        $limit
+        $limit,
+        $type
     );
 
     return response()->json([
@@ -170,7 +172,7 @@ public function update( Request $request, string $slider_id, string $image_id) {
             return [
                 'image' => [
                     'required',
-                    'mimes:jpeg,png,jpg',
+                    'mimes:jpeg,png,jpg,gif,webp',
                     // new SafeImage,
                 ],
             ];
@@ -179,7 +181,7 @@ public function update( Request $request, string $slider_id, string $image_id) {
         return [
             'image' => [
                 'nullable',
-                'mimes:jpeg,png,jpg',
+                'mimes:jpeg,png,jpg,gif,webp',
                 // new SafeImage,
             ],
         ];

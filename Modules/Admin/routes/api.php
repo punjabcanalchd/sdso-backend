@@ -90,6 +90,7 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
         Route::post('/{public_id}/update', [SliderController::class, 'update']); // Status
         Route::post('/{public_id}/status', [SliderController::class, 'updateStatus']);  // Delete
         Route::post('/{public_id}/delete', [SliderController::class, 'destroy' ]);
+        Route::post('/toggle-animated-banner', [SliderController::class, 'toggleAnimatedBanner']);
     });
 
     

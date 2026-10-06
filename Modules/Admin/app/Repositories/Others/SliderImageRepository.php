@@ -14,10 +14,18 @@ class SliderImageRepository
         $this->model = $model;
     }
 
-    public function paginate(int $sliderId, int $perPage = 30): LengthAwarePaginator
+    public function paginate(int $sliderId, int $perPage = 30, ?string $type = null): LengthAwarePaginator
     {
-        return $this->model
-            ->where('slider_id', $sliderId)
+        $query = $this->model
+            ->where('slider_id', $sliderId);
+
+        if ($type === 'gif') {
+            $query->whereRaw("LOWER(image_name) LIKE '%.gif'");
+        } elseif ($type === 'image') {
+            $query->whereRaw("LOWER(image_name) NOT LIKE '%.gif'");
+        }
+
+        return $query
             ->orderBy('id', 'DESC')
             ->paginate($perPage);
     }

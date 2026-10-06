@@ -6,6 +6,7 @@ use App\Models\ApplicationStat;
 use App\Models\Setting;
 use App\Models\Slider;
 use App\Traits\HasPublicId;
+use Illuminate\Support\Facades\DB;
 use Modules\Admin\Repositories\Others\SliderRepository;
 
 class SliderService
@@ -110,5 +111,27 @@ class SliderService
         $slider = $this->getSlider($id);
 
         return $this->sliderRepository->delete($slider);
+    }
+
+    /**
+     * Get animated banner status from settings.
+     */
+    public function getAnimatedBannerStatus(): bool
+    {
+        $val = DB::table('settings')->where('config_key', 'enable_animated_banner')->value('config_value');
+        return $val === '1' || $val === 'true' || $val === 'Y';
+    }
+
+    /**
+     * Update animated banner status in settings.
+     */
+    public function updateAnimatedBannerStatus(bool $status): bool
+    {
+        DB::table('settings')->updateOrInsert(
+            ['config_key' => 'enable_animated_banner'],
+            ['config_value' => $status ? '1' : '0']
+        );
+
+        return $status;
     }
 }

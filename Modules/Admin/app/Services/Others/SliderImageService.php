@@ -19,9 +19,9 @@ class SliderImageService
         return Slider::findOrFail($sliderId);
     }
 
-    public function getSliderImages(int $sliderId,int $perPage=30)
+    public function getSliderImages(int $sliderId, int $perPage = 30, ?string $type = null)
     {
-        return $this->sliderImageRepository->paginate($sliderId,$perPage);
+        return $this->sliderImageRepository->paginate($sliderId, $perPage, $type);
     }
 
      public function create(int $sliderId,array $data,?UploadedFile $image=null):SliderImage

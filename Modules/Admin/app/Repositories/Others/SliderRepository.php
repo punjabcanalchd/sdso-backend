@@ -21,7 +21,15 @@ class SliderRepository
         string $sortDirection = 'desc'
     ): LengthAwarePaginator {
 
-        $query = $this->model->with('images');
+        $query = $this->model->with('images')->withCount([
+            'images as images_count' => function ($q) {
+                $q->whereRaw("LOWER(image_name) NOT LIKE '%.gif'");
+            },
+            'images as gif_count' => function ($q) {
+                $q->whereRaw("LOWER(image_name) LIKE '%.gif'");
+            },
+            'images as total_images_count'
+        ]);
 
         if (! empty($search)) {
             $query->where(function ($q) use ($search) {
