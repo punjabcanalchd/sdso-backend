@@ -97,13 +97,13 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     // SliderImage
 Route::prefix('slider-image')->group(function () {
     // Create form
-    Route::get('/{slider_id}/create', [SliderImageController::class, 'create'])
-        ->name('slider-image-create');
     Route::get('/{slider_id}', [SliderImageController::class, 'index'])
         ->name('slider-image-admin');
     // Store
     Route::post('/{slider_id}', [SliderImageController::class, 'store'])
         ->name('slider-image-store');
+    Route::post('/{slider_id}/create', [SliderImageController::class, 'store'])
+        ->name('slider-image-create-post');
 
     // Get single slider image
     // Get single slider image by image ID

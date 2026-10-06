@@ -41,6 +41,7 @@ class SliderImage extends Model
     protected $fillable = [
         'slider_id',
         'image_name',
+        'file_type',
         'status',
         'link',
         'sort_order',

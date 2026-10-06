@@ -20,9 +20,18 @@ class SliderImageRepository
             ->where('slider_id', $sliderId);
 
         if ($type === 'gif') {
-            $query->whereRaw("LOWER(image_name) LIKE '%.gif'");
+            $query->where(function ($q) {
+                $q->where('file_type', 'gif')
+                  ->orWhereRaw("LOWER(image_name) LIKE '%.gif'");
+            });
         } elseif ($type === 'image') {
-            $query->whereRaw("LOWER(image_name) NOT LIKE '%.gif'");
+            $query->where(function ($q) {
+                $q->where('file_type', 'image')
+                  ->orWhere(function ($sq) {
+                      $sq->whereNull('file_type')
+                         ->whereRaw("LOWER(image_name) NOT LIKE '%.gif'");
+                  });
+            });
         }
 
         return $query

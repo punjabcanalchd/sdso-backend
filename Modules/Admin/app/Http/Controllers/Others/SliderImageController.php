@@ -60,9 +60,16 @@ class SliderImageController extends Controller
 
         $request->validate($this->rules());
 
+        $data = $request->except('image');
+        if (empty($data['file_type'])) {
+            $file = $request->file('image');
+            $ext = $file ? strtolower($file->getClientOriginalExtension()) : '';
+            $data['file_type'] = $ext === 'gif' ? 'gif' : 'image';
+        }
+
         $model=$this->service->create(
             $slider->slider_id,
-            $request->except('image'),
+            $data,
             $request->file('image')
         );
 
@@ -100,9 +107,16 @@ public function update( Request $request, string $slider_id, string $image_id) {
 
     $request->validate($this->rules($model->id));
 
+    $data = $request->except('image');
+    if (empty($data['file_type']) && $request->hasFile('image')) {
+        $file = $request->file('image');
+        $ext = strtolower($file->getClientOriginalExtension());
+        $data['file_type'] = $ext === 'gif' ? 'gif' : 'image';
+    }
+
     $model = $this->service->update(
         $model,
-        $request->except('image'),
+        $data,
         $request->file('image')
     );
 

@@ -23,10 +23,19 @@ class SliderRepository
 
         $query = $this->model->with('images')->withCount([
             'images as images_count' => function ($q) {
-                $q->whereRaw("LOWER(image_name) NOT LIKE '%.gif'");
+                $q->where(function ($sq) {
+                    $sq->where('file_type', 'image')
+                       ->orWhere(function ($ssq) {
+                           $ssq->whereNull('file_type')
+                              ->whereRaw("LOWER(image_name) NOT LIKE '%.gif'");
+                       });
+                });
             },
             'images as gif_count' => function ($q) {
-                $q->whereRaw("LOWER(image_name) LIKE '%.gif'");
+                $q->where(function ($sq) {
+                    $sq->where('file_type', 'gif')
+                       ->orWhereRaw("LOWER(image_name) LIKE '%.gif'");
+                });
             },
             'images as total_images_count'
         ]);
