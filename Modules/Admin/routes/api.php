@@ -32,7 +32,7 @@ use Modules\Admin\Http\Controllers\Others\MediaCategoryController;
 use Modules\Admin\Http\Controllers\Others\MediaGalleryController;
 use Modules\Admin\Http\Controllers\Others\NoticeboardCategoryController;
 use Modules\Admin\Http\Controllers\Others\TranslationController;
-
+use Modules\Admin\Http\Controllers\SettingController;
 
 
 // Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
@@ -53,6 +53,18 @@ use Modules\Admin\Http\Controllers\Others\TranslationController;
 
 Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.get_dashboard_data');
+        Route::prefix('settings')->group(function () {
+
+        Route::get('/general', [SettingController::class, 'general']);
+            Route::post('/general/update', [SettingController::class, 'updateGeneral']);
+            // Layout Settings
+            Route::get('/layout', [SettingController::class, 'layout']);
+            Route::post('/layout/update', [SettingController::class, 'updateLayout']);
+
+            // // Manage Section Settings
+            // Route::get('/manage-section', [SettingController::class, 'manageSection']);
+            // Route::post('/manage-section/update', [SettingController::class, 'updateManageSection']);
+   });
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('admin.get_all_users');
         Route::get('/{public_id}', [UserController::class, 'show'])->name('admin.get_user_details');
@@ -214,6 +226,9 @@ Route::prefix('slider-image')->group(function () {
         Route::post('/', [DamHeadWorksReadingController::class, 'store'])->name('admin.create_new_dam_headworks_reading');
         Route::post('/{public_id}/update', [DamHeadWorksReadingController::class, 'update'])->name('admin.update_dam_headworks_reading_details');
     });
+
+
+
 
     // Menu routes
     Route::prefix('menus')->group(function () {
