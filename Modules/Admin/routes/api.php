@@ -324,6 +324,9 @@ Route::prefix('slider-image')->group(function () {
     // Translations
     Route::prefix('translations')->group(function () {
         Route::get('/', [TranslationController::class, 'index'])->name('admin.translations.index');
+        Route::post('/', [TranslationController::class, 'store'])->name('admin.translations.store');
+        Route::post('/create', [TranslationController::class, 'store'])->name('admin.translations.create');
+        Route::get('/{key_id}', [TranslationController::class, 'show'])->name('admin.translations.show');
         Route::post('/update', [TranslationController::class, 'update'])->name('admin.translations.update');
         Route::post('/{key_id}/update', [TranslationController::class, 'updateSingle'])->name('admin.translations.update_single');
     });

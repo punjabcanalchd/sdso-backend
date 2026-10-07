@@ -3,14 +3,17 @@
 namespace Modules\Admin\Http\Controllers\Others;
 
 use App\Http\Controllers\Controller;
-use App\Models\Translation;
-use App\Models\TranslationValue;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Modules\Admin\Services\Others\TranslationService;
 
 class TranslationController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        protected TranslationService $service
+    ) {}
 
     /**
      * Get paginated translations list with optional group & search filtering
@@ -23,46 +26,67 @@ class TranslationController extends Controller
         $sortColumn = $request->get('sort_column', 'key_id');
         $sortDirection = $request->get('sort_direction', 'asc');
 
-        $query = Translation::with('values');
-
-        // Filter by group if provided
-        if ($group !== null && $group !== '' && $group !== 'all') {
-            $query->where('group', (int) $group);
-        }
-
-        // Filter by search string
-        if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('translation_key', 'ilike', "%{$search}%")
-                  ->orWhereHas('values', function ($vq) use ($search) {
-                      $vq->where('translation', 'ilike', "%{$search}%");
-                  });
-            });
-        }
-
-        $allowedSorts = ['key_id', 'group', 'translation_key'];
-        if (in_array($sortColumn, $allowedSorts)) {
-            $query->orderBy($sortColumn, strtolower($sortDirection) === 'desc' ? 'desc' : 'asc');
-        } else {
-            $query->orderBy('key_id', 'asc');
-        }
-
-        $paginated = $query->paginate($limit);
-
-        $paginated->getCollection()->transform(function ($item) {
-            $english = $item->values->firstWhere('language_id', 1);
-            $punjabi = $item->values->firstWhere('language_id', 2);
-
-            return [
-                'key_id'          => $item->key_id,
-                'group'           => $item->group,
-                'translation_key' => $item->translation_key,
-                'en'              => $english?->translation ?? '',
-                'pb'              => $punjabi?->translation ?? '',
-            ];
-        });
+        $paginated = $this->service->getPaginatedTranslations(
+            $limit,
+            $group,
+            $search,
+            $sortColumn,
+            $sortDirection
+        );
 
         return $this->paginatedResponse($paginated, 'Translations fetched successfully.');
+    }
+
+    /**
+     * Store a new translation
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'group'           => 'required|integer|in:1,2,3',
+            'translation_key' => 'required|string|max:255|unique:translations,translation_key',
+            'en'              => 'required|string',
+            'pb'              => 'nullable|string',
+        ]);
+
+        $translation = $this->service->createTranslation($validated);
+
+        return $this->successResponse($translation, 'Translation created successfully.', 201);
+    }
+
+    /**
+     * Get single translation by key_id
+     */
+    public function show($keyId)
+    {
+        $data = $this->service->getTranslationById($keyId);
+
+        if (!$data) {
+            return $this->errorResponse('Translation not found.', 404);
+        }
+
+        return $this->successResponse($data, 'Translation details fetched successfully.');
+    }
+
+    /**
+     * Update single translation by key_id
+     */
+    public function updateSingle(Request $request, $keyId)
+    {
+        $validated = $request->validate([
+            'group'           => 'nullable|integer|in:1,2,3',
+            'translation_key' => 'nullable|string|max:255|unique:translations,translation_key,' . $keyId . ',key_id',
+            'en'              => 'nullable|string',
+            'pb'              => 'nullable|string',
+        ]);
+
+        $translation = $this->service->updateTranslation($keyId, $validated);
+
+        if (!$translation) {
+            return $this->errorResponse('Translation key not found.', 404);
+        }
+
+        return $this->successResponse(null, 'Translation updated successfully.');
     }
 
     /**
@@ -76,52 +100,8 @@ class TranslationController extends Controller
             return $this->errorResponse('No translations provided for update.', 422);
         }
 
-        foreach ($translations as $item) {
-            $keyId = $item['key_id'] ?? null;
-            if (!$keyId) continue;
-
-            if (array_key_exists('en', $item)) {
-                TranslationValue::updateOrCreate(
-                    ['key_id' => $keyId, 'language_id' => 1],
-                    ['translation' => $item['en'] ?? '']
-                );
-            }
-
-            if (array_key_exists('pb', $item)) {
-                TranslationValue::updateOrCreate(
-                    ['key_id' => $keyId, 'language_id' => 2],
-                    ['translation' => $item['pb'] ?? '']
-                );
-            }
-        }
+        $this->service->batchUpdateTranslations($translations);
 
         return $this->successResponse(null, 'Translations updated successfully.');
-    }
-
-    /**
-     * Update single translation by key_id
-     */
-    public function updateSingle(Request $request, $keyId)
-    {
-        $translation = Translation::find($keyId);
-        if (!$translation) {
-            return $this->errorResponse('Translation key not found.', 404);
-        }
-
-        if ($request->has('en')) {
-            TranslationValue::updateOrCreate(
-                ['key_id' => $keyId, 'language_id' => 1],
-                ['translation' => $request->input('en', '')]
-            );
-        }
-
-        if ($request->has('pb')) {
-            TranslationValue::updateOrCreate(
-                ['key_id' => $keyId, 'language_id' => 2],
-                ['translation' => $request->input('pb', '')]
-            );
-        }
-
-        return $this->successResponse(null, 'Translation updated successfully.');
     }
 }
