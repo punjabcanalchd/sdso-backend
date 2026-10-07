@@ -274,12 +274,18 @@ Route::prefix('slider-image')->group(function () {
     //emailtemplates
      Route::prefix('email-templates')->group(function () {
       Route::get('/', [EmailTemplateController::class, 'index'])->name('admin.email_templates.index');
+      Route::post('/', [EmailTemplateController::class, 'store'])->name('admin.email_templates.store');
+      Route::post('/{id}/update', [EmailTemplateController::class, 'update'])->name('admin.email_templates.update');
       Route::post('/{id}/status', [EmailTemplateController::class, 'updateStatus'])->name('admin.email_templates.status');
+      Route::post('/{public_id}/delete', [EmailTemplateController::class, 'destroy'])->name('admin.delete_email_template');
+
      });
 
     //sms templates
-     Route::prefix('sms-templates')->group(function () {
+    Route::prefix('sms-templates')->group(function () {
       Route::get('/', [SmsTemplateController::class, 'index'])->name('admin.sms_templates.index');
+      Route::post('/', [SmsTemplateController::class, 'store'])->name('admin.sms_templates.store');
+      Route::post('/{id}/update', [SmsTemplateController::class, 'update'])->name('admin.sms_templates.update');
       Route::post('/{id}/status', [SmsTemplateController::class, 'updateStatus'])->name('admin.sms_templates.status');
      });
 
