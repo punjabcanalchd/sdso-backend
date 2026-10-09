@@ -5,7 +5,7 @@ namespace Modules\Admin\Http\Controllers;
 
 
 use App\Http\Controllers\Controller;
-use App\Services\SettingService;
+use Modules\Admin\Services\SettingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -134,6 +134,11 @@ class SettingController extends Controller
      /**
      * Get General Settings
      */
+    public function general()
+    {
+        return $this->getGeneral();
+    }
+
     public function getGeneral()
     {
         try {
@@ -162,10 +167,31 @@ class SettingController extends Controller
         try {
 
             $data = $request->validate([
-                'website_name' => ['required', 'string', 'max:150'],
-                'website_url' => ['nullable', 'url', 'max:255'],
-                'website_status' => ['required', 'in:live,maintenance,offline'],
-                'contact_support_email' => ['nullable', 'email', 'max:255'],
+                'website_name'           => ['required', 'string', 'max:150'],
+                'website_url'            => ['nullable', 'url', 'max:255'],
+                'website_status'         => ['required', 'in:live,maintenance,offline,1,2,3'],
+                'contact_support_email'  => ['nullable', 'email', 'max:255'],
+                'website_support_email'  => ['nullable', 'email', 'max:255'],
+                'site_icon'              => ['nullable'],
+                'website_icon'           => ['nullable'],
+                'default_language'       => ['nullable', 'string', 'max:10'],
+                'website_language'       => ['nullable', 'string', 'max:10'],
+                'facebook'               => ['nullable', 'string', 'max:255'],
+                'website_facebook'       => ['nullable', 'string', 'max:255'],
+                'twitter'                => ['nullable', 'string', 'max:255'],
+                'website_twitter'        => ['nullable', 'string', 'max:255'],
+                'youtube'                => ['nullable', 'string', 'max:255'],
+                'website_youtube'        => ['nullable', 'string', 'max:255'],
+                'instagram'              => ['nullable', 'string', 'max:255'],
+                'website_instagram'      => ['nullable', 'string', 'max:255'],
+                'linkedin'               => ['nullable', 'string', 'max:255'],
+                'website_linkedin'       => ['nullable', 'string', 'max:255'],
+                'twitter_section_widget' => ['nullable', 'string'],
+                'website_twitter_widget' => ['nullable', 'string'],
+                'records_per_page'       => ['nullable', 'integer', 'min:1'],
+                'website_pagination'     => ['nullable', 'integer', 'min:1'],
+                'captcha_validation'     => ['nullable', 'in:enabled,disabled,1,0'],
+                'adjust_file_size'       => ['nullable'],
             ]);
 
             $result = $this->service->updateGeneral($data);

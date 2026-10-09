@@ -285,9 +285,10 @@ Route::prefix('slider-image')->group(function () {
     Route::prefix('sms-templates')->group(function () {
       Route::get('/', [SmsTemplateController::class, 'index'])->name('admin.sms_templates.index');
       Route::post('/', [SmsTemplateController::class, 'store'])->name('admin.sms_templates.store');
+      Route::get('/{id}', [SmsTemplateController::class, 'show'])->name('admin.sms_templates.show');
       Route::post('/{id}/update', [SmsTemplateController::class, 'update'])->name('admin.sms_templates.update');
       Route::post('/{id}/status', [SmsTemplateController::class, 'updateStatus'])->name('admin.sms_templates.status');
-     });
+    });
 
     //sandes templates
      Route::prefix('sandes-templates')->group(function () {

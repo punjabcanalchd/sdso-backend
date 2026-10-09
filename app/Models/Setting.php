@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Yungts97\LaravelUserActivityLog\Traits\Loggable;
+// use Yungts97\LaravelUserActivityLog\Traits\Loggable;
 
 /**
  * Setting
@@ -14,7 +14,7 @@ use Yungts97\LaravelUserActivityLog\Traits\Loggable;
  */
 class Setting extends Model
 {
-    use HasFactory, Loggable;
+    use HasFactory;
 
     protected $table = 'settings';
 

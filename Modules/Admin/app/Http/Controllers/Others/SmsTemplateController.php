@@ -3,14 +3,21 @@
 namespace Modules\Admin\Http\Controllers\Others;
 
 use App\Http\Controllers\Controller;
-use App\Models\SmsTemplate;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Modules\Admin\Services\Others\SmsTemplateService;
 
 class SmsTemplateController extends Controller
 {
     use ApiResponse;
 
+    public function __construct(
+        protected SmsTemplateService $service
+    ) {}
+
+    /**
+     * Get paginated SMS templates with search and sorting.
+     */
     public function index(Request $request)
     {
         $limit = (int) $request->get('per_page', 25);
@@ -18,57 +25,86 @@ class SmsTemplateController extends Controller
         $sortColumn = $request->get('sort_column', 'template_id');
         $sortDirection = $request->get('sort_direction', 'desc');
 
-        $query = SmsTemplate::with('descriptions');
-
-        if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('templateid', 'ilike', "%{$search}%")
-                  ->orWhereHas('descriptions', function ($dq) use ($search) {
-                      $dq->where('message', 'ilike', "%{$search}%");
-                  });
-            });
-        }
-
-        $allowedSorts = ['name', 'status', 'created_at', 'template_id', 'templateid'];
-        if (in_array($sortColumn, $allowedSorts)) {
-            $query->orderBy($sortColumn, strtolower($sortDirection) === 'asc' ? 'asc' : 'desc');
-        } else {
-            $query->orderBy('template_id', 'desc');
-        }
-
-        $paginated = $query->paginate($limit);
-
-        $paginated->getCollection()->transform(function ($item) {
-            $english = $item->descriptions->firstWhere('language_id', 1);
-            $punjabi = $item->descriptions->firstWhere('language_id', 2);
-
-            return [
-                'id'          => $item->public_id ?? (string) $item->template_id,
-                'template_id' => $item->template_id,
-                'templateid'  => $item->templateid,
-                'name'        => $item->name,
-                'message_en'  => $english?->message ?? 'N/A',
-                'message_pb'  => $punjabi?->message ?? '',
-                'status'      => (bool) $item->status,
-                'created_at'  => $item->created_at ? $item->created_at->format('Y-m-d H:i:s') : null,
-            ];
-        });
+        $paginated = $this->service->getPaginatedTemplates(
+            $limit,
+            $search,
+            $sortColumn,
+            $sortDirection
+        );
 
         return $this->paginatedResponse($paginated, 'SMS templates fetched successfully.');
     }
 
-    public function updateStatus(Request $request, $id)
+    /**
+     * Get single SMS template details.
+     */
+    public function show($id)
     {
-        $template = SmsTemplate::findByPublicId($id) ?? SmsTemplate::find($id);
+        $template = $this->service->getTemplateById($id);
 
         if (!$template) {
             return $this->errorResponse('SMS template not found.', 404);
         }
 
-        $template->status = (bool) $request->input('status', false);
-        $template->save();
+        return $this->successResponse($template, 'SMS template details fetched successfully.');
+    }
 
-        return $this->successResponse($template, 'Status updated successfully.');
+    /**
+     * Store a new SMS template.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255',
+            'templateid'  => 'required|string|max:255',
+            'status'      => 'required',
+            'message_en'  => 'required|string',
+            'message_pb'  => 'nullable|string',
+        ]);
+
+        $validated['status'] = filter_var($validated['status'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? (bool) $validated['status'];
+
+        $template = $this->service->createTemplate($validated);
+
+        return $this->successResponse($template, 'SMS template created successfully.', 201);
+    }
+
+    /**
+     * Update an existing SMS template.
+     */
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255',
+            'templateid'  => 'required|string|max:255',
+            'status'      => 'required',
+            'message_en'  => 'required|string',
+            'message_pb'  => 'nullable|string',
+        ]);
+
+        $validated['status'] = filter_var($validated['status'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? (bool) $validated['status'];
+
+        $template = $this->service->updateTemplate($id, $validated);
+
+        if (!$template) {
+            return $this->errorResponse('SMS template not found.', 404);
+        }
+
+        return $this->successResponse($template, 'SMS template updated successfully.');
+    }
+
+    /**
+     * Update status of an SMS template.
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $status = (bool) $request->input('status', false);
+        $updated = $this->service->updateStatus($id, $status);
+
+        if (!$updated) {
+            return $this->errorResponse('SMS template not found.', 404);
+        }
+
+        return $this->successResponse(null, 'Status updated successfully.');
     }
 }

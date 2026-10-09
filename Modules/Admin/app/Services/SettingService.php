@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services;
+namespace Modules\Admin\Services;
 
 use App\Models\ImageResizer;
 use App\Models\Setting;
-use App\Repositories\SettingRepository;
+use Modules\Admin\Repositories\SettingRepository;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -31,6 +31,18 @@ class SettingService
      */
     public function updateGeneral(array $data)
     {
+        if (isset($data['site_icon']) && $data['site_icon'] instanceof UploadedFile) {
+            $fileName = time() . '-' . $data['site_icon']->getClientOriginalName();
+            ImageResizer::store($data['site_icon'], 'uploads', $fileName);
+            $data['site_icon'] = 'uploads/' . $fileName;
+            $data['website_icon'] = 'uploads/' . $fileName;
+        } elseif (isset($data['website_icon']) && $data['website_icon'] instanceof UploadedFile) {
+            $fileName = time() . '-' . $data['website_icon']->getClientOriginalName();
+            ImageResizer::store($data['website_icon'], 'uploads', $fileName);
+            $data['site_icon'] = 'uploads/' . $fileName;
+            $data['website_icon'] = 'uploads/' . $fileName;
+        }
+
         return $this->repository->updateGeneral($data);
     }
 
