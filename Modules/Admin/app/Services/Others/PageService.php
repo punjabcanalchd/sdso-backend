@@ -205,6 +205,8 @@ class PageService
 
         return [
             'public_id' => $page->public_id,
+            'page_id'   => $page->page_id,
+            'id'        => $page->page_id,
 
             // English
             'name_en' => $english?->title,

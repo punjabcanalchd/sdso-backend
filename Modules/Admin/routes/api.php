@@ -54,17 +54,38 @@ use Modules\Admin\Http\Controllers\SettingController;
 Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.get_dashboard_data');
         Route::prefix('settings')->group(function () {
-
-        Route::get('/general', [SettingController::class, 'general']);
+            // General Settings
+            Route::get('/general', [SettingController::class, 'general']);
             Route::post('/general/update', [SettingController::class, 'updateGeneral']);
+
             // Layout Settings
             Route::get('/layout', [SettingController::class, 'layout']);
             Route::post('/layout/update', [SettingController::class, 'updateLayout']);
 
-            // // Manage Section Settings
-            // Route::get('/manage-section', [SettingController::class, 'manageSection']);
-            // Route::post('/manage-section/update', [SettingController::class, 'updateManageSection']);
-   });
+            // Footer Settings
+            Route::get('/footer', [SettingController::class, 'footer']);
+            Route::post('/footer/update', [SettingController::class, 'updateFooter']);
+
+            // Manage Section Settings
+            Route::get('/manage-section', [SettingController::class, 'manageSection']);
+            Route::post('/manage-section/update', [SettingController::class, 'updateManageSection']);
+
+            // Logo Settings
+            Route::get('/logo', [SettingController::class, 'logo']);
+            Route::post('/logo/update', [SettingController::class, 'updateLogo']);
+
+            // Contact Us Settings
+            Route::get('/contact-us', [SettingController::class, 'contactUs']);
+            Route::post('/contact-us/update', [SettingController::class, 'updateContactUs']);
+
+            // Meta Information Settings
+            Route::get('/meta-information', [SettingController::class, 'metaInformation']);
+            Route::post('/meta-information/update', [SettingController::class, 'updateMetaInformation']);
+
+            // Additional Settings
+            Route::get('/additional-settings', [SettingController::class, 'additionalSettings']);
+            Route::post('/additional-settings/update', [SettingController::class, 'updateAdditionalSettings']);
+        });
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('admin.get_all_users');
         Route::get('/{public_id}', [UserController::class, 'show'])->name('admin.get_user_details');
