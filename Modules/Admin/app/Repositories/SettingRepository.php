@@ -337,30 +337,41 @@ class SettingRepository
         $unserialize = function ($val) {
             if (!$val) return [];
             $res = @unserialize($val);
-            return is_array($res) ? array_values($res) : [];
+            if (is_array($res)) {
+                return array_values($res);
+            }
+            return !empty($val) ? [(string)$val] : [];
         };
+
+        $cat1 = $unserialize($raw['footer_cat1_menus'] ?? null);
+        $cat2 = $unserialize($raw['footer_cat2_menus'] ?? null);
+        $cat3 = $unserialize($raw['footer_cat3_menus'] ?? null);
+
+        $cat1Selected = is_array($cat1) ? (string)($cat1[0] ?? '') : (string)$cat1;
+        $cat2Selected = is_array($cat2) ? (string)($cat2[0] ?? '') : (string)$cat2;
+        $cat3Selected = is_array($cat3) ? (string)($cat3[0] ?? '') : (string)$cat3;
 
         return [
             'footer_category_1_title_en' => $raw['footer_cat1_title'] ?? '',
             'footer_cat1_title'          => $raw['footer_cat1_title'] ?? '',
             'footer_category_1_title_pb' => $raw['footer_cat1_title_pb'] ?? '',
             'footer_cat1_title_pb'       => $raw['footer_cat1_title_pb'] ?? '',
-            'footer_category_1_menus'    => $unserialize($raw['footer_cat1_menus'] ?? null),
-            'footer_cat1_menus'          => $unserialize($raw['footer_cat1_menus'] ?? null),
+            'footer_category_1_menus'    => $cat1Selected,
+            'footer_cat1_menus'          => $cat1,
 
             'footer_category_2_title_en' => $raw['footer_cat2_title'] ?? '',
             'footer_cat2_title'          => $raw['footer_cat2_title'] ?? '',
             'footer_category_2_title_pb' => $raw['footer_cat2_title_pb'] ?? '',
             'footer_cat2_title_pb'       => $raw['footer_cat2_title_pb'] ?? '',
-            'footer_category_2_menus'    => $unserialize($raw['footer_cat2_menus'] ?? null),
-            'footer_cat2_menus'          => $unserialize($raw['footer_cat2_menus'] ?? null),
+            'footer_category_2_menus'    => $cat2Selected,
+            'footer_cat2_menus'          => $cat2,
 
             'footer_category_3_title_en' => $raw['footer_cat3_title'] ?? '',
             'footer_cat3_title'          => $raw['footer_cat3_title'] ?? '',
             'footer_category_3_title_pb' => $raw['footer_cat3_title_pb'] ?? '',
             'footer_cat3_title_pb'       => $raw['footer_cat3_title_pb'] ?? '',
-            'footer_category_3_menus'    => $unserialize($raw['footer_cat3_menus'] ?? null),
-            'footer_cat3_menus'          => $unserialize($raw['footer_cat3_menus'] ?? null),
+            'footer_category_3_menus'    => $cat3Selected,
+            'footer_cat3_menus'          => $cat3,
 
             'copyright_heading_1_en'     => $raw['website_copyright1'] ?? '',
             'website_copyright1'         => $raw['website_copyright1'] ?? '',
@@ -406,16 +417,24 @@ class SettingRepository
             'website_copyright2_pb'      => 'website_copyright2_pb',
         ];
 
+        $serializeMenu = function ($val) {
+            if (is_array($val)) {
+                $filtered = array_values(array_filter($val, fn($item) => $item !== '' && $item !== null));
+                return serialize($filtered);
+            }
+            if ($val !== null && $val !== '') {
+                return serialize([(string)$val]);
+            }
+            return serialize([]);
+        };
+
         foreach ($data as $k => $val) {
             if (in_array($k, ['footer_category_1_menus', 'footer_cat1_menus'], true)) {
-                $serialized = is_array($val) ? serialize($val) : $val;
-                $this->updateOrCreate('footer_cat1_menus', $serialized);
+                $this->updateOrCreate('footer_cat1_menus', $serializeMenu($val));
             } elseif (in_array($k, ['footer_category_2_menus', 'footer_cat2_menus'], true)) {
-                $serialized = is_array($val) ? serialize($val) : $val;
-                $this->updateOrCreate('footer_cat2_menus', $serialized);
+                $this->updateOrCreate('footer_cat2_menus', $serializeMenu($val));
             } elseif (in_array($k, ['footer_category_3_menus', 'footer_cat3_menus'], true)) {
-                $serialized = is_array($val) ? serialize($val) : $val;
-                $this->updateOrCreate('footer_cat3_menus', $serialized);
+                $this->updateOrCreate('footer_cat3_menus', $serializeMenu($val));
             } elseif (isset($keyMapping[$k])) {
                 $this->updateOrCreate($keyMapping[$k], (string)$val);
             }
