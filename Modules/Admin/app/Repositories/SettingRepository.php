@@ -243,7 +243,7 @@ class SettingRepository
         $screenReaderPageId = (string)($raw['website_sc_reader_page_id'] ?? '23');
 
         return [
-            'menus'                             => $selectedMenu,
+            'menus'                             => $menus,
             'website_menus'                     => $menus,
             'home_page_slider'                  => $homeSliderId,
             'home_slider'                       => $homeSliderId,
@@ -356,21 +356,21 @@ class SettingRepository
             'footer_cat1_title'          => $raw['footer_cat1_title'] ?? '',
             'footer_category_1_title_pb' => $raw['footer_cat1_title_pb'] ?? '',
             'footer_cat1_title_pb'       => $raw['footer_cat1_title_pb'] ?? '',
-            'footer_category_1_menus'    => $cat1Selected,
+            'footer_category_1_menus'    => $cat1,
             'footer_cat1_menus'          => $cat1,
 
             'footer_category_2_title_en' => $raw['footer_cat2_title'] ?? '',
             'footer_cat2_title'          => $raw['footer_cat2_title'] ?? '',
             'footer_category_2_title_pb' => $raw['footer_cat2_title_pb'] ?? '',
             'footer_cat2_title_pb'       => $raw['footer_cat2_title_pb'] ?? '',
-            'footer_category_2_menus'    => $cat2Selected,
+            'footer_category_2_menus'    => $cat2,
             'footer_cat2_menus'          => $cat2,
 
             'footer_category_3_title_en' => $raw['footer_cat3_title'] ?? '',
             'footer_cat3_title'          => $raw['footer_cat3_title'] ?? '',
             'footer_category_3_title_pb' => $raw['footer_cat3_title_pb'] ?? '',
             'footer_cat3_title_pb'       => $raw['footer_cat3_title_pb'] ?? '',
-            'footer_category_3_menus'    => $cat3Selected,
+            'footer_category_3_menus'    => $cat3,
             'footer_cat3_menus'          => $cat3,
 
             'copyright_heading_1_en'     => $raw['website_copyright1'] ?? '',

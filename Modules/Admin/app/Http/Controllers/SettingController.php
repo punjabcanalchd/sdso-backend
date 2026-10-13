@@ -480,13 +480,25 @@ class SettingController extends Controller
     public function updateLogo(Request $request): JsonResponse
     {
         try {
+            $imageValidator = function ($attribute, $value, $fail) {
+                if ($value instanceof \Illuminate\Http\UploadedFile) {
+                    $ext = strtolower($value->getClientOriginalExtension());
+                    if (!in_array($ext, ['jpeg', 'png', 'jpg', 'webp', 'gif'], true)) {
+                        $fail("The {$attribute} must be a valid image file (jpeg, png, jpg, webp, gif).");
+                    }
+                    if ($value->getSize() > 2048 * 1024) {
+                        $fail("The {$attribute} must not exceed 2MB.");
+                    }
+                }
+            };
+
             $data = $request->validate([
-                'logo_english'                       => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-                'website_logo'                        => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-                'logo_punjabi'                        => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-                'website_logo_pb'                     => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-                'secondary_logo_english'              => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-                'secondary_logo_punjabi'              => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+                'logo_english'                       => ['nullable', $imageValidator],
+                'website_logo'                        => ['nullable', $imageValidator],
+                'logo_punjabi'                        => ['nullable', $imageValidator],
+                'website_logo_pb'                     => ['nullable', $imageValidator],
+                'secondary_logo_english'              => ['nullable', $imageValidator],
+                'secondary_logo_punjabi'              => ['nullable', $imageValidator],
                 'logo_heading_en'                     => ['nullable', 'string', 'max:255'],
                 'website_logo_heading_en'             => ['nullable', 'string', 'max:255'],
                 'logo_heading_pb'                     => ['nullable', 'string', 'max:255'],
@@ -497,8 +509,8 @@ class SettingController extends Controller
                 'website_logo_sub_heading_pb'         => ['nullable', 'string', 'max:500'],
                 'toogle_status'                       => ['nullable'],
                 'government_officials_toggle'         => ['nullable'],
-                'chief_minister_logo'                 => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-                'cabinet_minister_logo'               => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+                'chief_minister_logo'                 => ['nullable', $imageValidator],
+                'cabinet_minister_logo'               => ['nullable', $imageValidator],
                 'chief_minister_logo_heading_en'      => ['nullable', 'string', 'max:255'],
                 'chief_minister_logo_heading_pb'      => ['nullable', 'string', 'max:255'],
                 'chief_minister_logo_sub_heading_en'  => ['nullable', 'string', 'max:500'],
