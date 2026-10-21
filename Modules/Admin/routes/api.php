@@ -32,6 +32,7 @@ use Modules\Admin\Http\Controllers\Others\MediaCategoryController;
 use Modules\Admin\Http\Controllers\Others\MediaGalleryController;
 use Modules\Admin\Http\Controllers\Others\NoticeboardCategoryController;
 use Modules\Admin\Http\Controllers\Others\TranslationController;
+use Modules\Admin\Http\Controllers\Others\ClientQueryController;
 use Modules\Admin\Http\Controllers\SettingController;
 
 
@@ -357,6 +358,25 @@ Route::prefix('slider-image')->group(function () {
         Route::get('/{key_id}', [TranslationController::class, 'show'])->name('admin.translations.show');
         Route::post('/update', [TranslationController::class, 'update'])->name('admin.translations.update');
         Route::post('/{key_id}/update', [TranslationController::class, 'updateSingle'])->name('admin.translations.update_single');
+    });
+
+    // Client Queries
+    Route::prefix('client-queries')->group(function () {
+        Route::get('/', [ClientQueryController::class, 'index'])->name('admin.client_queries.index');
+        Route::get('/status-counts', [ClientQueryController::class, 'statusCounts'])->name('admin.client_queries.counts');
+        Route::get('/{id}', [ClientQueryController::class, 'show'])->name('admin.client_queries.show');
+        Route::post('/{id}/status', [ClientQueryController::class, 'updateStatus'])->name('admin.client_queries.status');
+        Route::post('/{id}/remark', [ClientQueryController::class, 'addRemark'])->name('admin.client_queries.remark');
+        Route::post('/{id}/delete', [ClientQueryController::class, 'destroy'])->name('admin.client_queries.destroy');
+    });
+
+    Route::prefix('client_queries')->group(function () {
+        Route::get('/', [ClientQueryController::class, 'index']);
+        Route::get('/status-counts', [ClientQueryController::class, 'statusCounts']);
+        Route::get('/{id}', [ClientQueryController::class, 'show']);
+        Route::post('/{id}/status', [ClientQueryController::class, 'updateStatus']);
+        Route::post('/{id}/remark', [ClientQueryController::class, 'addRemark']);
+        Route::post('/{id}/delete', [ClientQueryController::class, 'destroy']);
     });
 
 });
