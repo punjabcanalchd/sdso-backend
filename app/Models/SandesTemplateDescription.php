@@ -29,6 +29,7 @@ class SandesTemplateDescription extends Model
         'language_id',
         'subject',
         'message',
+        'name',
     ];
 
     public function getActivitylogOptions(): LogOptions

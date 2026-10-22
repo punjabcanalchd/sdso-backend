@@ -28,6 +28,7 @@ class SmsTemplateDescription extends Model
         'template_id',
         'language_id',
         'message',
+        'name',
     ];
 
     public function getActivitylogOptions(): LogOptions

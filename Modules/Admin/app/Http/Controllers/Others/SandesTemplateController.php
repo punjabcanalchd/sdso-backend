@@ -6,67 +6,85 @@ use App\Http\Controllers\Controller;
 use App\Models\SandesTemplate;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Modules\Admin\Services\Others\SandesTemplateService;
+use Modules\Admin\Requests\Others\StoreSandesTemplateRequest;
+use Modules\Admin\Requests\Others\UpdateSandesTemplateRequest;
 
 class SandesTemplateController extends Controller
 {
     use ApiResponse;
+    protected SandesTemplateService $service;
 
-    public function index(Request $request)
+    public function __construct(SandesTemplateService $service)
     {
-        $limit = (int) $request->get('per_page', 25);
-        $search = $request->get('search');
-        $sortColumn = $request->get('sort_column', 'template_id');
-        $sortDirection = $request->get('sort_direction', 'desc');
+        $this->service = $service;
+    }
 
-        $query = SandesTemplate::with('descriptions');
+   public function index(Request $request)
+    {
+        $defaultLimit = config('pagination.default_limit');
 
-        if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', "%{$search}%")
-                  ->orWhereHas('descriptions', function ($dq) use ($search) {
-                      $dq->where('message', 'ilike', "%{$search}%");
-                  });
-            });
-        }
+        $maxLimit = config('pagination.max_limit');
 
-        $allowedSorts = ['name', 'status', 'created_at', 'template_id'];
-        if (in_array($sortColumn, $allowedSorts)) {
-            $query->orderBy($sortColumn, strtolower($sortDirection) === 'asc' ? 'asc' : 'desc');
-        } else {
-            $query->orderBy('template_id', 'desc');
-        }
+        $limit = (int) $request->input('per_page',$defaultLimit);
+        $search = $request->input('search');
+        $sort_column =  $request->input('sort_column');
+        $sort_direction =  $request->input('sort_direction');
 
-        $paginated = $query->paginate($limit);
+        $limit = min($limit, $maxLimit);
 
-        $paginated->getCollection()->transform(function ($item) {
-            $english = $item->descriptions->firstWhere('language_id', 1);
-            $punjabi = $item->descriptions->firstWhere('language_id', 2);
+        $limit = max($limit, 1);
 
-            return [
-                'id'          => $item->public_id ?? (string) $item->template_id,
-                'template_id' => $item->template_id,
-                'name'        => $item->name,
-                'message_en'  => $english?->message ?? 'N/A',
-                'message_pb'  => $punjabi?->message ?? '',
-                'status'      => (bool) $item->status,
-                'created_at'  => $item->created_at ? $item->created_at->format('Y-m-d H:i:s') : null,
-            ];
-        });
+        $template = $this->service->getAll($limit, $search, $sort_column, $sort_direction);
 
-        return $this->paginatedResponse($paginated, 'Sandes templates fetched successfully.');
+        return $this->paginatedResponse(
+            $template,
+            'Sandes Templates fetched successfully.'
+        );
     }
 
     public function updateStatus(Request $request, $id)
     {
-        $template = SandesTemplate::findByPublicId($id) ?? SandesTemplate::find($id);
+        $status = $request->input('status', false);
+        $this->service->updateStatus($id, $status);
 
-        if (!$template) {
-            return $this->errorResponse('Sandes template not found.', 404);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Status updated successfully.',
+        ], 200);
+    }
 
-        $template->status = (bool) $request->input('status', false);
-        $template->save();
 
-        return $this->successResponse($template, 'Status updated successfully.');
+    public function store(StoreSandesTemplateRequest $request)
+    {
+
+        $template = $this->service->store($request->validated());
+
+        return $this->successResponse(
+            $template,
+            'Sandes Template created successfully.',
+            201
+        );
+    }
+
+    public function update(UpdateSandesTemplateRequest $request, string $publicId) {
+
+        $template = $this->service->update($request->validated(), $publicId);
+
+        return $this->successResponse(
+            $template,
+            'Sandes Template updated successfully.'
+        );
+    }
+
+   
+    public function destroy(string $public_id)
+    {
+        $this->service->delete($public_id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sandes Template deleted successfully.',
+        ], 200);
     }
 }

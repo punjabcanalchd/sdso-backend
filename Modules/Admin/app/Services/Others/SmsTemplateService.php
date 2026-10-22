@@ -2,152 +2,120 @@
 
 namespace Modules\Admin\Services\Others;
 
-use App\Models\SmsTemplate;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 use Modules\Admin\Repositories\Others\SmsTemplateRepository;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use App\Models\SmsTemplate;
+
 
 class SmsTemplateService
 {
-    public function __construct(
-        protected SmsTemplateRepository $repository
-    ) {}
+    protected SmsTemplateRepository $repository;
 
-    /**
-     * Get paginated SMS templates formatted for admin listing.
-     */
-    public function getPaginatedTemplates(
-        int $limit = 25,
-        ?string $search = null,
-        string $sortColumn = 'template_id',
-        string $sortDirection = 'desc'
-    ): LengthAwarePaginator {
-        $paginated = $this->repository->getAll(
-            $limit,
-            $search,
-            $sortColumn,
-            $sortDirection
-        );
-
-        $paginated->getCollection()->transform(function ($item) {
-            $english = $item->descriptions->firstWhere('language_id', 1);
-            $punjabi = $item->descriptions->firstWhere('language_id', 2);
-
-            return [
-                'id'          => $item->public_id ?? (string) $item->template_id,
-                'public_id'   => $item->public_id,
-                'template_id' => $item->template_id,
-                'templateid'  => $item->templateid,
-                'name'        => $item->name,
-                'message_en'  => $english?->message ?? '',
-                'message_pb'  => $punjabi?->message ?? '',
-                'status'      => (bool) $item->status,
-                'created_at'  => $item->created_at ? $item->created_at->format('Y-m-d H:i:s') : null,
-            ];
-        });
-
-        return $paginated;
+    public function __construct(SmsTemplateRepository $repository) {
+        $this->repository = $repository;
     }
 
-    /**
-     * Get single SMS template details.
-     */
-    public function getTemplateById(int|string $id): ?array
+    public function getAll(int $limit, ?string $search, ?string $sort_column, ?string $sort_direction)
     {
-        $template = $this->repository->findById($id);
-        if (!$template) {
-            return null;
-        }
+        $smsTemplates = $this->repository->getAll($limit,$search,$sort_column,$sort_direction);
+        $smsTemplates->getCollection()->transform(function ($smsTemplate) {
+            return $this->formatResponse($smsTemplate);
+        });
 
-        $english = $template->descriptions->firstWhere('language_id', 1);
-        $punjabi = $template->descriptions->firstWhere('language_id', 2);
+        return $smsTemplates;
+    }
+
+
+    /* ------------------------------------------------------------------
+     * GET SINGLE Sms Template
+     * ---------------------------------------------------------------- */
+
+    public function getSmsTemplate(string $publicId) {
+        $smsTemplate = $this->repository->findByPublicId($publicId);
+        return $this->formatResponse($smsTemplate);
+    }
+
+    private function formatResponse($smsTemplate)
+    {
+        $english = $smsTemplate->descriptions->firstWhere('language_id', 1);
+        $punjabi = $smsTemplate->descriptions->firstWhere('language_id', 2);
 
         return [
-            'id'          => $template->public_id ?? (string) $template->template_id,
-            'public_id'   => $template->public_id,
-            'template_id' => $template->template_id,
-            'templateid'  => $template->templateid,
-            'name'        => $template->name,
-            'message_en'  => $english?->message ?? '',
-            'message_pb'  => $punjabi?->message ?? '',
-            'status'      => $template->status ? 1 : 0,
-            'created_at'  => $template->created_at ? $template->created_at->format('Y-m-d H:i:s') : null,
+            'public_id' => $smsTemplate->public_id,
+            'name_en'   => $english?->name,
+            'name_pb'   => $punjabi?->name,
+            'description_en'   => $english?->message,
+            'description_pb'   => $punjabi?->message,
+            'templateid'=> $smsTemplate->templateid,
+            'created_at'=> $smsTemplate->created_at,
+            'status'    => $smsTemplate->status,
         ];
     }
 
-    /**
-     * Create SMS template with English and Punjabi messages.
-     */
-    public function createTemplate(array $data): SmsTemplate
+    public function store(array $data): SmsTemplate
     {
         return DB::transaction(function () use ($data) {
-            $template = $this->repository->create([
-                'name'       => $data['name'],
-                'templateid' => $data['templateid'],
-                'status'     => (bool) ($data['status'] ?? true),
-            ]);
 
-            if (array_key_exists('message_en', $data) && $data['message_en'] !== null && $data['message_en'] !== '') {
-                $this->repository->updateOrCreateDescription($template->template_id, 1, $data['message_en']);
-            }
+            $translations = [
+                'name' => $data['subject'] ?? [],
+                'description' => $data['description'] ?? [],
+            ];
 
-            if (array_key_exists('message_pb', $data) && $data['message_pb'] !== null && $data['message_pb'] !== '') {
-                $this->repository->updateOrCreateDescription($template->template_id, 2, $data['message_pb']);
-            }
+            unset(
+                $data['subject'],
+                $data['description'],
+            );
+            // Repository handles database operation
+            $smsTemplate = $this->repository->create($data);
 
-            return $template;
+            // Repository handles translation database operation
+            $this->repository->createDescriptions($smsTemplate, $translations);
+
+            return $smsTemplate;
         });
     }
 
-    /**
-     * Update SMS template and its descriptions.
-     */
-    public function updateTemplate(int|string $id, array $data): ?SmsTemplate
+    public function update(array $data, string $publicId)
     {
-        $template = $this->repository->findById($id);
-        if (!$template) {
-            return null;
+
+        $names = $data['subject'] ?? [];
+        $description = $data['description'] ?? [];
+
+        unset(
+            $data['subject'],
+            $data['description'],
+        );
+
+        $descriptions = [];
+
+        foreach ($names as $languageId => $name) {
+
+            $descriptions[] = [
+                'language_id' => $languageId,
+                'name' => $name,
+                'description' => $description[$languageId] ?? null,
+            ];
         }
 
-        return DB::transaction(function () use ($template, $data) {
-            $updateData = [];
+        DB::transaction(function () use ($publicId, $data, $descriptions) {
 
-            if (array_key_exists('name', $data)) {
-                $updateData['name'] = $data['name'];
-            }
-            if (array_key_exists('templateid', $data)) {
-                $updateData['templateid'] = $data['templateid'];
-            }
-            if (array_key_exists('status', $data)) {
-                $updateData['status'] = $data['status'];
-            }
-
-            if (!empty($updateData)) {
-                $this->repository->update($template, $updateData);
-            }
-
-            if (array_key_exists('message_en', $data)) {
-                $this->repository->updateOrCreateDescription($template->template_id, 1, $data['message_en'] ?? '');
-            }
-
-            if (array_key_exists('message_pb', $data)) {
-                $this->repository->updateOrCreateDescription($template->template_id, 2, $data['message_pb'] ?? '');
-            }
-
-            return $template;
+            return $this->repository->updatePageWithDescriptions(
+                $publicId,
+                $data,
+                $descriptions
+            );
         });
+
     }
 
-    /**
-     * Update status of an SMS template.
-     */
-    public function updateStatus(int|string $id, bool $status): bool
+    public function updateStatus(string $publicId, bool $status)
     {
-        $template = $this->repository->findById($id);
-        if (!$template) {
-            return false;
-        }
+        return $this->repository->updateStatus($publicId, $status);
+    }
 
-        return $this->repository->updateStatus($template, $status);
+    public function delete(string $publicId)
+    {
+        return $this->repository->delete($publicId);
     }
 }

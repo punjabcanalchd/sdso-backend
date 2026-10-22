@@ -310,12 +310,16 @@ Route::prefix('slider-image')->group(function () {
       Route::get('/{id}', [SmsTemplateController::class, 'show'])->name('admin.sms_templates.show');
       Route::post('/{id}/update', [SmsTemplateController::class, 'update'])->name('admin.sms_templates.update');
       Route::post('/{id}/status', [SmsTemplateController::class, 'updateStatus'])->name('admin.sms_templates.status');
-    });
+      Route::post('/{public_id}/delete', [SmsTemplateController::class, 'destroy'])->name('admin.delete_sms_template');
+     });
 
     //sandes templates
      Route::prefix('sandes-templates')->group(function () {
       Route::get('/', [SandesTemplateController::class, 'index'])->name('admin.sandes_templates.index');
+      Route::post('/', [SandesTemplateController::class, 'store'])->name('admin.sandes_templates.store');
+      Route::post('/{id}/update', [SandesTemplateController::class, 'update'])->name('admin.sandes_templates.update');
       Route::post('/{id}/status', [SandesTemplateController::class, 'updateStatus'])->name('admin.sandes_templates.status');
+      Route::post('/{public_id}/delete', [SandesTemplateController::class, 'destroy'])->name('admin.delete_sandes_template');
      });
 
     //media categories
