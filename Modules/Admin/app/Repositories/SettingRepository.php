@@ -691,15 +691,17 @@ class SettingRepository
     public function getAdditionalSettings(): array
     {
         $raw = $this->getAllAsArray();
-        $fileUploadStatus = $raw['file_upload_size_status'] ?? $raw['adjust_file_size_status'] ?? '1';
+        $fileUploadStatus = $raw['file_size_status'] ?? $raw['file_size_status'] ?? '1';
         $isUploadActive = ($fileUploadStatus === '1' || $fileUploadStatus === 'active' || $fileUploadStatus === 'true' || $fileUploadStatus === true || $fileUploadStatus === 1);
 
         return [
-            'latest_news_bg_color'    => $raw['latest_news_bg_color'] ?? '#0056b3',
-            'latest_news_text_color'  => $raw['latest_news_text_color'] ?? '#ffffff',
-            'file_upload_size_status' => $isUploadActive,
+            'ln_bg_color'    => $raw['ln_bg_color'] ?? '#0056b3',
+            'ln_txt_color'  => $raw['ln_txt_color'] ?? '#ffffff',
+            'file_size_status' => $isUploadActive,
         ];
     }
+
+
 
     /**
      * Update Additional Settings.
@@ -707,15 +709,15 @@ class SettingRepository
     public function updateAdditionalSettings(array $data): array
     {
         $keyMapping = [
-            'latest_news_bg_color'   => 'latest_news_bg_color',
-            'latest_news_text_color' => 'latest_news_text_color',
+            'ln_bg_color'   => 'ln_bg_color',
+            'ln_txt_color' => 'ln_txt_color',
         ];
 
         foreach ($data as $k => $val) {
-            if ($k === 'file_upload_size_status') {
+            if ($k === 'file_size_status') {
                 $statusVal = ($val === true || $val === '1' || $val === 'active' || $val === 1 || $val === 'true') ? '1' : '0';
-                $this->updateOrCreate('file_upload_size_status', $statusVal);
-                $this->updateOrCreate('adjust_file_size_status', $statusVal);
+                $this->updateOrCreate('file_size_status', $statusVal);
+                $this->updateOrCreate('file_size_status', $statusVal);
             } elseif (isset($keyMapping[$k])) {
                 $this->updateOrCreate($keyMapping[$k], (string)$val);
             }

@@ -18,119 +18,6 @@ class SettingController extends Controller
     {
         $this->service = $service;
     }
-
-    /**
-     * Get all settings.
-     */
-    // public function index(): JsonResponse
-    // {
-    //     $settings = $this->service->getAll();
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Settings fetched successfully.',
-    //         'data' => $settings,
-    //     ]);
-    // }
-
-    /**
-     * Get one setting.
-     */
-    // public function show(string $key): JsonResponse
-    // {
-    //     $value = $this->service->get($key);
-
-    //     if ($value === null) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Setting not found.',
-    //             'data' => null,
-    //         ], 404);
-    //     }
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Setting fetched successfully.',
-    //         'data' => [
-    //             'config_key' => $key,
-    //             'config_value' => $value,
-    //         ],
-    //     ]);
-    // }
-
-    /**
-     * Update settings.
-     */
-    // public function update(Request $request): JsonResponse
-    // {
-    //     $this->validateRequest($request);
-
-    //     $data = $request->except([
-    //         '_token',
-    //         '_method',
-    //     ]);
-
-    //     $settings = $this->service->update($data);
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Settings saved successfully.',
-    //         'data' => $settings,
-    //     ]);
-    // }
-
-    // /**
-    //  * Update a single setting.
-    //  */
-    // public function updateSingle(
-    //     Request $request,
-    //     string $key
-    // ): JsonResponse {
-
-    //     $value = $request->input('value');
-
-    //     if ($value === null) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Value is required.',
-    //         ], 422);
-    //     }
-
-    //     $settings = $this->service->update([
-    //         $key => $value,
-    //     ]);
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Setting updated successfully.',
-    //         'data' => [
-    //             'config_key' => $key,
-    //             'config_value' => $settings[$key] ?? $value,
-    //         ],
-    //     ]);
-    // }
-
-    /**
-     * Delete setting.
-     */
-    // public function destroy(string $key): JsonResponse
-    // {
-    //     $deleted = $this->service->delete($key);
-
-    //     if (!$deleted) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Setting not found.',
-    //         ], 404);
-    //     }
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Setting deleted successfully.',
-    //     ]);
-    // }
-
-
      /**
      * Get General Settings
      */
@@ -711,12 +598,13 @@ class SettingController extends Controller
     {
         try {
             $data = $request->validate([
-                'latest_news_bg_color'    => ['required', 'string', 'regex:/^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/'],
-                'latest_news_text_color'  => ['required', 'string', 'regex:/^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/'],
-                'file_upload_size_status' => ['required'],
+                'ln_bg_color'    => ['required', 'string', 'regex:/^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/'],
+                'ln_txt_color'  => ['required', 'string', 'regex:/^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/'],
+                'file_size_status' => ['required'],
             ]);
 
             $result = $this->service->updateAdditionalSettings($data);
+            
 
             return response()->json([
                 'success' => true,
