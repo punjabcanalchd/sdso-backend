@@ -12,15 +12,6 @@ class PageController extends Controller
         private PageService $pageService
     ) {}
 
-    // // Get all active pages
-    // public function index(): JsonResponse
-    // {
-    //     return response()->json([
-    //         'success' => true,
-    //         'data' => $this->pageService->getActivePages(),
-    //     ]);
-    // }
-
     // Get a single page by page ID and language ID
     public function show( int $pageId, int $languageId ): JsonResponse { 
 
