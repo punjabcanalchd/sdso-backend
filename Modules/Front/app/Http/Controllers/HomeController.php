@@ -3,7 +3,7 @@
 namespace Modules\Front\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Modules\Front\Services\HomeService;
 
 class HomeController extends Controller
@@ -12,26 +12,11 @@ class HomeController extends Controller
         private HomeService $homeService
     ) {}
 
-    public function notifications(Request $request)
+    public function index(): JsonResponse
     {
-        $limit = (int) $request->get('limit', 10);
-        $categoryId = $request->filled('category_id') ? (int) $request->get('category_id') : null;
-
-        $data = $this->homeService->getNotifications($limit, $categoryId);
-
         return response()->json([
             'success' => true,
-            'data' => $data,
-        ]);
-    }
-
-    public function noticeBoardTabs(Request $request)
-    {
-        $tabs = $this->homeService->getNoticeBoardTabs();
-
-        return response()->json([
-            'success' => true,
-            'data' => $tabs,
+            'data' => $this->homeService->getHomeData(),
         ]);
     }
 }
