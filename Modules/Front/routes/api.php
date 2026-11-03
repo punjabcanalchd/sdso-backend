@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Front\Http\Controllers\FooterController;
 use Modules\Front\Http\Controllers\HomeController;
 use Modules\Front\Http\Controllers\MenuController;
 use Modules\Front\Http\Controllers\NoticeboardController;
@@ -22,6 +23,9 @@ Route::prefix('front')->group(function () {
     // Pages
     Route::get('/pages/{pageId}/{languageId}', [PageController::class, 'show']);
     Route::get('/pages/slug/{slug}/{languageId}', [PageController::class, 'showBySlug']);
+
+    // Footer
+    Route::get('/footer', [FooterController::class, 'index']);
 
     // Home
     Route::get('/home', [HomeController::class, 'index']);

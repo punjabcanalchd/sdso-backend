@@ -63,7 +63,7 @@ class NotificationService
                 'id' => $cat->template_id,
                 'name' => $nameEn ?: $cat->name,
                 'name_pb' => $namePb,
-                'route' => '/notice',
+                'route' => '/noticeboard/' . $cat->template_id,
                 'notices' => $notices,
             ];
         });
