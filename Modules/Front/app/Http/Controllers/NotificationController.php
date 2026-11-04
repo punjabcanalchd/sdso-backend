@@ -57,4 +57,35 @@ class NotificationController extends Controller
             'data' => $items,
         ]);
     }
+
+
+public function noticeboard(int $languageId, int $id): JsonResponse
+{
+    try {
+        $data = $this->notificationService->getNoticeboardPageData(
+            $id,
+            $languageId
+        );
+
+        if (!$data) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Noticeboard category not found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Noticeboard page data retrieved successfully.',
+            'data' => $data,
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'An error occurred while fetching noticeboard data.',
+            'error' => config('app.debug') ? $e->getMessage() : null,
+        ], 500);
+    }
+}
 }

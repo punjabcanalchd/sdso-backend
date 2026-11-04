@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Modules\Front\Http\Controllers\FooterController;
 use Modules\Front\Http\Controllers\HomeController;
 use Modules\Front\Http\Controllers\MenuController;
-use Modules\Front\Http\Controllers\NoticeboardController;
 use Modules\Front\Http\Controllers\NotificationController;
 use Modules\Front\Http\Controllers\PageController;
 
@@ -18,7 +17,10 @@ Route::prefix('front')->group(function () {
     Route::get('/ticker', [NotificationController::class, 'ticker']);
 
     // Noticeboard details (Teammate's feature)
-    Route::get('/noticeboard/{id}/{languageId}', [NoticeboardController::class, 'show']);
+    Route::get('/noticeboard/{languageId?}/{id}', [NotificationController::class, 'noticeboard']);
+  
+
+    
 
     // Pages
     Route::get('/pages/{pageId}/{languageId}', [PageController::class, 'show']);
