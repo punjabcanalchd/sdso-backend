@@ -28,12 +28,12 @@ class UpdateMenuRequest extends BaseRequest
                     return $query->where('language_id', 2);
                 })->ignore($menuId, 'menu_id'),
             ],
-            'parent_id'     => 'nullable|integer|exists:menus,menu_id',
+            'parent_id'     => ['nullable', 'integer', 'exists:menus,menu_id', Rule::notIn(array_filter([$menuId]))],
             'sort_order'    => 'required|integer|min:0',
             'status'        => 'required|boolean',
             'link_type'     => 'nullable|integer',
             'external_link' => 'nullable|string|max:1000',
-            'page_id'       => 'nullable|integer|exists:pages,id',
+            'page_id'       => 'nullable|integer|exists:pages,page_id',
         ];
     }
 }

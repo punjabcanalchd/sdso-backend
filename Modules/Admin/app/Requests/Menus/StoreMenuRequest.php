@@ -27,7 +27,7 @@ class StoreMenuRequest extends BaseRequest
             'status'        => 'required|boolean',
             'link_type'     => 'nullable|integer',
             'external_link' => 'nullable|string|max:1000',
-            'page_id'       => 'nullable|integer|exists:pages,id',
+            'page_id'       => 'nullable|integer|exists:pages,page_id',
         ];
     }
 }

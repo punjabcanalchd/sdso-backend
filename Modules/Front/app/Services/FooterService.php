@@ -22,6 +22,7 @@ class FooterService
         return [
             'columns' => $this->getFooterColumns($languageId, $lang),
             'top_links' => $this->getTopFooterLinks($lang),
+            'top_links_title' => ($lang === 'pb') ? 'ਨੀਤੀਆਂ ਅਤੇ ਸਹਾਇਤਾ' : 'Policies & Help',
             'partner_logos' => $this->getPartnerLogos(),
             'copyright' => $this->getCopyrightInfo($lang),
             'stats' => $this->getFooterStats(),
@@ -231,8 +232,8 @@ class FooterService
         }
 
         $lastUpdatedFormatted = $lastUpdatedCarbon
-            ? $lastUpdatedCarbon->format('d M Y')
-            : date('d M Y');
+            ? $lastUpdatedCarbon->format('d-m-Y H:i:s')
+            : date('d-m-Y H:i:s');
 
         // 2. Total Visitors: base offset + live count
         $baseVisitors = 19200;

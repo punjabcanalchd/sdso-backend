@@ -8,9 +8,12 @@ class MenuService
 {
     public function getActiveMenus()
     {
-        // 1. Fetch ALL active menus in one go
-        $allActiveMenus = Menu::with('englishDescription')
-            ->where('status', true)
+        // 1. Fetch ALL active menus with both English and Punjabi descriptions
+        $allActiveMenus = Menu::with(['englishDescription', 'punjabiDescription'])
+            ->where(function ($query) {
+                $query->where('status', true)
+                      ->orWhere('status', 1);
+            })
             ->orderBy('sort_order')
             ->get();
 

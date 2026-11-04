@@ -43,8 +43,9 @@ class SandesTemplateService
 
         return [
             'public_id' => $sandesTemplate->public_id,
-            'name_en'   => $english?->name,
-            'name_pb'   => $punjabi?->name,
+            'name'      => $sandesTemplate->name ?? $english?->name,
+            'name_en'   => $english?->name ?? $sandesTemplate->name,
+            'name_pb'   => $punjabi?->name ?? $sandesTemplate->name,
             'description_en'   => $english?->message,
             'description_pb'   => $punjabi?->message,
             'created_at'=> $sandesTemplate->created_at,
