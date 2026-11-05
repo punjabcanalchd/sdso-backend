@@ -43,8 +43,9 @@ class SmsTemplateService
 
         return [
             'public_id' => $smsTemplate->public_id,
-            'name_en'   => $english?->name,
-            'name_pb'   => $punjabi?->name,
+            'name'      => $smsTemplate->name ?? $english?->name,
+            'name_en'   => $english?->name ?? $smsTemplate->name,
+            'name_pb'   => $punjabi?->name ?? $smsTemplate->name,
             'description_en'   => $english?->message,
             'description_pb'   => $punjabi?->message,
             'templateid'=> $smsTemplate->templateid,

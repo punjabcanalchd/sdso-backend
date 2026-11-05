@@ -52,11 +52,11 @@ class EmailTemplateService
 
         return [
             'public_id' => $emailTemplate->public_id,
-            'name_en'   => $english?->subject,
-            'name_pb'   => $punjabi?->subject,
+            'name'      => $emailTemplate->name ?? $english?->subject,
+            'name_en'   => $english?->subject ?? $emailTemplate->name,
+            'name_pb'   => $punjabi?->subject ?? $emailTemplate->name,
             'description_en'   => $english?->message,
             'description_pb'   => $punjabi?->message,
-            'name'=> $emailTemplate->name,
             'created_at'=> $emailTemplate->created_at,
             'status'    => $emailTemplate->status,
         ];

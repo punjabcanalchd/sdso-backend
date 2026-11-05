@@ -24,11 +24,14 @@ class UpdateStateRequest extends BaseRequest
     {
 
         $stateId = 0;
+        $currentLgdStateCode = null;
         $publicId = $this->route('public_id');
 
         if ($publicId) {
             try {
                 $stateId = $this->decode($publicId);
+                $state = \App\Models\States::find($stateId);
+                $currentLgdStateCode = $state?->lgdstatecode;
             } catch (\Exception $e) {
                 \Log::error('State ID decryption failed', [
                     'public_id' => $publicId,
@@ -52,6 +55,21 @@ class UpdateStateRequest extends BaseRequest
             'languages.*.name' => [
                 'required',
                 'string',
+                function ($attribute, $value, $fail) use ($currentLgdStateCode) {
+                    preg_match('/languages\.(\d+)\.name/', $attribute, $matches);
+                    $index = $matches[1] ?? null;
+                    $languageId = request()->input("languages.{$index}.language_id");
+
+                    $exists = \App\Models\StatesDescription::where('name', 'ILIKE', trim($value))
+                        ->when($languageId, fn($q) => $q->where('language_id', $languageId))
+                        ->when($currentLgdStateCode, fn($q) => $q->where('lgdstatecode', '!=', $currentLgdStateCode))
+                        ->exists();
+
+                    if ($exists) {
+                        $langLabel = ($languageId == 2) ? 'Punjabi' : 'English';
+                        $fail("The State name '{$value}' ({$langLabel}) already exists.");
+                    }
+                },
             ],
 
             'languages.*.description' => [

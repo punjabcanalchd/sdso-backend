@@ -20,22 +20,48 @@ class UpdateDistrictRequest extends BaseRequest
     |--------------------------------------------------------------------------
     */
 
-    public function rules(): array
+    protected function prepareForValidation(): void
     {
-        // Get district_id from route
-        $publicId = $this->route('public_id');
-        if ($publicId) {
-            try {
-                $districtId = (int) Crypt::decryptString(urldecode($publicId));
-            } catch (\Exception $e) {
-                $districtId = 0;
+        if ($this->has('status')) {
+            $status = $this->input('status');
+            if ($status === 'ACTIVE' || $status === '1' || $status === 1 || $status === true) {
+                $this->merge(['status' => true]);
+            } elseif ($status === 'INACTIVE' || $status === '0' || $status === 0 || $status === false) {
+                $this->merge(['status' => false]);
             }
         }
+    }
+
+    public function rules(): array
+    {
+        // Get district from route public_id
+        $publicId = $this->route('public_id');
+        $district = $publicId ? \App\Models\Districts::findByPublicId($publicId) : null;
+        $districtId = $district?->district_id ?? 0;
+        $currentLgdDistCode = $district?->lgddistcode;
+
         return [
 
             'name' => ['required', 'array'],
 
-            'name.*' => ['required', 'string'],
+            'name.*' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) use ($currentLgdDistCode) {
+                    preg_match('/name\.(\d+)/', $attribute, $matches);
+                    $languageId = $matches[1] ?? null;
+
+                    $exists = \App\Models\DistrictsDescription::where('name', 'ILIKE', trim($value))
+                        ->when($languageId, fn($q) => $q->where('language_id', $languageId))
+                        ->when($currentLgdDistCode, fn($q) => $q->where('lgddistcode', '!=', $currentLgdDistCode))
+                        ->exists();
+
+                    if ($exists) {
+                        $langLabel = ($languageId == 2) ? 'Punjabi' : 'English';
+                        $fail("The District name '{$value}' ({$langLabel}) already exists.");
+                    }
+                }
+            ],
 
             'description' => ['required', 'array'],
 

@@ -2,9 +2,11 @@
 
 namespace Modules\Admin\Services;
 
-use App\Models\GwApplication;
-use App\Enums\ServiceType;
-use App\Enums\ApplicationStatus;
+use App\Models\DamHeadwork;
+use App\Models\DamDailyReading;
+use App\Models\User;
+use App\Models\NoticeboardTemplate;
+use Carbon\Carbon;
 
 class DashboardService
 {
@@ -30,73 +32,39 @@ class DashboardService
     }
 
     /**
-     * Top cards (Fresh, Amendments, Intimations, Renewals, Revocations)
+     * Top cards
      */
     private function getSummaryCards(): array
     {
-        return [
-            'fresh' => $this->getFreshStats(),
-            'amendments' => $this->getAmendmentStats(),
-            'intimations' => $this->getIntimationStats(),
-            'renewals' => $this->getRenewalStats(),
-            'revocations' => $this->getRevocationStats(),
-        ];
-    }
-
-    private function getFreshStats(): array
-    {
-        return $this->getServiceStats(ServiceType::gwFreshCodes());
-    }
-
-    private function getAmendmentStats(): array
-    {
-        return $this->getServiceStats(ServiceType::gwAmendmentCodes());
-    }
-
-    private function getIntimationStats(): array
-    {
-        return $this->getServiceStats(ServiceType::gwIntimationCodes());
-    }
-
-    private function getRenewalStats(): array
-    {
-        return $this->getServiceStats(ServiceType::gwRenewalCodes());
-    }
-
-    private function getRevocationStats(): array
-    {
-        return $this->getServiceStats(ServiceType::gwRevocationCodes());
-    }
-
-    private function getServiceStats(array $serviceTypes): array
-    {
-        $applications = GwApplication::query()
-            ->with('payment')
-            ->select(
-                'application_id',
-                'application_status',
-                'payment_status'
-            )
-            ->where('delete_status', false)
-            ->whereHas('services', function ($query) use ($serviceTypes) {
-                $query->whereIn('service_type', $serviceTypes);
-            })
-            ->get();
+        $totalHeadworks = DamHeadwork::count();
+        $totalReadings = DamDailyReading::count();
+        $todayReadings = DamDailyReading::whereDate('created_at', Carbon::today())->count();
+        $totalUsers = User::count();
 
         return [
-            'total' => $applications->count(),
-
-            'approved' => $applications
-                ->filter->isApproved()
-                ->count(),
-
-            'inProcess' => $applications
-                ->filter->isInProcess()
-                ->count(),
-
-            'rejected' => $applications
-                ->filter->isRejected()
-                ->count(),
+            'headworks' => [
+                'total' => $totalHeadworks,
+                'label' => 'Total Headworks & Dams'
+            ],
+            'readings' => [
+                'total' => $totalReadings,
+                'today' => $todayReadings,
+                'label' => 'Daily Readings'
+            ],
+            'users' => [
+                'total' => $totalUsers,
+                'label' => 'Active System Users'
+            ],
+            'fresh' => [
+                'total' => $totalHeadworks,
+                'approved' => $totalHeadworks,
+                'inProcess' => 0,
+                'rejected' => 0
+            ],
+            'amendments' => ['total' => 0, 'approved' => 0, 'inProcess' => 0, 'rejected' => 0],
+            'intimations' => ['total' => 0, 'approved' => 0, 'inProcess' => 0, 'rejected' => 0],
+            'renewals' => ['total' => 0, 'approved' => 0, 'inProcess' => 0, 'rejected' => 0],
+            'revocations' => ['total' => 0, 'approved' => 0, 'inProcess' => 0, 'rejected' => 0],
         ];
     }
 

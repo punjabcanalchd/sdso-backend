@@ -30,6 +30,20 @@ class StoreStateRequest extends BaseRequest
             'languages.*.name' => [
                 'required',
                 'string',
+                function ($attribute, $value, $fail) {
+                    preg_match('/languages\.(\d+)\.name/', $attribute, $matches);
+                    $index = $matches[1] ?? null;
+                    $languageId = request()->input("languages.{$index}.language_id");
+
+                    $exists = \App\Models\StatesDescription::where('name', 'ILIKE', trim($value))
+                        ->when($languageId, fn($q) => $q->where('language_id', $languageId))
+                        ->exists();
+
+                    if ($exists) {
+                        $langLabel = ($languageId == 2) ? 'Punjabi' : 'English';
+                        $fail("The State name '{$value}' ({$langLabel}) already exists.");
+                    }
+                },
             ],
 
             'languages.*.description' => [

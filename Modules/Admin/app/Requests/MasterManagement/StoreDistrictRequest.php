@@ -23,13 +23,41 @@ class StoreDistrictRequest extends BaseRequest
     |--------------------------------------------------------------------------
     */
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('status')) {
+            $status = $this->input('status');
+            if ($status === 'ACTIVE' || $status === '1' || $status === 1 || $status === true) {
+                $this->merge(['status' => true]);
+            } elseif ($status === 'INACTIVE' || $status === '0' || $status === 0 || $status === false) {
+                $this->merge(['status' => false]);
+            }
+        }
+    }
+
     public function rules(): array
     {
         $rules = [];
 
         $rules['name'] = ['required','array'];
 
-        $rules['name.*'] = ['required','string'];
+        $rules['name.*'] = [
+            'required',
+            'string',
+            function ($attribute, $value, $fail) {
+                preg_match('/name\.(\d+)/', $attribute, $matches);
+                $languageId = $matches[1] ?? null;
+
+                $exists = \App\Models\DistrictsDescription::where('name', 'ILIKE', trim($value))
+                    ->when($languageId, fn($q) => $q->where('language_id', $languageId))
+                    ->exists();
+
+                if ($exists) {
+                    $langLabel = ($languageId == 2) ? 'Punjabi' : 'English';
+                    $fail("The District name '{$value}' ({$langLabel}) already exists.");
+                }
+            }
+        ];
 
         $rules['description'] = ['required','array'];
 
