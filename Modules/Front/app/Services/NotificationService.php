@@ -81,63 +81,76 @@ class NotificationService
     /**
      * Get noticeboard page data for controllers (replaces old noticeboard method logic).
      */
- public function getNoticeboardPageData(int $categoryId, int $languageId = 1)
-{
-    $categoryData = $this->notificationRepository
-        ->findActiveCategoryById($categoryId);
+    public function getNoticeboardPageData(int $categoryId, int $languageId = 1)
+    {
+        $categoryData = $this->notificationRepository
+            ->findActiveCategoryById($categoryId);
 
-    if (!$categoryData) {
-        return null;
-    }
+        if (!$categoryData) {
+            return null;
+        }
 
-    // Get description for selected language
-    $categoryDescription = $categoryData->descriptions
-        ->firstWhere('language_id', $languageId);
-
-    // Fallback to English
-    if (!$categoryDescription) {
+        // Get description for selected language
         $categoryDescription = $categoryData->descriptions
-            ->firstWhere('language_id', 1);
-    }
-
-    $moduleMetaTitle = $categoryDescription?->message
-        ?? $categoryData->name;
-
-    $pagination = defined('website_pagination')
-        ? website_pagination
-        : 30;
-
-    $noticeboardData = $this->notificationRepository
-        ->getPaginatedNoticesByCategory($categoryId, $pagination);
-
-    $notificationArray = [];
-
-    foreach ($noticeboardData as $key => $value) {
-
-        $description = $value->descriptions
             ->firstWhere('language_id', $languageId);
 
         // Fallback to English
-        if (!$description) {
-            $description = $value->descriptions
+        if (!$categoryDescription) {
+            $categoryDescription = $categoryData->descriptions
                 ->firstWhere('language_id', 1);
         }
 
-        $notificationArray[$value->category_name][$key] = [
-            'message' => $description?->message ?? $value->name,
-            'publish_date' => $value->publish_date,
-            'upload_notice' => $value->upload_notice,
+        $moduleMetaTitle = $this->extractCategoryName($categoryDescription?->message, $categoryData->name);
+
+        $pagination = defined('website_pagination')
+            ? website_pagination
+            : 30;
+
+        $noticeboardData = $this->notificationRepository
+            ->getPaginatedNoticesByCategory($categoryId, $pagination);
+
+        $notificationArray = [];
+
+        foreach ($noticeboardData as $key => $value) {
+
+            $description = $value->descriptions
+                ->firstWhere('language_id', $languageId);
+            $english = $value->descriptions
+                ->firstWhere('language_id', 1);
+
+            $parsedLang = $this->parseNoticeMessage($description?->message, $value->name ?? '');
+            $parsedEn = $this->parseNoticeMessage($english?->message, $value->name ?? '');
+
+            // Fallback chain for title
+            $title = !empty($parsedLang['title'])
+                ? $parsedLang['title']
+                : (!empty($parsedEn['title']) ? $parsedEn['title'] : ($value->name ?? ''));
+
+            // Fallback chain for description (HTML body)
+            $htmlBody = !empty($parsedLang['description'])
+                ? $parsedLang['description']
+                : (!empty($parsedEn['description']) ? $parsedEn['description'] : '');
+
+            $displayMessage = !empty($htmlBody) ? $htmlBody : $title;
+
+            $notificationArray[$value->category_name][$key] = [
+                'id' => $value->template_id,
+                'title' => $title,
+                'description' => $htmlBody,
+                'message' => $displayMessage,
+                'publish_date' => $value->publish_date,
+                'upload_notice' => $value->upload_notice,
+            ];
+        }
+
+        return [
+            'noticeboard_data' => $noticeboardData,
+            'notificationarray' => $notificationArray,
+            'cid' => $categoryId,
+            'category_data' => $categoryData,
+            'module_meta_title' => $moduleMetaTitle,
         ];
     }
-
-    return [
-        'noticeboard_data' => $noticeboardData,
-        'notificationarray' => $notificationArray,
-        'cid' => $categoryId,
-        'category_data' => $categoryData,
-        'module_meta_title' => $moduleMetaTitle,
-    ];
-}
 
     /**
      * Find specific notice by ID and Language using repository.
@@ -155,14 +168,14 @@ class NotificationService
         $english = $item->descriptions->firstWhere('language_id', 1);
         $punjabi = $item->descriptions->firstWhere('language_id', 2);
 
-        $englishData = json_decode($english?->message, true);
-        $punjabiData = json_decode($punjabi?->message, true);
+        $englishData = $this->parseNoticeMessage($english?->message, $item->name ?? '');
+        $punjabiData = $this->parseNoticeMessage($punjabi?->message, '');
 
-        $titleEn = is_array($englishData) ? ($englishData['title'] ?? $item->name) : ($item->name ?: ($english?->message ?? ''));
-        $titlePb = is_array($punjabiData) ? ($punjabiData['title'] ?? '') : ($punjabi?->message ?? '');
+        $titleEn = !empty($englishData['title']) ? $englishData['title'] : ($item->name ?: '');
+        $titlePb = !empty($punjabiData['title']) ? $punjabiData['title'] : '';
 
-        $descriptionEn = is_array($englishData) ? ($englishData['description'] ?? '') : ($english?->message ?? '');
-        $descriptionPb = is_array($punjabiData) ? ($punjabiData['description'] ?? '') : ($punjabi?->message ?? '');
+        $descriptionEn = !empty($englishData['description']) ? $englishData['description'] : '';
+        $descriptionPb = !empty($punjabiData['description']) ? $punjabiData['description'] : '';
 
         $isNew = false;
         if (!empty($item->publish_date)) {
@@ -186,6 +199,37 @@ class NotificationService
             'external' => (bool)$fileUrl,
             'category_id' => $item->category_name,
             'category_name' => $item->category?->name ?? '',
+        ];
+    }
+
+    /**
+     * Parse notice description JSON or plain string.
+     */
+    private function parseNoticeMessage(?string $message, string $defaultTitle = ''): array
+    {
+        if (empty($message)) {
+            return [
+                'title' => $defaultTitle,
+                'description' => '',
+            ];
+        }
+
+        $trimmed = trim($message);
+        if (str_starts_with($trimmed, '{')) {
+            $data = json_decode($trimmed, true);
+            if (is_array($data)) {
+                $title = !empty($data['title']) ? $data['title'] : $defaultTitle;
+                $desc = $data['description'] ?? '';
+                return [
+                    'title' => $title,
+                    'description' => $desc,
+                ];
+            }
+        }
+
+        return [
+            'title' => $message,
+            'description' => $message,
         ];
     }
 
