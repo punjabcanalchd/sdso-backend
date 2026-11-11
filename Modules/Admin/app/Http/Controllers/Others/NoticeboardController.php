@@ -46,6 +46,10 @@ class NoticeboardController extends Controller
             $name_pb = is_array($punjabiData) ? ($punjabiData['title'] ?? '') : ($punjabi?->message ?? '');
             $desc_pb = is_array($punjabiData) ? ($punjabiData['description'] ?? '') : '';
 
+            $is_latest_news = is_array($englishData) && !empty($englishData['is_latest_news']);
+            $access_type = is_array($englishData) && !empty($englishData['access_type']) ? $englishData['access_type'] : 'public';
+            $last_submission_date = is_array($englishData) && !empty($englishData['last_submission_date']) ? $englishData['last_submission_date'] : '';
+
             return [
                 'id' => $item->template_id,
                 'name_en' => $name_en,
@@ -55,8 +59,11 @@ class NoticeboardController extends Controller
                 'category_id' => $item->category_name,
                 'category_name' => $item->category?->name ?? 'N/A',
                 'publish_date' => $item->publish_date,
+                'last_submission_date' => $last_submission_date,
                 'upload_notice' => $item->upload_notice,
                 'status' => $item->status ? 1 : 0,
+                'is_latest_news' => $is_latest_news,
+                'access_type' => $access_type,
                 'created_at' => $item->created_at?->format('Y-m-d H:i:s'),
             ];
         });
@@ -96,9 +103,16 @@ class NoticeboardController extends Controller
             'status' => $request->boolean('status', true),
         ]);
 
-             $englishMessage = json_encode([
+        $isLatestNews = $request->boolean('is_latest_news');
+        $accessType = $request->input('access_type', 'public');
+        $lastSubmissionDate = $request->input('last_submission_date', '');
+
+        $englishMessage = json_encode([
             'title' => $request->input('name_en', ''),
             'description' => $request->input('description_en', ''),
+            'is_latest_news' => $isLatestNews,
+            'access_type' => $accessType,
+            'last_submission_date' => $lastSubmissionDate,
         ]);
         NoticeboardTemplateDescription::create([
             'template_id' => $notice->template_id,
@@ -109,6 +123,9 @@ class NoticeboardController extends Controller
             $punjabiMessage = json_encode([
                 'title' => $request->input('name_pb', ''),
                 'description' => $request->input('description_pb', ''),
+                'is_latest_news' => $isLatestNews,
+                'access_type' => $accessType,
+                'last_submission_date' => $lastSubmissionDate,
             ]);
             NoticeboardTemplateDescription::create([
                 'template_id' => $notice->template_id,
@@ -146,9 +163,16 @@ class NoticeboardController extends Controller
 
         $notice->update($updateData);
 
-               $englishMessage = json_encode([
+        $isLatestNews = $request->boolean('is_latest_news');
+        $accessType = $request->input('access_type', 'public');
+        $lastSubmissionDate = $request->input('last_submission_date', '');
+
+        $englishMessage = json_encode([
             'title' => $request->input('name_en', ''),
             'description' => $request->input('description_en', ''),
+            'is_latest_news' => $isLatestNews,
+            'access_type' => $accessType,
+            'last_submission_date' => $lastSubmissionDate,
         ]);
 
         NoticeboardTemplateDescription::updateOrCreate(
@@ -160,6 +184,9 @@ class NoticeboardController extends Controller
             $punjabiMessage = json_encode([
                 'title' => $request->input('name_pb', ''),
                 'description' => $request->input('description_pb', ''),
+                'is_latest_news' => $isLatestNews,
+                'access_type' => $accessType,
+                'last_submission_date' => $lastSubmissionDate,
             ]);
 
             NoticeboardTemplateDescription::updateOrCreate(

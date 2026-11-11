@@ -3,15 +3,15 @@
 namespace Modules\Front\Services;
 
 use App\Models\Menu;
-use App\Models\NoticeboardTemplate;
-use App\Models\Page;
-use App\Models\Setting;
-use App\Models\Slider;
-use App\Models\SliderImage;
 use Carbon\Carbon;
+use Modules\Front\Repositories\FooterRepository;
 
 class FooterService
 {
+    public function __construct(
+        protected FooterRepository $footerRepository
+    ) {}
+
     /**
      * Get all structured footer data in a single call.
      */
@@ -34,11 +34,11 @@ class FooterService
      */
     private function getFooterColumns(int $languageId, string $lang): array
     {
-        $settings = Setting::whereIn('config_key', [
+        $settings = $this->footerRepository->getSettingsByKeys([
             'footer_cat1_title', 'footer_cat1_title_pb', 'footer_cat1_menus',
             'footer_cat2_title', 'footer_cat2_title_pb', 'footer_cat2_menus',
             'footer_cat3_title', 'footer_cat3_title_pb', 'footer_cat3_menus',
-        ])->pluck('config_value', 'config_key');
+        ]);
 
         $columns = [];
 
@@ -60,10 +60,7 @@ class FooterService
 
             $links = [];
             if (!empty($menuIds)) {
-                $menus = Menu::with(['englishDescription', 'descriptions'])
-                    ->whereIn('menu_id', $menuIds)
-                    ->where('status', true)
-                    ->get();
+                $menus = $this->footerRepository->getMenusByIds($menuIds);
 
                 // Sort as ordered in $menuIds
                 $menus = $menus->sortBy(fn($m) => array_search($m->menu_id, $menuIds));
@@ -100,13 +97,8 @@ class FooterService
      */
     private function getTopFooterLinks(string $lang): array
     {
-        $slider = Slider::where('slider_id', 6)->where('status', true)->first();
-
-        if ($slider) {
-            $images = SliderImage::where('slider_id', 6)
-                ->where('status', true)
-                ->orderBy('sort_order', 'asc')
-                ->get();
+        if ($this->footerRepository->isSliderActive(6)) {
+            $images = $this->footerRepository->getSliderImages(6);
 
             if ($images->isNotEmpty()) {
                 return $images->map(function ($item) use ($lang) {
@@ -137,8 +129,6 @@ class FooterService
      */
     private function getPartnerLogos(): array
     {
-        $slider = Slider::where('slider_id', 3)->where('status', true)->first();
-
         // Local asset map for zero 3rd-party risk
         $localMap = [
             'data portal' => ['img' => 'assets/images/front/footer/data-gov-logo.png', 'name' => 'Data Gov'],
@@ -150,11 +140,8 @@ class FooterService
             'national informatics centre' => ['img' => 'assets/images/front/footer/Meity_logo.png', 'name' => 'NIC'],
         ];
 
-        if ($slider) {
-            $items = SliderImage::where('slider_id', 3)
-                ->where('status', true)
-                ->orderBy('sort_order', 'asc')
-                ->get();
+        if ($this->footerRepository->isSliderActive(3)) {
+            $items = $this->footerRepository->getSliderImages(3);
 
             if ($items->isNotEmpty()) {
                 $logos = [];
@@ -191,10 +178,10 @@ class FooterService
      */
     private function getCopyrightInfo(string $lang): array
     {
-        $settings = Setting::whereIn('config_key', [
+        $settings = $this->footerRepository->getSettingsByKeys([
             'website_copyright1', 'website_copyright1_pb',
             'website_copyright2', 'website_copyright2_pb',
-        ])->pluck('config_value', 'config_key');
+        ]);
 
         $line1 = ($lang === 'pb')
             ? ($settings->get('website_copyright1_pb') ?: $settings->get('website_copyright1'))
@@ -216,28 +203,16 @@ class FooterService
      */
     private function getFooterStats(): array
     {
-        // 1. Last Updated Date: from latest updated notice or page in database
-        $latestNotice = NoticeboardTemplate::orderBy('updated_at', 'desc')->value('updated_at');
-        $latestPage = Page::orderBy('updated_at', 'desc')->value('updated_at');
+        // 1. Dynamic Last Updated Date: tracks across notices, pages, menus, sliders, settings & activity logs
+        $latestUpdated = $this->footerRepository->getLatestWebsiteUpdatedAt();
 
-        $lastUpdatedCarbon = null;
-        if ($latestNotice && $latestPage) {
-            $lastUpdatedCarbon = Carbon::parse($latestNotice)->gt(Carbon::parse($latestPage))
-                ? Carbon::parse($latestNotice)
-                : Carbon::parse($latestPage);
-        } elseif ($latestNotice) {
-            $lastUpdatedCarbon = Carbon::parse($latestNotice);
-        } elseif ($latestPage) {
-            $lastUpdatedCarbon = Carbon::parse($latestPage);
-        }
-
-        $lastUpdatedFormatted = $lastUpdatedCarbon
-            ? $lastUpdatedCarbon->format('d-m-Y H:i:s')
+        $lastUpdatedFormatted = $latestUpdated
+            ? Carbon::parse($latestUpdated)->format('d-m-Y H:i:s')
             : date('d-m-Y H:i:s');
 
         // 2. Total Visitors: base offset + live count
         $baseVisitors = 19200;
-        $dbVisitorCount = (int) Setting::where('config_key', 'total_visitors')->value('config_value');
+        $dbVisitorCount = $this->footerRepository->getDbVisitorCount();
         $totalVisitors = $baseVisitors + $dbVisitorCount;
 
         return [

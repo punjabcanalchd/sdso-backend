@@ -3,6 +3,7 @@
 namespace Modules\Admin\Repositories;
 
 use App\Models\Setting;
+use App\Models\Menu;
 use Illuminate\Database\Eloquent\Collection;
 
 class SettingRepository
@@ -343,9 +344,19 @@ class SettingRepository
             return !empty($val) ? [(string)$val] : [];
         };
 
-        $cat1 = $unserialize($raw['footer_cat1_menus'] ?? null);
-        $cat2 = $unserialize($raw['footer_cat2_menus'] ?? null);
-        $cat3 = $unserialize($raw['footer_cat3_menus'] ?? null);
+        $cat1Raw = $unserialize($raw['footer_cat1_menus'] ?? null);
+        $cat2Raw = $unserialize($raw['footer_cat2_menus'] ?? null);
+        $cat3Raw = $unserialize($raw['footer_cat3_menus'] ?? null);
+
+        // Automatically filter out orphaned menu IDs that no longer exist in tbl_menus
+        $existingMenuIds = Menu::pluck('menu_id')->map(fn($id) => (string)$id)->flip()->toArray();
+        $filterExisting = function (array $ids) use ($existingMenuIds): array {
+            return array_values(array_filter($ids, fn($id) => isset($existingMenuIds[(string)$id])));
+        };
+
+        $cat1 = $filterExisting($cat1Raw);
+        $cat2 = $filterExisting($cat2Raw);
+        $cat3 = $filterExisting($cat3Raw);
 
         $cat1Selected = is_array($cat1) ? (string)($cat1[0] ?? '') : (string)$cat1;
         $cat2Selected = is_array($cat2) ? (string)($cat2[0] ?? '') : (string)$cat2;
@@ -439,6 +450,8 @@ class SettingRepository
                 $this->updateOrCreate($keyMapping[$k], (string)$val);
             }
         }
+
+        $this->updateOrCreate('website_last_updated', now()->toDateTimeString());
 
         return $this->getFooter();
     }

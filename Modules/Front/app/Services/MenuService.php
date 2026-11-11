@@ -2,20 +2,18 @@
 
 namespace Modules\Front\Services;
 
-use App\Models\Menu;
+use Modules\Front\Repositories\MenuRepository;
 
 class MenuService
 {
+    public function __construct(
+        protected MenuRepository $menuRepository
+    ) {}
+
     public function getActiveMenus()
     {
-        // 1. Fetch ALL active menus with both English and Punjabi descriptions
-        $allActiveMenus = Menu::with(['englishDescription', 'punjabiDescription'])
-            ->where(function ($query) {
-                $query->where('status', true)
-                      ->orWhere('status', 1);
-            })
-            ->orderBy('sort_order')
-            ->get();
+        // 1. Fetch ALL active menus with both English and Punjabi descriptions via repository
+        $allActiveMenus = $this->menuRepository->getActiveMenus();
 
         $tree = [];
         $mapped = [];

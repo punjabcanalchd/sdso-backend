@@ -4,6 +4,7 @@ namespace Modules\Front\Services;
 
 use App\Models\NoticeboardTemplate;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Modules\Front\Repositories\NotificationRepository;
 
 class NotificationService
@@ -58,24 +59,49 @@ class NotificationService
     }
 
     /**
+     * Get active items for the news ticker (cached for high performance).
      * Get active items for the news ticker.
      */
     public function getTickerItems(?int $limit = 10, ?int $categoryId = null)
     {
         $limit = ($limit && $limit > 0) ? min($limit, 10) : 10;
+        $catKey = $categoryId ?: 'all';
 
-        if (!$categoryId) {
-            $notificationCategory = $this->notificationRepository->findCategoryByNamePattern('%notification%');
-            $categoryId = $notificationCategory?->template_id;
-        }
+        return Cache::remember("front_ticker_{$limit}_{$catKey}", 300, function () use ($limit, $categoryId) {
+            $notices = $this->notificationRepository->getActiveNotices(30, $categoryId);
+        $notices = $this->notificationRepository->getActiveNotices(30, $categoryId);
 
-        $items = $this->getNotifications($limit, $categoryId);
+            // Filter notices explicitly marked as Latest News
+            $latest = $notices->filter(function ($item) {
+                $en = $item->descriptions->firstWhere('language_id', 1);
+                if ($en && str_starts_with(trim($en->message), '{')) {
+                    $decoded = json_decode($en->message, true);
+                    return !empty($decoded['is_latest_news']);
+                }
+                return false;
+            });
+        // Filter notices explicitly marked as Latest News
+        $latest = $notices->filter(function ($item) {
+            $en = $item->descriptions->firstWhere('language_id', 1);
+            if ($en && str_starts_with(trim($en->message), '{')) {
+                $decoded = json_decode($en->message, true);
+                return !empty($decoded['is_latest_news']);
+            }
+            return false;
+        });
 
-        if ($items->isEmpty() && $categoryId) {
-            $items = $this->getNotifications($limit, null);
-        }
+            // Use notices marked as latest news, or fallback to active notices if none specifically marked
+            $chosen = $latest->isNotEmpty() ? $latest->take($limit) : $notices->take($limit);
+        // Use notices marked as latest news, or fallback to active notices if none specifically marked
+        $chosen = $latest->isNotEmpty() ? $latest->take($limit) : $notices->take($limit);
 
-        return $items;
+            return $chosen->map(function ($item) {
+                return $this->formatNotice($item);
+            })->values();
+        });
+        return $chosen->map(function ($item) {
+            return $this->formatNotice($item);
+        })->values();
     }
 
     /**
