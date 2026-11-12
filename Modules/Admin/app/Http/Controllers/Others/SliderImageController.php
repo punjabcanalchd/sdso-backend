@@ -93,13 +93,7 @@ class SliderImageController extends Controller
         );
     }
 
-
-    
-
-    /**
-     * Update slider image.
-     */
-    /**
+/**
  * Update slider image.
  */
 public function update( Request $request, string $slider_id, string $image_id) {

@@ -9,6 +9,8 @@ use Modules\Front\Http\Controllers\PageController;
 
 Route::prefix('front')->group(function () {
     Route::get('/menus', [MenuController::class, 'index']);
+    // Home SLider
+    Route::get('/sliders', [HomeController::class, 'getHomeSliders']);
 
     // Notifications, Announcements & Ticker
     Route::get('/notifications', [NotificationController::class, 'index']);
