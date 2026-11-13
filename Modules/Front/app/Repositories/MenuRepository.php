@@ -10,15 +10,19 @@ class MenuRepository
     /**
      * Retrieve all active menus with both English and Punjabi descriptions.
      */
-    public function getActiveMenus(): Collection
+    public function getActiveMenus($language)
     {
-        return Menu::with(['englishDescription', 'punjabiDescription'])
+       $data =  Menu::with(['englishDescription', 'punjabiDescription'])
             ->where(function ($query) {
                 $query->where('status', true)
                       ->orWhere('status', 1);
             })
             ->orderBy('sort_order')
             ->get();
+
+     
+        
+        return $data ;
     }
 }
 

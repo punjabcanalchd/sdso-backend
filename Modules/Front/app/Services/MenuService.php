@@ -10,11 +10,11 @@ class MenuService
         protected MenuRepository $menuRepository
     ) {}
 
-    public function getActiveMenus()
+    public function getActiveMenus($language)
     {
+        
         // 1. Fetch ALL active menus with both English and Punjabi descriptions via repository
-        $allActiveMenus = $this->menuRepository->getActiveMenus();
-
+        $allActiveMenus = $this->menuRepository->getActiveMenus($language);       
         $tree = [];
         $mapped = [];
 
