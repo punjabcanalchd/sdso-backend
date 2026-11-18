@@ -1,10 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-// use Modules\Front\Http\Controllers\FooterController;
+use Modules\Front\Http\Controllers\FooterController;
+use Modules\Front\Http\Controllers\GalleryController;
 use Modules\Front\Http\Controllers\HomeController;
-// use Modules\Front\Http\Controllers\MenuController;
-// use Modules\Front\Http\Controllers\NotificationController;
+use Modules\Front\Http\Controllers\MenuController;
+use Modules\Front\Http\Controllers\NotificationController;
 use Modules\Front\Http\Controllers\PageController;
 
 Route::prefix('front')->group(function () {
@@ -18,7 +19,7 @@ Route::prefix('front')->group(function () {
     Route::get('/pages/slug/{slug}/{languageId}', [PageController::class, 'showBySlug']);
 
 
-    // Route::get('/menus', [MenuController::class, 'index']);
+    Route::get('/menus', [MenuController::class, 'index']);
     // Home SLider
     // Route::get('/sliders', [HomeController::class, 'getHomeSliders']);
 
@@ -28,13 +29,18 @@ Route::prefix('front')->group(function () {
     // Route::get('/noticeboard-tabs', [NotificationController::class, 'tabs']);
     // Route::get('/ticker', [NotificationController::class, 'ticker']);
 
-    // Noticeboard details (Teammate's feature)
+    // Noticeboard details 
     // Route::get('/noticeboard/{languageId?}/{id}', [NotificationController::class, 'noticeboard']);
   
+
 
 
     // Footer
     // Route::get('/footer', [FooterController::class, 'index']);
 
     // Home
+    Route::get('/home', [HomeController::class, 'index']);
+
+    // Work Gallery
+    Route::get('/work-gallery', [GalleryController::class, 'index']);
 });

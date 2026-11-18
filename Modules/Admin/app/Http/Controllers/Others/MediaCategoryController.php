@@ -71,15 +71,32 @@ class MediaCategoryController extends Controller
             'description_en'       => ['nullable', 'string'],
             'description_pb'       => ['nullable', 'string'],
             'category_image'       => ['nullable'],
+            'category_images'      => ['nullable'],
             'parent_id'            => ['nullable'],
             'display_on_home_page' => ['nullable'],
             'status'               => ['nullable'],
         ]);
 
-        $file = $request->file('category_image');
+        $files = [];
+        if ($request->hasFile('category_images')) {
+            $uploaded = $request->file('category_images');
+            if (is_array($uploaded)) {
+                $files = array_merge($files, $uploaded);
+            } else {
+                $files[] = $uploaded;
+            }
+        } elseif ($request->hasFile('category_image')) {
+            $single = $request->file('category_image');
+            if (is_array($single)) {
+                $files = array_merge($files, $single);
+            } else {
+                $files[] = $single;
+            }
+        }
+
         $existingImage = is_string($request->input('category_image')) ? $request->input('category_image') : null;
 
-        $created = $this->service->createCategory($validated, $file, $existingImage);
+        $created = $this->service->createCategory($validated, $files, $existingImage);
 
         return $this->successResponse($created, 'Media category created successfully.', 201);
     }
@@ -95,15 +112,40 @@ class MediaCategoryController extends Controller
             'description_en'       => ['nullable', 'string'],
             'description_pb'       => ['nullable', 'string'],
             'category_image'       => ['nullable'],
+            'category_images'      => ['nullable'],
+            'deleted_images'       => ['nullable'],
             'parent_id'            => ['nullable'],
             'display_on_home_page' => ['nullable'],
             'status'               => ['nullable'],
         ]);
 
-        $file = $request->file('category_image');
+        $files = [];
+        if ($request->hasFile('category_images')) {
+            $uploaded = $request->file('category_images');
+            if (is_array($uploaded)) {
+                $files = array_merge($files, $uploaded);
+            } else {
+                $files[] = $uploaded;
+            }
+        } elseif ($request->hasFile('category_image')) {
+            $single = $request->file('category_image');
+            if (is_array($single)) {
+                $files = array_merge($files, $single);
+            } else {
+                $files[] = $single;
+            }
+        }
+
+        $deletedImages = $request->input('deleted_images', []);
+        if (is_string($deletedImages)) {
+            $decoded = json_decode($deletedImages, true);
+            $deletedImages = is_array($decoded) ? $decoded : explode(',', $deletedImages);
+        }
+        $deletedImages = array_filter((array) $deletedImages, fn($v) => $v !== '' && $v !== null);
+
         $existingImage = is_string($request->input('category_image')) ? $request->input('category_image') : null;
 
-        $updated = $this->service->updateCategory($id, $validated, $file, $existingImage);
+        $updated = $this->service->updateCategory($id, $validated, $files, $deletedImages, $existingImage);
 
         if (!$updated) {
             return $this->errorResponse('Media category not found.', 404);
