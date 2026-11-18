@@ -32,13 +32,13 @@ class HomeService
 
             'sliders' => $this->sliderService->getHomeSliders(),
 
-            // 'announcements' => $this->notificationService->getNotifications(10),
+            'announcements' => $this->notificationService->getNotifications(10),
 
-            // 'noticeboardTabs' => $this->notificationService->getNoticeBoardTabs(),
+            'noticeboardTabs' => $this->notificationService->getNoticeBoardTabs(),
 
-            // 'ticker' => $this->notificationService->getTickerItems(10),
+            'ticker' => $this->notificationService->getTickerItems(10),
 
-            // 'footer' => $this->footerService->getFooterData($languageId),
+            'footer' => $this->footerService->getFooterData($languageId),
         ];
     }
 }
