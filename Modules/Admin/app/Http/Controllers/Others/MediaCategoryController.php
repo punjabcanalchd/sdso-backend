@@ -65,17 +65,25 @@ class MediaCategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'name_en'              => ['required', 'string', 'max:255'],
             'name_pb'              => ['required', 'string', 'max:255'],
             'description_en'       => ['nullable', 'string'],
             'description_pb'       => ['nullable', 'string'],
-            'category_image'       => ['nullable'],
-            'category_images'      => ['nullable'],
+            'category_images'      => ['nullable', 'array'],
+            'category_images.*'    => ['file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'parent_id'            => ['nullable'],
             'display_on_home_page' => ['nullable'],
             'status'               => ['nullable'],
-        ]);
+        ];
+
+        if ($request->hasFile('category_image')) {
+            $rules['category_image'] = ['file', 'mimes:jpg,jpeg,png,webp', 'max:5120'];
+        } else {
+            $rules['category_image'] = ['nullable'];
+        }
+
+        $validated = $request->validate($rules);
 
         $files = [];
         if ($request->hasFile('category_images')) {
@@ -106,18 +114,26 @@ class MediaCategoryController extends Controller
      */
     public function update(Request $request, string|int $id)
     {
-        $validated = $request->validate([
+        $rules = [
             'name_en'              => ['required', 'string', 'max:255'],
             'name_pb'              => ['required', 'string', 'max:255'],
             'description_en'       => ['nullable', 'string'],
             'description_pb'       => ['nullable', 'string'],
-            'category_image'       => ['nullable'],
-            'category_images'      => ['nullable'],
+            'category_images'      => ['nullable', 'array'],
+            'category_images.*'    => ['file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'deleted_images'       => ['nullable'],
             'parent_id'            => ['nullable'],
             'display_on_home_page' => ['nullable'],
             'status'               => ['nullable'],
-        ]);
+        ];
+
+        if ($request->hasFile('category_image')) {
+            $rules['category_image'] = ['file', 'mimes:jpg,jpeg,png,webp', 'max:5120'];
+        } else {
+            $rules['category_image'] = ['nullable'];
+        }
+
+        $validated = $request->validate($rules);
 
         $files = [];
         if ($request->hasFile('category_images')) {

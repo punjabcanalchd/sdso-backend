@@ -70,10 +70,50 @@ class GalleryRepository
     public function findCategory(string|int $id): ?MediaCategoryTemplate
     {
         if (is_numeric($id)) {
-            return MediaCategoryTemplate::with('descriptions')->where('mediacat_id', $id)->first();
+            return MediaCategoryTemplate::with('descriptions')->where('mediacat_id', (int) $id)->first();
         }
 
         return MediaCategoryTemplate::findByPublicId($id);
+    }
+
+    /**
+     * Get all active gallery items with descriptions.
+     */
+    public function getAllActiveGalleryItems(): Collection
+    {
+        return MediaGalleryTemplate::with('descriptions')
+            ->where('status', true)
+            ->whereNotNull('select_img')
+            ->where('select_img', '!=', '')
+            ->orderBy('mediagal_id', 'asc')
+            ->get();
+    }
+
+    /**
+     * Get active gallery items for a specific category.
+     */
+    public function getItemsByCategory(string|int $categoryId): Collection
+    {
+        $category = $this->findCategory($categoryId);
+        $identifiers = [(string) $categoryId];
+
+        if ($category) {
+            $identifiers[] = (string) $category->mediacat_id;
+            if (!empty($category->public_id)) {
+                $identifiers[] = $category->public_id;
+            }
+            if (!empty($category->name)) {
+                $identifiers[] = $category->name;
+            }
+        }
+
+        return MediaGalleryTemplate::with('descriptions')
+            ->where('status', true)
+            ->whereNotNull('select_img')
+            ->where('select_img', '!=', '')
+            ->whereIn('category_name', array_values(array_unique($identifiers)))
+            ->orderBy('mediagal_id', 'asc')
+            ->get();
     }
 }
 

@@ -87,6 +87,183 @@ class GalleryService
     }
 
     /**
+     * Get full Gallery page data (all categories and albums with multi-image slideshows).
+     */
+    public function getGalleryPageData(int $languageId = 1, string|int|null $selectedCategoryId = null): array
+    {
+        $isPb = ($languageId === 2);
+        $categories = $this->galleryRepository->getAllActiveCategories();
+        $allItems = $this->galleryRepository->getAllActiveGalleryItems();
+
+        // Group gallery items by category_name (which stores mediacat_id or public_id)
+        $itemsByCategory = $allItems->groupBy(function ($item) {
+            return (string) $item->category_name;
+        });
+
+        $formattedCategories = [
+            [
+                'id' => 'all',
+                'name' => $isPb ? 'ਸਾਰੇ' : 'All',
+                'name_en' => 'All',
+                'name_pb' => 'ਸਾਰੇ',
+                'count' => 0,
+            ]
+        ];
+
+        $albums = [];
+        $totalPhotos = 0;
+
+        foreach ($categories as $cat) {
+            $catIdStr = (string) $cat->mediacat_id;
+            $enDesc = $cat->descriptions->firstWhere('language_id', 1);
+            $pbDesc = $cat->descriptions->firstWhere('language_id', 2);
+
+            $enPayload = $this->decodeCategoryPayload($enDesc?->message, $cat->name);
+            $pbPayload = $this->decodeCategoryPayload($pbDesc?->message, $enPayload['title']);
+
+            $titleEn = $enPayload['title'] ?: $cat->name;
+            $titlePb = $pbPayload['title'] ?: $titleEn;
+            $catTitle = $isPb ? ($titlePb ?: $titleEn) : ($titleEn ?: $titlePb);
+
+            $descEn = $this->cleanHtmlText($enPayload['description'] ?: '');
+            $descPb = $this->cleanHtmlText($pbPayload['description'] ?: $descEn);
+            $catDesc = $isPb ? ($descPb ?: $descEn) : ($descEn ?: $descPb);
+
+            $catCoverImg = $enPayload['image'] ?? null;
+
+            // Find gallery items matching this category
+            $catItems = $itemsByCategory->get($catIdStr, collect());
+            if ($catItems->isEmpty() && !empty($cat->public_id)) {
+                $catItems = $itemsByCategory->get((string) $cat->public_id, collect());
+            }
+            if ($catItems->isEmpty() && !empty($cat->name)) {
+                $catItems = $itemsByCategory->get((string) $cat->name, collect());
+            }
+
+            $images = [];
+            foreach ($catItems as $item) {
+                $itemImgUrl = $this->resolveImageUrl($item->select_img);
+                if (empty($itemImgUrl)) {
+                    continue;
+                }
+
+                $itemTitleEn = $item->title_en ?: $titleEn;
+                $itemTitlePb = $item->title_pb ?: $itemTitleEn;
+                $itemTitle = $isPb ? ($itemTitlePb ?: $itemTitleEn) : ($itemTitleEn ?: $itemTitlePb);
+                $caption = $this->extractCaption($item, $isPb, $itemTitle);
+
+                $images[] = [
+                    'id' => $item->mediagal_id,
+                    'url' => $itemImgUrl,
+                    'alt' => $itemTitle ?: $catTitle,
+                    'title' => $itemTitle,
+                    'caption' => $caption,
+                ];
+            }
+
+            // Fallback: if no individual gallery items exist but category has a cover image
+            if (empty($images) && !empty($catCoverImg)) {
+                $coverUrl = $this->resolveImageUrl($catCoverImg);
+                if (!empty($coverUrl)) {
+                    $images[] = [
+                        'id' => 0,
+                        'url' => $coverUrl,
+                        'alt' => $catTitle,
+                        'title' => $catTitle,
+                        'caption' => $catDesc,
+                    ];
+                }
+            }
+
+            $albumCoverUrl = !empty($images) ? $images[0]['url'] : $this->resolveImageUrl($catCoverImg);
+
+            $album = [
+                'id' => $cat->mediacat_id,
+                'public_id' => $cat->public_id,
+                'title' => $catTitle,
+                'title_en' => $titleEn,
+                'title_pb' => $titlePb,
+                'description' => $catDesc,
+                'coverUrl' => $albumCoverUrl,
+                'cover_url' => $albumCoverUrl,
+                'date' => $cat->created_at ? $cat->created_at->format('M d, Y') : '',
+                'created_at' => $cat->created_at?->toIso8601String(),
+                'media_count' => count($images),
+                'images' => $images,
+            ];
+
+            $albums[] = $album;
+            $totalPhotos += count($images);
+
+            $formattedCategories[] = [
+                'id' => $cat->mediacat_id,
+                'public_id' => $cat->public_id,
+                'name' => $catTitle,
+                'name_en' => $titleEn,
+                'name_pb' => $titlePb,
+                'count' => count($images),
+            ];
+        }
+
+        $formattedCategories[0]['count'] = $totalPhotos;
+
+        // If a specific category filter is requested, filter albums
+        $activeCategoryId = 'all';
+        if (!empty($selectedCategoryId) && $selectedCategoryId !== 'all') {
+            $filteredAlbums = array_values(array_filter($albums, function ($a) use ($selectedCategoryId) {
+                return (string) $a['id'] === (string) $selectedCategoryId
+                    || (!empty($a['public_id']) && (string) $a['public_id'] === (string) $selectedCategoryId);
+            }));
+
+            if (!empty($filteredAlbums)) {
+                $activeCategoryId = $filteredAlbums[0]['id'];
+            }
+        }
+
+        return [
+            'categories' => $formattedCategories,
+            'albums' => $albums,
+            'active_category_id' => $activeCategoryId,
+            'total_albums' => count($albums),
+            'total_photos' => $totalPhotos,
+        ];
+    }
+
+    /**
+     * Decode category description payload into structured array.
+     */
+    public function decodeCategoryPayload(?string $message, string $defaultTitle = ''): array
+    {
+        if (empty($message)) {
+            return [
+                'title'       => $defaultTitle,
+                'description' => '',
+                'image'       => null,
+                'parent_id'   => null,
+            ];
+        }
+
+        if (str_starts_with(trim($message), '{')) {
+            $data = json_decode($message, true);
+            if (is_array($data)) {
+                return [
+                    'title'       => $data['t'] ?? $data['title'] ?? $data['name'] ?? $defaultTitle,
+                    'description' => $data['d'] ?? $data['description'] ?? '',
+                    'image'       => $data['img'] ?? $data['image'] ?? null,
+                    'parent_id'   => isset($data['p']) ? (int) $data['p'] : ($data['parent_id'] ?? null),
+                ];
+            }
+        }
+
+        return [
+            'title'       => $message ?: $defaultTitle,
+            'description' => '',
+            'image'       => null,
+            'parent_id'   => null,
+        ];
+    }
+
+    /**
      * Format a single gallery item for frontend consumption.
      */
     public function formatGalleryItem(MediaGalleryTemplate $item, bool $isPb, array $categoryMap = []): array
@@ -181,13 +358,28 @@ class GalleryService
             if (str_starts_with($msg, '{')) {
                 $decoded = json_decode($msg, true);
                 if (is_array($decoded)) {
-                    return $decoded['d'] ?? $decoded['caption'] ?? $decoded['description'] ?? $decoded['t'] ?? $fallback;
+                    $raw = $decoded['d'] ?? $decoded['caption'] ?? $decoded['description'] ?? $decoded['t'] ?? $fallback;
+                    return $this->cleanHtmlText($raw);
                 }
             }
-            return $msg;
+            return $this->cleanHtmlText($msg);
         }
 
-        return $fallback;
+        return $this->cleanHtmlText($fallback);
+    }
+
+    /**
+     * Clean and strip HTML tags and decode entities for plain text display.
+     */
+    private function cleanHtmlText(?string $text): string
+    {
+        if (empty($text)) {
+            return '';
+        }
+
+        $clean = strip_tags($text);
+        $clean = html_entity_decode($clean, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        return trim(preg_replace('/\s+/', ' ', $clean));
     }
 
     /**

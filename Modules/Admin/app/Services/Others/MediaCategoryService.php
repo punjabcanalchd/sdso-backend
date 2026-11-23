@@ -100,7 +100,10 @@ class MediaCategoryService
                             'select_img_vid' => '0',
                         ]);
                         $this->galleryRepository->createDescriptions($galId, $data['name_en'], $data['name_pb']);
-                    } catch (\Throwable $e) {}
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::error('MediaCategoryService createCategory gallery error: ' . $e->getMessage());
+                        throw new \Exception('Failed to attach image to media category: ' . $e->getMessage());
+                    }
                 }
             }
 
@@ -218,7 +221,10 @@ class MediaCategoryService
                             'select_img_vid' => '0',
                         ]);
                         $this->galleryRepository->createDescriptions($galId, $data['name_en'], $data['name_pb']);
-                    } catch (\Throwable $e) {}
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::error('MediaCategoryService createCategory gallery error: ' . $e->getMessage());
+                        throw new \Exception('Failed to attach image to media category: ' . $e->getMessage());
+                    }
                 }
             }
 
@@ -241,7 +247,10 @@ class MediaCategoryService
                             'select_img_vid' => '0',
                         ]);
                         $this->galleryRepository->createDescriptions($galId, $data['name_en'], $data['name_pb']);
-                    } catch (\Throwable $e) {}
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::error('MediaCategoryService createCategory gallery error: ' . $e->getMessage());
+                        throw new \Exception('Failed to attach image to media category: ' . $e->getMessage());
+                    }
                 }
             }
 
