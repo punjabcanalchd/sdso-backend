@@ -22,7 +22,7 @@ class NotificationService
     public function getNotifications(?int $limit = 10, ?int $categoryId = null)
     {
         $notices = $this->notificationRepository->getActiveNotices($limit, $categoryId);
-
+   
         return $notices->map(function ($item) {
             return $this->formatNotice($item);
         });
@@ -276,5 +276,11 @@ class NotificationService
         }
 
         return $message;
+    }
+
+    public function getImportantLinkOnHomePage($languageId)
+    {
+        $data = $this->notificationRepository->getSideBarCatdata($languageId);         
+        return $data;
     }
 }

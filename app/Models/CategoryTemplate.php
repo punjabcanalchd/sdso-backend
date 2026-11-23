@@ -68,4 +68,13 @@ class CategoryTemplate extends Model
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
     }
+
+    public function languageDescription()
+    {
+        return $this->hasOne(
+            CategoryTemplateDescription::class,
+            'template_id',
+            'template_id'
+        );
+    }
 }

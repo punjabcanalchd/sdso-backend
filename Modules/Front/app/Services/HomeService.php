@@ -34,7 +34,10 @@ class HomeService
             'announcements'   => $this->notificationService->getNotifications(10),
             'noticeboardTabs' => $this->notificationService->getNoticeBoardTabs(),
             'ticker'          => $this->notificationService->getTickerItems(10),
-            'footer'          => $this->footerService->getFooterData($languageId),
+            'footer'          => $this->footerService->getFooterData($languageId),            
+            'importantLinks' => $this->notificationService->getImportantLinkOnHomePage($languageId),
+            // 'ticker' => $this->notificationService->getTickerItems(10),
+            // 'footer' => $this->footerService->getFooterData($languageId),
         ];
     }
 }

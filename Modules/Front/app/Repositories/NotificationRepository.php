@@ -128,4 +128,20 @@ class NotificationRepository
 
         return $notice;
     }
+
+
+//  Important Link on home page sidebar
+    public function getSideBarCatdata($languageId)
+    {
+        return CategoryTemplate::whereIn('template_id', [7, 8, 9, 10, 11])
+            ->where('status', 1)
+            ->where('display_on_home_page', true)
+            ->with([
+                'languageDescription' => function ($query) use ($languageId) {
+                    $query->where('language_id', $languageId);
+                }
+            ])
+            ->get();
+
+        }
 }
