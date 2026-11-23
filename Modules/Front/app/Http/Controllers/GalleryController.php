@@ -28,5 +28,26 @@ class GalleryController extends Controller
             'data' => $data,
         ]);
     }
+
+    /**
+     * Get full Gallery page data (albums, categories, and photos).
+     */
+    public function showGallery(Request $request, string|int|null $id = null): JsonResponse
+    {
+        $langParam = $request->get('language_id', $request->get('lang', 1));
+        $languageId = match (strtolower((string) $langParam)) {
+            'pb', '2' => 2,
+            default   => 1,
+        };
+
+        $categoryId = $id ?: $request->get('category_id');
+
+        $data = $this->galleryService->getGalleryPageData($languageId, $categoryId);
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
+    }
 }
 

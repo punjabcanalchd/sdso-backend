@@ -41,6 +41,8 @@ Route::prefix('front')->group(function () {
     // Home
     Route::get('/home', [HomeController::class, 'index']);
 
-    // Work Gallery
+    // Gallery & Media
+    Route::get('/gallery/{id?}', [GalleryController::class, 'showGallery']);
+    Route::get('/media/{id?}', [GalleryController::class, 'showGallery']);
     Route::get('/work-gallery', [GalleryController::class, 'index']);
 });
