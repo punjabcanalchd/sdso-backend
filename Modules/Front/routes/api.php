@@ -7,12 +7,17 @@ use Modules\Front\Http\Controllers\HomeController;
 use Modules\Front\Http\Controllers\MenuController;
 use Modules\Front\Http\Controllers\NotificationController;
 use Modules\Front\Http\Controllers\PageController;
+use Modules\Front\Http\Controllers\TranslationController;
 
 Route::prefix('front')->group(function () {
 
 
     Route::get('/home/{language?}', [HomeController::class, 'index'])
     ->where('language', 'en|pb');
+
+    // Dynamic Translations
+    Route::get('/translations/{language?}', [TranslationController::class, 'index'])
+        ->where('language', 'en|pb');
 
     // Pages
     Route::get('/pages/{pageId}/{languageId}', [PageController::class, 'show']);
