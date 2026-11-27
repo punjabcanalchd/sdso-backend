@@ -20,6 +20,42 @@ class StaticTranslationsSeeder extends Seeder
                 'en' => 'State Dam Safety Organization (SDSO) | Dam Safety Organisation',
                 'pb' => 'ਰਾਜ ਡੈਮ ਸੁਰੱਖਿਆ ਸੰਗਠਨ (SDSO) | ਡੈਮ ਸੁਰੱਖਿਆ ਸੰਗਠਨ'
             ],
+            [
+                'group' => 1,
+                'key' => 'Header.Login',
+                'en' => 'Login',
+                'pb' => 'ਲਾਗਇਨ'
+            ],
+            [
+                'group' => 1,
+                'key' => 'Header.Dashboard',
+                'en' => 'Dashboard',
+                'pb' => 'ਡੈਸ਼ਬੋਰਡ'
+            ],
+            [
+                'group' => 1,
+                'key' => 'Header.Logout',
+                'en' => 'Logout',
+                'pb' => 'ਲਾਗਆਉਟ'
+            ],
+            [
+                'group' => 1,
+                'key' => 'key_login',
+                'en' => 'Login',
+                'pb' => 'ਲਾਗਇਨ'
+            ],
+            [
+                'group' => 1,
+                'key' => 'key_dashboard',
+                'en' => 'Dashboard',
+                'pb' => 'ਡੈਸ਼ਬੋਰਡ'
+            ],
+            [
+                'group' => 1,
+                'key' => 'key_logout',
+                'en' => 'Logout',
+                'pb' => 'ਲਾਗਆਉਟ'
+            ],
             // Noticeboard
             [
                 'group' => 2,
