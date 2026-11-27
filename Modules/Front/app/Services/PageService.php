@@ -2,41 +2,74 @@
 
 namespace Modules\Front\Services;
 
-use App\Models\Page;
-use App\Models\PageDescription;
+use Modules\Front\Repositories\PageRepository;
+use Modules\Admin\Repositories\SettingRepository;
 
 class PageService
 {
-    public function getPageByIdAndLanguage(int $pageId, int $languageId): ?array {
-        
-        $page = Page::query()
-            ->where('page_id', $pageId)
-            ->where('status', 1)
-            ->first();
+    protected PageRepository $pageRepository;
+    protected SettingRepository $settingRepository;
+
+    public function __construct(
+        PageRepository $pageRepository,
+        SettingRepository $settingRepository
+    ) {
+        $this->pageRepository = $pageRepository;
+        $this->settingRepository = $settingRepository;
+    }
+
+    /**
+     * Get page details by page ID and language ID.
+     */
+    public function getPageByIdAndLanguage(
+        int $pageId,
+        int $languageId
+    ): ?array {
+
+        $page = $this->pageRepository->findActivePageById($pageId);
 
         if (!$page) {
             return null;
         }
 
-        $description = PageDescription::query()
-            ->where('page_id', $pageId)
-            ->where('language_id', $languageId)
-            ->first();
+        $description = $this->pageRepository->findPageDescription(
+            $pageId,
+            $languageId
+        );
 
         if (!$description) {
             return null;
         }
 
         return [
-            'page_id' => $page->page_id,
-            'public_id' => $page->public_id,
-            'slug' => $page->slug,
-            'page_type' => $page->page_type,
-            'title' => $description->title,
-            'description' => $description->description,
-            'meta_title' => $description->meta_title,
+            'page_id'          => $page->page_id,
+            'public_id'        => $page->public_id,
+            'slug'             => $page->slug,
+            'page_type'        => $page->page_type,
+            'title'            => $description->title,
+            'description'      => $description->description,
+            'meta_title'       => $description->meta_title,
             'meta_description' => $description->meta_description,
-            'meta_keyword' => $description->meta_keyword,
+            'meta_keyword'     => $description->meta_keyword,
         ];
+    }
+
+    /**
+     * Get website index text page according to language.
+     */
+    public function getIndexTextPage(int $languageId): ?array
+    {
+        $pageId = $this->settingRepository->getValue(
+            'website_index_text_page_id'
+        );
+
+        if (empty($pageId) || !is_numeric($pageId)) {
+            return null;
+        }
+
+        return $this->getPageByIdAndLanguage(
+            (int) $pageId,
+            $languageId
+        );
     }
 }

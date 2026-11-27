@@ -7,6 +7,8 @@ use Modules\Front\Services\NotificationService;
 use Modules\Front\Services\MenuService;
 use Modules\Front\Services\FooterService;
 use Modules\Front\Services\SettingService;
+use Modules\Front\Services\PageService;
+ 
 
 class HomeService
 {
@@ -15,7 +17,8 @@ class HomeService
         private NotificationService $notificationService,
         private MenuService $menuService,
         private FooterService $footerService,
-        private SettingService $settingService
+        private SettingService $settingService,
+        private PageService $pageService,
     ) {}
 
     public function getHomeData(string $language = 'en'): array
@@ -36,6 +39,7 @@ class HomeService
             'ticker'          => $this->notificationService->getTickerItems(10),
             'footer'          => $this->footerService->getFooterData($languageId),            
             'importantLinks' => $this->notificationService->getImportantLinkOnHomePage($languageId),
+            'aboutUs'        => $this->$pageService->getIndexTextPage($languageId),
             // 'ticker' => $this->notificationService->getTickerItems(10),
             // 'footer' => $this->footerService->getFooterData($languageId),
         ];
